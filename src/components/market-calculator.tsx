@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useState, type FormEvent } from "react";
+import { Suspense, useEffect, useRef, useState, type FormEvent } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowUp, ArrowDown, Radio, Calculator, LoaderCircle } from "lucide-react";
 import { COMPANIES, quotesQuery, type Symbol } from "@/lib/markets";
@@ -57,47 +57,71 @@ function InvestmentForm({ symbol }: { symbol: Symbol }) {
   const [purchasePrice, setPurchasePrice] = useState<number | null>(null);
   const [result, setResult] = useState<Result | null>(null);
   const [busy, setBusy] = useState(false);
+  const [priceLoading, setPriceLoading] = useState(false);
   const [error, setError] = useState("");
+  const entered = useRef({ shares: "10", amount: "", basis: "shares" as "shares" | "amount" });
+  const revision = useRef(0);
   const company = COMPANIES.find(c => c.symbol === symbol);
-  useEffect(() => { setResult(null); setError(""); setPurchasePrice(null); setAmount(""); }, [symbol, startDate]);
+  useEffect(() => { revision.current += 1; setResult(null); setError(""); setPurchasePrice(null); }, [symbol, startDate]);
   useEffect(() => {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate)) return;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate)) { setPriceLoading(false); return; }
     let cancelled = false;
+    setPriceLoading(true);
     getPriceOnDate({ data: { symbol, date: startDate } })
       .then(price => {
         if (cancelled) return;
         setPurchasePrice(price);
-        const q = Number(shares);
-        if (price != null && Number.isFinite(q) && q > 0) setAmount((Math.round(q * price * 100) / 100).toString());
+        if (price == null) { setError("No purchase price is available for this investment date."); return; }
+        if (entered.current.basis === "amount") {
+          const a = Number(entered.current.amount);
+          if (Number.isFinite(a) && a > 0) {
+            const next = (a / price).toString();
+            entered.current.shares = next; setShares(next);
+          }
+        } else {
+          const q = Number(entered.current.shares);
+          if (Number.isFinite(q) && q > 0) {
+            const next = (Math.round(q * price * 100) / 100).toString();
+            entered.current.amount = next; setAmount(next);
+          }
+        }
       })
-      .catch(() => { if (!cancelled) setPurchasePrice(null); });
+      .catch(() => { if (!cancelled) { setPurchasePrice(null); setError("Purchase price unavailable. Please try another date."); } })
+      .finally(() => { if (!cancelled) setPriceLoading(false); });
     return () => { cancelled = true; };
   }, [symbol, startDate]);
   function updateShares(v: string) {
+    revision.current += 1;
+    entered.current.shares = v; entered.current.basis = "shares";
     setShares(v); setResult(null);
     const q = Number(v);
-    if (purchasePrice != null && Number.isFinite(q) && q > 0) setAmount((Math.round(q * purchasePrice * 100) / 100).toString());
+    const next = purchasePrice != null && Number.isFinite(q) && q > 0 ? (Math.round(q * purchasePrice * 100) / 100).toString() : "";
+    entered.current.amount = next; setAmount(next);
   }
   function updateAmount(v: string) {
+    revision.current += 1;
+    entered.current.amount = v; entered.current.basis = "amount";
     setAmount(v); setResult(null);
     const a = Number(v);
-    if (purchasePrice != null && Number.isFinite(a) && a > 0) setShares((Math.round(a / purchasePrice * 1e6) / 1e6).toString());
+    const next = purchasePrice != null && Number.isFinite(a) && a > 0 ? (a / purchasePrice).toString() : "";
+    entered.current.shares = next; setShares(next);
   }
   async function calculate(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
     setBusy(true);
-    try { setResult(await getInvestmentResult({ data: { symbol, startDate, endDate, shares: Number(shares) } })); }
-    catch (err) { setError(err instanceof Error ? err.message : "Prices are unavailable. Please try again."); }
+    const submittedRevision = revision.current;
+    try { const next = await getInvestmentResult({ data: { symbol, startDate, endDate, shares: Number(shares) } }); if (submittedRevision === revision.current) setResult(next); }
+    catch (err) { if (submittedRevision === revision.current) setError(err instanceof Error ? err.message : "Prices are unavailable. Please try again."); }
     finally { setBusy(false); }
   }
   return <section className="mt-7 border-t border-border pt-6" aria-label="Profit calculator">
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-1"><h2 className="font-display text-xl font-semibold">Profit calculator</h2><span className="text-sm font-medium text-primary-deep">{company?.name} · {symbol}</span></div>
-    <form className="mt-5 grid items-end gap-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_auto]" onSubmit={calculate}>
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-4"><h2 className="font-display text-xl font-semibold">Profit calculator</h2><span className="text-sm font-medium text-primary-deep">{company?.name} · {symbol}</span><label className="grid w-full gap-2 text-xs font-medium sm:ml-auto sm:w-60" htmlFor="investment-amount">Investment amount (USD)<Input id="investment-amount" type="number" min="0.01" step="any" value={amount} disabled={busy || priceLoading || purchasePrice == null} placeholder={priceLoading ? "Loading purchase price…" : "Select investment date"} onChange={e => updateAmount(e.target.value)} className="h-11" /></label></div>
+    <form className="mt-5 grid items-end gap-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto]" onSubmit={calculate}>
       <label className="grid gap-2 text-xs font-medium" htmlFor="investment-date">Investment date<Input id="investment-date" type="date" required value={startDate} disabled={busy} onChange={e => { setStartDate(e.target.value); setResult(null); }} className="h-11" /></label>
-      <label className="grid gap-2 text-xs font-medium" htmlFor="valuation-date">Valuation date<Input id="valuation-date" type="date" required min={startDate || undefined} value={endDate} disabled={busy} onChange={e => { setEndDate(e.target.value); setResult(null); }} className="h-11" /></label>
-      <label className="grid gap-2 text-xs font-medium" htmlFor="investment-shares">Number of shares<Input id="investment-shares" type="number" min="0.000001" step="any" required value={shares} disabled={busy} onChange={e => { setShares(e.target.value); setResult(null); }} className="h-11" /></label>
-      <Button type="submit" disabled={busy} className="h-11 min-w-40 text-base font-semibold">{busy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Calculator className="h-4 w-4" />}{busy ? "Calculating…" : "Calculate"}</Button>
+      <label className="grid gap-2 text-xs font-medium" htmlFor="valuation-date">Valuation date<Input id="valuation-date" type="date" required min={startDate || undefined} value={endDate} disabled={busy} onChange={e => { revision.current += 1; setEndDate(e.target.value); setResult(null); }} className="h-11" /></label>
+      <label className="grid gap-2 text-xs font-medium" htmlFor="investment-shares">Number of shares<Input id="investment-shares" type="number" min="0.000001" step="any" required value={shares} disabled={busy} onChange={e => updateShares(e.target.value)} className="h-11" /></label>
+      <Button type="submit" disabled={busy || priceLoading || (entered.current.basis === "amount" && purchasePrice == null)} className="h-11 min-w-40 text-base font-semibold">{busy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Calculator className="h-4 w-4" />}{busy ? "Calculating…" : "Calculate"}</Button>
     </form>
     {error && <p role="alert" className="mt-3 text-sm text-destructive">{error}</p>}
     <Dialog open={result != null} onOpenChange={open => { if (!open) setResult(null); }}>
