@@ -1,4 +1,7 @@
 # Website update
+- [ ] Finish the linked investment amount field and verify company switching.
+- [ ] Remove premarket information, add compact genuine market caps inside company buttons, and check quotes every second.
+- [ ] Verify quote data, layout, calculator behavior and relevant tests.
 - [x] Replace all content below companies with a selected-company, dates and shares calculator with popup results.
 - [x] Add genuine timestamped premarket and after-hours prices with smaller price typography.
 - [x] Verify calculation, company switching, unavailable prices and page layout.
