@@ -3,7 +3,7 @@ let session: { cookie: string; crumb: string; expires: number } | null = null;
 let sessionPending: Promise<{ cookie: string; crumb: string; expires: number }> | null = null;
 let cached: { data: Record<string, unknown>[]; expires: number } | null = null;
 let pending: Promise<Record<string, unknown>[]> | null = null;
-const headers = { "User-Agent": "Mozilla/5.0", Accept: "application/json" };
+const headers = { "User-Agent": "Mozilla/5.0", Accept: "*/*" };
 const symbols = "NVDA,AAPL,MSFT,AMZN,GOOGL,META,TSLA";
 
 async function getSession() {
