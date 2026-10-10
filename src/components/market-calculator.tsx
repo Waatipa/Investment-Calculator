@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useRef, useState, type FormEvent } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowUp, ArrowDown, Radio, Calculator, LoaderCircle } from "lucide-react";
-import { COMPANIES, quotesQuery, type Symbol } from "@/lib/markets";
+import { COMPANIES, formatMarketCap, quotesQuery, type Symbol } from "@/lib/markets";
 import { usd } from "@/lib/calc";
 import { getInvestmentResult, getPriceOnDate, type MarketQuote } from "@/lib/nvda.functions";
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,7 @@ function CompanyButtons({ symbol, setSymbol, quotes }: { symbol: Symbol; setSymb
     const change = quote?.price != null && quote.previousClose != null ? quote.price - quote.previousClose : null;
     const percent = change != null && quote?.previousClose ? change / quote.previousClose * 100 : null;
     return <div key={c.symbol} className="min-w-0">
-      <Button className="h-12 w-full flex-col gap-0 px-1 font-display text-base font-semibold" variant={symbol === c.symbol ? "default" : "outline"} aria-pressed={symbol === c.symbol} onClick={() => setSymbol(c.symbol)}>{c.name}<span className="text-[10px] font-normal opacity-70">{c.symbol}</span></Button>
+      <Button className="h-24 w-full flex-col gap-1 px-1 font-display text-base font-semibold" variant={symbol === c.symbol ? "default" : "outline"} aria-pressed={symbol === c.symbol} onClick={() => setSymbol(c.symbol)}>{c.name}<span className="text-[10px] font-normal opacity-70">{c.symbol}</span><span className="mt-1 text-xs font-medium tabular-nums" title="Market capitalization in USD">{quote ? formatMarketCap(quote.marketCap) : "—"}</span><span className="text-[9px] font-normal opacity-70">Market cap · USD</span></Button>
       <div className="px-1 pt-2">
         <div key={quote?.price} className="quote-tick text-sm font-semibold tabular-nums" title={quote?.time ? sessionTime(quote.time) : undefined}>{quote?.price != null ? usd(quote.price) : quotes ? "Unavailable" : "—"}</div>
         <div className={`mt-1 flex min-h-4 items-center gap-0.5 text-[10px] tabular-nums ${change == null || change === 0 ? "text-muted-foreground" : change > 0 ? "text-success" : "text-destructive"}`}>{change != null && percent != null ? <>{change > 0 ? <ArrowUp className="h-3 w-3 shrink-0" /> : change < 0 ? <ArrowDown className="h-3 w-3 shrink-0" /> : null}{Math.abs(change).toFixed(2)} ({percent > 0 ? "+" : ""}{percent.toFixed(2)}%)</> : "—"}</div>

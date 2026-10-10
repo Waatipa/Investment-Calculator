@@ -13,7 +13,9 @@
 - Keep ticker and timeline query options in a browser-safe market module and validate the public price request with an allowlist, so controls cannot request arbitrary instruments.
 - Use a shared date-and-share calculator on home and Markets; clear submitted results when inputs or company change so results never describe stale inputs.
 - Compute date-and-share returns from allowlisted daily closing prices on demand, using source trading dates and disclosing the split-adjusted share basis so share quantities and historical prices stay consistent.
-- Derive extended-hours prices only from source observations within Yahoo session boundaries and display their timestamps so older sessions are not misrepresented as live trades.
+- Display source-reported after-hours prices with their source timestamps so older sessions are not misrepresented as live trades.
+- Batch all allowlisted company quotes and market caps through a server-only Yahoo anonymous session; coalesce in-flight requests and cache at most one second to avoid duplicate provider traffic.
+- Keep the most recently edited investment basis (USD or shares) when switching companies; derive its equivalent using the first source trading close on or after the investment date.
 - Fetch company quotes together through an allowlisted public market function and refresh without synthesizing ticks; chart stock prices separately from calculated portfolio results so axes remain truthful.
 - Transfer the request-scoped Query cache through router dehydration/hydration so live market prices match the server-rendered snapshot on first load.
 - Render candlesticks only from source OHLC observations; quote-only endpoints have no fabricated candle and below-close shading uses the latest session's previous close.
