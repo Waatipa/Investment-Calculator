@@ -74,11 +74,11 @@ export const getMarketQuotes = createServerFn({ method: "GET" }).handler(async (
   const quotes = await fetchCompanyQuotes().catch(() => []);
   const positive = (value: unknown) => typeof value === "number" && Number.isFinite(value) && value > 0 ? value : null;
   return symbols.map(symbol => {
-    const quote = quotes.find(q => q.symbol === symbol);
-    const usdQuote = quote?.currency === "USD" ? quote : undefined;
-    const time = positive(usdQuote?.regularMarketTime);
-    const postTime = positive(usdQuote?.postMarketTime);
-    return { symbol, price: positive(usdQuote?.regularMarketPrice), time: time == null ? null : time * 1000, opening: positive(usdQuote?.regularMarketOpen), previousClose: positive(usdQuote?.regularMarketPreviousClose), marketOpen: usdQuote?.marketState === "REGULAR", marketCap: positive(usdQuote?.marketCap), postMarketPrice: postTime != null ? positive(usdQuote?.postMarketPrice) : null, postMarketTime: postTime == null ? null : postTime * 1000 };
+    const quote = quotes.find(q => q['symbol'] === symbol);
+    const usdQuote = quote?.['currency'] === "USD" ? quote : undefined;
+    const time = positive(usdQuote?.['regularMarketTime']);
+    const postTime = positive(usdQuote?.['postMarketTime']);
+    return { symbol, price: positive(usdQuote?.['regularMarketPrice']), time: time == null ? null : time * 1000, opening: positive(usdQuote?.['regularMarketOpen']), previousClose: positive(usdQuote?.['regularMarketPreviousClose']), marketOpen: usdQuote?.['marketState'] === "REGULAR", marketCap: positive(usdQuote?.['marketCap']), postMarketPrice: postTime != null ? positive(usdQuote?.['postMarketPrice']) : null, postMarketTime: postTime == null ? null : postTime * 1000 };
   });
 });
 
