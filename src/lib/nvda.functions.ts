@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { calculateShares, latestSessionPrice, tradingDate } from "./investment";
+import { calculateShares, tradingDate } from "./investment";
 
 export type NvdaData = {
   points: { t: number; p: number; c: number; o: number | null; h: number | null; l: number | null }[];
