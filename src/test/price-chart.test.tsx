@@ -15,9 +15,9 @@ describe("Real stock chart", () => {
     const { container } = render(<PriceChart {...props} candles/>);
     expect(container.querySelectorAll('[data-chart="candles"] rect')).toHaveLength(2);
   });
-  it("checks both prices and chart history every five seconds", () => {
+  it("checks company quotes every second and chart history every five seconds", () => {
     expect(marketQuery().refetchInterval).toBe(5000);
-    expect(quotesQuery().refetchInterval).toBe(5000);
+    expect(quotesQuery().refetchInterval).toBe(1000);
     expect(quotesQuery().staleTime).toBe(0);
   });
 });

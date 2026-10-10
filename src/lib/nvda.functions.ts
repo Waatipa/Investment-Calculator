@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { calculateShares, latestSessionPrice, tradingDate } from "./investment";
+import { calculateShares, tradingDate } from "./investment";
 
 export type NvdaData = {
   points: { t: number; p: number; c: number; o: number | null; h: number | null; l: number | null }[];
@@ -65,35 +65,21 @@ async function fetchHistory(data: { symbol: string; range: string }): Promise<Nv
 
 export type MarketQuote = {
   symbol: string; price: number | null; time: number | null; opening: number | null; previousClose: number | null; marketOpen: boolean;
-  preMarketPrice: number | null; preMarketTime: number | null; postMarketPrice: number | null; postMarketTime: number | null;
+  marketCap: number | null; postMarketPrice: number | null; postMarketTime: number | null;
 };
 
 export const getMarketQuotes = createServerFn({ method: "GET" }).handler(async (): Promise<MarketQuote[]> => {
   const symbols = ["NVDA", "AAPL", "MSFT", "AMZN", "GOOGL", "META", "TSLA"] as const;
-  return Promise.all(symbols.map(async (symbol): Promise<MarketQuote> => {
-    try {
-      const response = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=5d&interval=5m&includePrePost=true`, { headers: { "User-Agent": "Mozilla/5.0", Accept: "application/json" }, signal: AbortSignal.timeout(15000) });
-      if (!response.ok) throw new Error("Quotes unavailable");
-      const json: any = await response.json();
-      const r = json?.chart?.result?.[0];
-      if (!r) throw new Error("Quotes unavailable");
-      const meta = r.meta;
-      const timestamps: number[] = r.timestamp ?? [];
-      const closes: (number | null)[] = r.indicators?.quote?.[0]?.close ?? [];
-      const periods = (session: "pre" | "post") => {
-        const observed = meta.tradingPeriods?.[session]?.flat() ?? [];
-        return observed.length ? observed : meta.currentTradingPeriod?.[session] ? [meta.currentTradingPeriod[session]] : [];
-      };
-      const pre = latestSessionPrice(timestamps, closes, periods("pre"));
-      const post = latestSessionPrice(timestamps, closes, periods("post"));
-      const regular = meta.currentTradingPeriod?.regular;
-      const openIndex = timestamps.findIndex(t => t >= regular?.start && t < regular?.end);
-      const opening = openIndex >= 0 ? r.indicators?.quote?.[0]?.open?.[openIndex] : null;
-      return { symbol, price: meta.regularMarketPrice ?? null, time: meta.regularMarketTime ? meta.regularMarketTime * 1000 : null, opening: opening ?? null, previousClose: meta.previousClose ?? meta.chartPreviousClose ?? null, marketOpen: regular?.start != null && Date.now() >= regular.start * 1000 && Date.now() < regular.end * 1000, preMarketPrice: pre?.price ?? null, preMarketTime: pre?.time ?? null, postMarketPrice: post?.price ?? null, postMarketTime: post?.time ?? null };
-    } catch {
-      return { symbol, price: null, time: null, opening: null, previousClose: null, marketOpen: false, preMarketPrice: null, preMarketTime: null, postMarketPrice: null, postMarketTime: null };
-    }
-  }));
+  const { fetchCompanyQuotes } = await import("./market-quotes.server");
+  const quotes = await fetchCompanyQuotes().catch(() => []);
+  const positive = (value: unknown) => typeof value === "number" && Number.isFinite(value) && value > 0 ? value : null;
+  return symbols.map(symbol => {
+    const quote = quotes.find(q => q['symbol'] === symbol);
+    const usdQuote = quote?.['currency'] === "USD" ? quote : undefined;
+    const time = positive(usdQuote?.['regularMarketTime']);
+    const postTime = positive(usdQuote?.['postMarketTime']);
+    return { symbol, price: positive(usdQuote?.['regularMarketPrice']), time: time == null ? null : time * 1000, opening: positive(usdQuote?.['regularMarketOpen']), previousClose: positive(usdQuote?.['regularMarketPreviousClose']), marketOpen: usdQuote?.['marketState'] === "REGULAR", marketCap: positive(usdQuote?.['marketCap']), postMarketPrice: postTime != null ? positive(usdQuote?.['postMarketPrice']) : null, postMarketTime: postTime == null ? null : postTime * 1000 };
+  });
 });
 
 const dateInput = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(value => {
@@ -136,6 +122,6 @@ export const getPriceOnDate = createServerFn({ method: "GET" })
     const eligible = timestamps.flatMap((t, i) => {
       const c = closes[i];
       return c != null && Number.isFinite(c) && c > 0 && tradingDate(t * 1000) >= data.date ? [c] : [];
-    }).sort((a, b) => a - b);
+    });
     return eligible.length ? eligible[0] ?? null : null;
   });

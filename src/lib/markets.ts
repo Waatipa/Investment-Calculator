@@ -11,6 +11,11 @@ export const COMPANIES = [
   { symbol: "TSLA", name: "Tesla" },
 ] as const;
 export type Symbol = typeof COMPANIES[number]["symbol"];
+export function formatMarketCap(value: number | null | undefined) {
+  if (value == null || !Number.isFinite(value) || value <= 0) return "Unavailable";
+  const unit = value >= 1e12 ? { scale: 1e12, label: "T" } : value >= 1e9 ? { scale: 1e9, label: "B" } : { scale: 1e6, label: "M" };
+  return `$${(value / unit.scale).toFixed(2)} ${unit.label}`;
+}
 export const TIMELINES = [
   { key: "1d", label: "1 day" }, { key: "5d", label: "5 days" },
   { key: "1mo", label: "1 month" }, { key: "6mo", label: "6 months" },
@@ -30,7 +35,7 @@ export const quotesQuery = () => queryOptions({
   queryFn: () => getMarketQuotes(),
    staleTime: 0,
    refetchOnMount: false,
-   refetchInterval: 5_000,
+   refetchInterval: 1_000,
 });
 
 export const pageHead = (title: string, description: string) => ({ meta: [
