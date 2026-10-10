@@ -23,7 +23,7 @@ export function MarketCalculator() {
 
 function LiveCompanies({ symbol, setSymbol }: { symbol: Symbol; setSymbol: (s: Symbol) => void }) {
   const { data, isFetching } = useSuspenseQuery(quotesQuery());
-  return <><CompanyButtons symbol={symbol} setSymbol={setSymbol} quotes={data} /><div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground"><Radio className={`h-3 w-3 ${isFetching ? "text-primary-deep" : ""}`} />{data.some(q => q.marketOpen) ? "Market open" : "Market closed"} · Checked every 5 seconds · May be delayed</div></>;
+  return <><CompanyButtons symbol={symbol} setSymbol={setSymbol} quotes={data} /><div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground"><Radio className={`h-3 w-3 ${isFetching ? "text-primary-deep" : ""}`} />{data.some(q => q.marketOpen) ? "Market open" : "Market closed"} · Checked every second · Yahoo Finance data may be delayed</div></>;
 }
 
 const sessionTime = (t: number) => new Date(t).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/New_York" }) + " ET";
@@ -38,7 +38,6 @@ function CompanyButtons({ symbol, setSymbol, quotes }: { symbol: Symbol; setSymb
       <div className="px-1 pt-2">
         <div key={quote?.price} className="quote-tick text-sm font-semibold tabular-nums" title={quote?.time ? sessionTime(quote.time) : undefined}>{quote?.price != null ? usd(quote.price) : quotes ? "Unavailable" : "—"}</div>
         <div className={`mt-1 flex min-h-4 items-center gap-0.5 text-[10px] tabular-nums ${change == null || change === 0 ? "text-muted-foreground" : change > 0 ? "text-success" : "text-destructive"}`}>{change != null && percent != null ? <>{change > 0 ? <ArrowUp className="h-3 w-3 shrink-0" /> : change < 0 ? <ArrowDown className="h-3 w-3 shrink-0" /> : null}{Math.abs(change).toFixed(2)} ({percent > 0 ? "+" : ""}{percent.toFixed(2)}%)</> : "—"}</div>
-        <SessionPrice label="Premarket" price={quote?.preMarketPrice ?? null} time={quote?.preMarketTime ?? null} />
         <SessionPrice label="After-hours" price={quote?.postMarketPrice ?? null} time={quote?.postMarketTime ?? null} />
       </div>
     </div>;

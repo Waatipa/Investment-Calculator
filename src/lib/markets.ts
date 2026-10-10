@@ -30,7 +30,7 @@ export const quotesQuery = () => queryOptions({
   queryFn: () => getMarketQuotes(),
    staleTime: 0,
    refetchOnMount: false,
-   refetchInterval: 5_000,
+   refetchInterval: 1_000,
 });
 
 export const pageHead = (title: string, description: string) => ({ meta: [
