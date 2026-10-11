@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateShares, latestSessionPrice } from "@/lib/investment";
+import { calculateShares, latestSessionPrice, longDate } from "@/lib/investment";
 const points = [{ t: Date.parse("2025-01-03T21:00Z"), c: 100 }, { t: Date.parse("2025-01-06T21:00Z"), c: 120 }, { t: Date.parse("2025-01-07T21:00Z"), c: 90 }];
 describe("Date and shares calculator", () => {
   it("calculates profit and uses actual trading days for weekends", () => {
