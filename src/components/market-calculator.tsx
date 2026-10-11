@@ -135,10 +135,10 @@ function InvestmentForm({ symbol, open, setOpen }: { symbol: Symbol; open: boole
           <Button type="submit" disabled={busy || priceLoading || (entered.current.basis === "amount" && purchasePrice == null)} className="h-12 text-base font-semibold sm:col-span-2">{busy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Calculator className="h-4 w-4" />}{busy ? "Calculating…" : "Calculate Profit"}</Button>
         </form> : <>
           <div className="grid gap-4 md:grid-cols-2">
-            {card("Profit today", result.profit, result.roi, [["Valuation price", `${usd(result.endPrice)} · ${longDate(result.valuationDate)}`], ["Portfolio value", usd(result.value)], ["Investment cost", usd(result.invested)]])}
-            {card("Profit at maximum stock price", result.maxProfit, result.maxRoi, [["Highest price", usd(result.maxPrice)], ["Date reached", longDate(result.maxDate)], ["Portfolio value", usd(result.maxValue)], ["Investment cost", usd(result.invested)]])}
+            {card("Profit today", result.profit, result.roi, [["Current Stock Price", `${usd(result.endPrice)} · ${longDate(result.valuationDate)}`], ["Buying Stock Price", `${usd(result.purchasePrice)} · ${longDate(result.purchaseDate)}`], ["Portfolio Value (Investment Date)", usd(result.invested)], ["Portfolio Value (To Date)", usd(result.value)]])}
+            {card("Profit at maximum stock price", result.maxProfit, result.maxRoi, [["Highest Stock Price", `${usd(result.maxPrice)} · ${longDate(result.maxDate)}`], ["Buying Stock Price", `${usd(result.purchasePrice)} · ${longDate(result.purchaseDate)}`], ["Portfolio Value (Investment Date)", usd(result.invested)], ["Portfolio Value (Peak Date)", usd(result.maxValue)]])}
           </div>
-          <p className="text-xs text-muted-foreground">Purchase price {usd(result.purchasePrice)} on {longDate(result.purchaseDate)}. Portfolio value is shares × price; profit is portfolio value minus investment cost.</p>
+          <p className="text-xs text-muted-foreground">Portfolio value is shares × price on each date; profit is the later portfolio value minus the portfolio value at the investment date.</p>
           <p className="text-xs leading-relaxed text-muted-foreground">Yahoo Finance prices in USD, split-adjusted; shares are on the current split-adjusted basis. Investment uses the first trading day close on or after your date; valuation uses the last trading day close on or before your date. The maximum uses the highest daily traded price in that period (hypothetical sale). Excludes dividends, taxes and fees. Not financial advice.</p>
           <Button variant="outline" className="h-12 text-base" onClick={() => setResult(null)}>Edit Investment Details</Button>
         </>}
