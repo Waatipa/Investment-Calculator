@@ -4,6 +4,7 @@ import { ArrowUp, ArrowDown, Radio, Calculator, LoaderCircle } from "lucide-reac
 import { COMPANIES, formatMarketCap, quotesQuery, type Symbol } from "@/lib/markets";
 import { usd } from "@/lib/calc";
 import { getInvestmentResult, getPriceOnDate, type MarketQuote } from "@/lib/nvda.functions";
+import { longDate } from "@/lib/investment";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -122,12 +123,9 @@ function InvestmentForm({ symbol, open, setOpen }: { symbol: Symbol; open: boole
     <div className={`text-sm font-medium ${profit >= 0 ? "text-success" : "text-destructive"}`}>{roi >= 0 ? "+" : ""}{roi.toFixed(2)}% return</div>
     <dl className="mt-3 grid gap-2 border-t border-border pt-3 text-sm">{rows.map(([k, v]) => <div key={k} className="flex justify-between gap-3"><dt className="text-muted-foreground">{k}</dt><dd className="text-right font-medium tabular-nums">{v}</dd></div>)}</dl>
   </div>;
-  return <section className="mt-7 border-t border-border pt-6" aria-label="Profit calculator">
-    <div className="flex flex-wrap items-center gap-3"><h2 className="font-display text-xl font-semibold">Profit calculator</h2><span className="text-sm font-medium text-primary-deep">{company?.name} · {symbol}</span><Button className="h-11 w-full text-base font-semibold sm:ml-auto sm:w-auto" onClick={() => setOpen(true)}><Calculator className="h-4 w-4" />Open calculator</Button></div>
-    <p className="mt-2 text-sm text-muted-foreground">Tap any company above to open its calculator.</p>
-    <Dialog open={open} onOpenChange={o => { setOpen(o); if (!o) setResult(null); }}>
+  return <Dialog open={open} onOpenChange={o => { setOpen(o); if (!o) setResult(null); }}>
       <DialogContent className="max-h-[90dvh] w-[calc(100%-1.5rem)] max-w-3xl overflow-y-auto overflow-x-hidden rounded-lg p-4 sm:p-6">
-        <DialogHeader><DialogTitle className="pr-8 font-display text-xl">{company?.name} ({symbol}) {result ? "investment result" : "profit calculator"}</DialogTitle><DialogDescription>{result ? `${result.shares} ${symbol} shares · ${result.purchaseDate} to ${result.valuationDate}` : "Enter your dates and shares or amount, then calculate."}</DialogDescription></DialogHeader>
+        <DialogHeader><DialogTitle className="pr-8 font-display text-xl">{company?.name} ({symbol}) {result ? "investment result" : "profit calculator"}</DialogTitle><DialogDescription>{result ? `${result.shares} ${symbol} shares · ${longDate(result.purchaseDate)} to ${longDate(result.valuationDate)}` : "Enter your dates and shares or amount, then calculate."}</DialogDescription></DialogHeader>
         {!result ? <form className="grid gap-4 sm:grid-cols-2" onSubmit={calculate}>
           <label className="grid gap-2 text-xs font-medium" htmlFor="investment-date">Investment date<Input id="investment-date" type="date" required value={startDate} disabled={busy} onChange={e => { setStartDate(e.target.value); setResult(null); }} className="h-12 text-base" /></label>
           <label className="grid gap-2 text-xs font-medium" htmlFor="valuation-date">Valuation date<Input id="valuation-date" type="date" required min={startDate || undefined} value={endDate} disabled={busy} onChange={e => { revision.current += 1; setEndDate(e.target.value); setResult(null); }} className="h-12 text-base" /></label>
@@ -137,14 +135,13 @@ function InvestmentForm({ symbol, open, setOpen }: { symbol: Symbol; open: boole
           <Button type="submit" disabled={busy || priceLoading || (entered.current.basis === "amount" && purchasePrice == null)} className="h-12 text-base font-semibold sm:col-span-2">{busy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Calculator className="h-4 w-4" />}{busy ? "Calculating…" : "Calculate Profit"}</Button>
         </form> : <>
           <div className="grid gap-4 md:grid-cols-2">
-            {card("Profit today", result.profit, result.roi, [["Valuation price", `${usd(result.endPrice)} · ${result.valuationDate}`], ["Portfolio value", usd(result.value)], ["Investment cost", usd(result.invested)]])}
-            {card("Profit at maximum stock price", result.maxProfit, result.maxRoi, [["Highest price", usd(result.maxPrice)], ["Date reached", result.maxDate], ["Portfolio value", usd(result.maxValue)], ["Investment cost", usd(result.invested)]])}
+            {card("Profit today", result.profit, result.roi, [["Valuation price", `${usd(result.endPrice)} · ${longDate(result.valuationDate)}`], ["Portfolio value", usd(result.value)], ["Investment cost", usd(result.invested)]])}
+            {card("Profit at maximum stock price", result.maxProfit, result.maxRoi, [["Highest price", usd(result.maxPrice)], ["Date reached", longDate(result.maxDate)], ["Portfolio value", usd(result.maxValue)], ["Investment cost", usd(result.invested)]])}
           </div>
-          <p className="text-xs text-muted-foreground">Purchase price {usd(result.purchasePrice)} on {result.purchaseDate}. Portfolio value is shares × price; profit is portfolio value minus investment cost.</p>
+          <p className="text-xs text-muted-foreground">Purchase price {usd(result.purchasePrice)} on {longDate(result.purchaseDate)}. Portfolio value is shares × price; profit is portfolio value minus investment cost.</p>
           <p className="text-xs leading-relaxed text-muted-foreground">Yahoo Finance prices in USD, split-adjusted; shares are on the current split-adjusted basis. Investment uses the first trading day close on or after your date; valuation uses the last trading day close on or before your date. The maximum uses the highest daily traded price in that period (hypothetical sale). Excludes dividends, taxes and fees. Not financial advice.</p>
           <Button variant="outline" className="h-12 text-base" onClick={() => setResult(null)}>Edit Investment Details</Button>
         </>}
       </DialogContent>
-    </Dialog>
-  </section>;
+    </Dialog>;
 }
