@@ -7,6 +7,10 @@ describe("Date and shares calculator", () => {
     expect(calculateShares(points, "2025-01-03", "2025-01-06", 10)).toMatchObject({ profit: 200, roi: 20 });
   });
   it("supports losses and fractional shares", () => { expect(calculateShares(points, "2025-01-03", "2025-01-07", 0.5)).toMatchObject({ profit: -5, roi: -10 }); });
+  it("shows trading dates as day, full month and year", () => {
+    expect(longDate("2022-01-11")).toBe("11 January 2022");
+    expect(longDate("2026-10-08")).toBe("8 October 2026");
+  });
   it("rejects invalid shares, reversed dates and dates without observations", () => {
     expect(() => calculateShares(points, "2025-01-03", "2025-01-07", 0)).toThrow();
     expect(() => calculateShares(points, "2025-01-07", "2025-01-03", 10)).toThrow();
