@@ -101,9 +101,10 @@ export const getInvestmentResult = createServerFn({ method: "GET" })
     const r = json?.chart?.result?.[0];
     const timestamps: number[] = r?.timestamp ?? [];
     const closes: (number | null)[] = r?.indicators?.quote?.[0]?.close ?? [];
+    const highs: (number | null)[] = r?.indicators?.quote?.[0]?.high ?? [];
     const points = timestamps.flatMap((t, i) => {
       const c = closes[i];
-      return c != null && Number.isFinite(c) && c > 0 ? [{ t: t * 1000, c }] : [];
+      return c != null && Number.isFinite(c) && c > 0 ? [{ t: t * 1000, c, h: highs[i] ?? null }] : [];
     });
     return calculateShares(points, data.startDate, data.endDate, data.shares);
   });

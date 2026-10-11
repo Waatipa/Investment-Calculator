@@ -22,11 +22,14 @@ function mount() {
 describe("Linked investment calculator", () => {
   it("links shares and USD amount and preserves the chosen basis across companies", async () => {
     const client = mount();
+    fireEvent.click(screen.getByRole("button", { name: /NVIDIA/ }));
     fireEvent.change(screen.getByLabelText("Investment date"), { target: { value: "2021-10-07" } });
     fireEvent.change(screen.getByLabelText("Valuation date"), { target: { value: "2026-10-08" } });
     await waitFor(() => expect(screen.getByLabelText("Investment amount (USD)")).toHaveValue(200));
     fireEvent.change(screen.getByLabelText("Number of shares"), { target: { value: "25" } });
     expect(screen.getByLabelText("Investment amount (USD)")).toHaveValue(500);
+    fireEvent.keyDown(document.activeElement ?? document.body, { key: "Escape" });
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
     fireEvent.click(screen.getByRole("button", { name: /Meta/ }));
     await waitFor(() => expect(screen.getByLabelText("Investment amount (USD)")).toHaveValue(1250));
     expect(screen.getByLabelText("Number of shares")).toHaveValue(25);
@@ -34,6 +37,8 @@ describe("Linked investment calculator", () => {
     expect(screen.getByLabelText("Valuation date")).toHaveValue("2026-10-08");
     fireEvent.change(screen.getByLabelText("Investment amount (USD)"), { target: { value: "1000" } });
     expect(screen.getByLabelText("Number of shares")).toHaveValue(20);
+    fireEvent.keyDown(document.activeElement ?? document.body, { key: "Escape" });
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
     fireEvent.click(screen.getByRole("button", { name: /NVIDIA/ }));
     await waitFor(() => expect(screen.getByLabelText("Number of shares")).toHaveValue(50));
     expect(screen.getByLabelText("Investment amount (USD)")).toHaveValue(1000);

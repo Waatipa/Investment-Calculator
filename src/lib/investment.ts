@@ -1,4 +1,4 @@
-export type InvestmentPoint = { t: number; c: number };
+export type InvestmentPoint = { t: number; c: number; h?: number | null };
 export const tradingDate = (t: number) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(t));
 
 export function calculateShares(points: InvestmentPoint[], startDate: string, endDate: string, shares: number) {
@@ -11,7 +11,16 @@ export function calculateShares(points: InvestmentPoint[], startDate: string, en
   const invested = shares * first.c;
   const value = shares * last.c;
   const profit = value - invested;
-  return { shares, invested, value, profit, roi: profit / invested * 100, purchasePrice: first.c, endPrice: last.c, purchaseDate: tradingDate(first.t), valuationDate: tradingDate(last.t) };
+  // Highest actual traded price (daily high, falling back to close when the source omits a high).
+  let peak = { price: first.c, t: first.t };
+  for (const p of eligible) {
+    const price = p.h != null && Number.isFinite(p.h) && p.h > 0 ? Math.max(p.h, p.c) : p.c;
+    if (price > peak.price) peak = { price, t: p.t };
+  }
+  const maxValue = shares * peak.price;
+  const maxProfit = maxValue - invested;
+  return { shares, invested, value, profit, roi: profit / invested * 100, purchasePrice: first.c, endPrice: last.c, purchaseDate: tradingDate(first.t), valuationDate: tradingDate(last.t),
+    maxPrice: peak.price, maxDate: tradingDate(peak.t), maxValue, maxProfit, maxRoi: maxProfit / invested * 100 };
 }
 
 export function latestSessionPrice(timestamps: number[], closes: (number | null)[], periods: { start: number; end: number }[]) {
