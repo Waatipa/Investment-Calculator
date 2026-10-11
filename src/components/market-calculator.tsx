@@ -11,13 +11,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 type Result = Awaited<ReturnType<typeof getInvestmentResult>>;
 
 export function MarketCalculator() {
-  const [symbol, setSymbol] = useState<Symbol>("NVDA");
+  const [symbol, setSymbolState] = useState<Symbol>("NVDA");
+  const [open, setOpen] = useState(false);
+  const setSymbol = (s: Symbol) => { setSymbolState(s); setOpen(true); };
   return <main className="mx-auto max-w-6xl px-6 py-8">
     <div className="text-xs font-medium uppercase tracking-wide text-primary-deep">Magnificent Seven · Investment Time Machine</div>
     <h1 className="mt-2 max-w-3xl font-display text-3xl font-semibold leading-tight md:text-4xl">See What Your Money Would Have Become.</h1>
     <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted-foreground">Pick a company, enter how much you would have invested, drag through time, and instantly see the profit, ROI, and portfolio value. Historical investment math made simple.</p>
     <Suspense fallback={<CompanyButtons symbol={symbol} setSymbol={setSymbol} />}><LiveCompanies symbol={symbol} setSymbol={setSymbol} /></Suspense>
-    <InvestmentForm symbol={symbol} />
+    <InvestmentForm symbol={symbol} open={open} setOpen={setOpen} />
   </main>;
 }
 
@@ -48,7 +50,7 @@ function SessionPrice({ label, price, time }: { label: string; price?: number | 
   return <div className="mt-2 border-t border-border pt-2"><div className="text-[10px] text-muted-foreground">{label}</div><div key={price} className="quote-tick text-xs font-medium tabular-nums">{price != null ? usd(price) : "Unavailable"}</div>{time != null && <div className="mt-0.5 text-[9px] leading-relaxed text-muted-foreground">{sessionTime(time)}</div>}</div>;
 }
 
-function InvestmentForm({ symbol }: { symbol: Symbol }) {
+function InvestmentForm({ symbol, open, setOpen }: { symbol: Symbol; open: boolean; setOpen: (o: boolean) => void }) {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [shares, setShares] = useState("10");
@@ -114,19 +116,34 @@ function InvestmentForm({ symbol }: { symbol: Symbol }) {
     catch (err) { if (submittedRevision === revision.current) setError(err instanceof Error ? err.message : "Prices are unavailable. Please try again."); }
     finally { setBusy(false); }
   }
+  const card = (title: string, profit: number, roi: number, rows: [string, string][]) => <div className="rounded-lg border border-border p-4">
+    <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{title}</div>
+    <div className={`mt-1 font-display text-2xl font-semibold tabular-nums ${profit >= 0 ? "text-success" : "text-destructive"}`}>{profit >= 0 ? "+" : ""}{usd(profit)}</div>
+    <div className={`text-sm font-medium ${profit >= 0 ? "text-success" : "text-destructive"}`}>{roi >= 0 ? "+" : ""}{roi.toFixed(2)}% return</div>
+    <dl className="mt-3 grid gap-2 border-t border-border pt-3 text-sm">{rows.map(([k, v]) => <div key={k} className="flex justify-between gap-3"><dt className="text-muted-foreground">{k}</dt><dd className="text-right font-medium tabular-nums">{v}</dd></div>)}</dl>
+  </div>;
   return <section className="mt-7 border-t border-border pt-6" aria-label="Profit calculator">
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-4"><h2 className="font-display text-xl font-semibold">Profit calculator</h2><span className="text-sm font-medium text-primary-deep">{company?.name} · {symbol}</span><label className="grid w-full gap-2 text-xs font-medium sm:ml-auto sm:w-60" htmlFor="investment-amount">Investment amount (USD)<Input id="investment-amount" type="number" min="0.01" step="any" value={amount} disabled={busy || priceLoading || purchasePrice == null} placeholder={priceLoading ? "Loading purchase price…" : "Pick a date first"} onChange={e => updateAmount(e.target.value)} className="h-11" /></label></div>
-    <form className="mt-5 grid items-end gap-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto]" onSubmit={calculate}>
-      <label className="grid gap-2 text-xs font-medium" htmlFor="investment-date">Investment date<Input id="investment-date" type="date" required value={startDate} disabled={busy} onChange={e => { setStartDate(e.target.value); setResult(null); }} className="h-11" /></label>
-      <label className="grid gap-2 text-xs font-medium" htmlFor="valuation-date">Valuation date<Input id="valuation-date" type="date" required min={startDate || undefined} value={endDate} disabled={busy} onChange={e => { revision.current += 1; setEndDate(e.target.value); setResult(null); }} className="h-11" /></label>
-      <label className="grid gap-2 text-xs font-medium" htmlFor="investment-shares">Number of shares<Input id="investment-shares" type="number" min="0.000001" step="any" required value={shares} disabled={busy} onChange={e => updateShares(e.target.value)} className="h-11" /></label>
-      <Button type="submit" disabled={busy || priceLoading || (entered.current.basis === "amount" && purchasePrice == null)} className="h-11 min-w-40 text-base font-semibold">{busy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Calculator className="h-4 w-4" />}{busy ? "Calculating…" : "Calculate"}</Button>
-    </form>
-    {error && <p role="alert" className="mt-3 text-sm text-destructive">{error}</p>}
-    <Dialog open={result != null} onOpenChange={open => { if (!open) setResult(null); }}>
-      <DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] overflow-y-auto rounded-lg">
-        <DialogHeader><DialogTitle className="font-display text-xl">{company?.name} investment result</DialogTitle><DialogDescription>{result?.shares} {symbol} shares · {result?.purchaseDate} to {result?.valuationDate}</DialogDescription></DialogHeader>
-        {result && <><div className="border-y border-border py-5"><div className="text-xs text-muted-foreground">Profit / Loss</div><div className={`mt-1 font-display text-3xl font-semibold tabular-nums ${result.profit >= 0 ? "text-success" : "text-destructive"}`}>{result.profit >= 0 ? "+" : ""}{usd(result.profit)}</div><div className={`mt-1 text-sm font-medium ${result.profit >= 0 ? "text-success" : "text-destructive"}`}>{result.roi >= 0 ? "+" : ""}{result.roi.toFixed(2)}% return</div></div><dl className="grid grid-cols-2 gap-4 text-sm"><div><dt className="text-xs text-muted-foreground">Amount invested</dt><dd className="mt-1 font-semibold">{usd(result.invested)}</dd></div><div><dt className="text-xs text-muted-foreground">Value on valuation date</dt><dd className="mt-1 font-semibold">{usd(result.value)}</dd></div><div><dt className="text-xs text-muted-foreground">Purchase price</dt><dd className="mt-1">{usd(result.purchasePrice)}</dd></div><div><dt className="text-xs text-muted-foreground">Valuation price</dt><dd className="mt-1">{usd(result.endPrice)}</dd></div></dl><p className="text-xs leading-relaxed text-muted-foreground">Yahoo Finance closing prices, split-adjusted; shares are on the current split-adjusted basis. Investment uses the first trading day on or after your date; valuation uses the last trading day on or before your date. Excludes dividends, taxes and fees. Not financial advice.</p></>}
+    <div className="flex flex-wrap items-center gap-3"><h2 className="font-display text-xl font-semibold">Profit calculator</h2><span className="text-sm font-medium text-primary-deep">{company?.name} · {symbol}</span><Button className="h-11 w-full text-base font-semibold sm:ml-auto sm:w-auto" onClick={() => setOpen(true)}><Calculator className="h-4 w-4" />Open calculator</Button></div>
+    <p className="mt-2 text-sm text-muted-foreground">Tap any company above to open its calculator.</p>
+    <Dialog open={open} onOpenChange={o => { setOpen(o); if (!o) setResult(null); }}>
+      <DialogContent className="max-h-[90dvh] w-[calc(100%-1.5rem)] max-w-3xl overflow-y-auto overflow-x-hidden rounded-lg p-4 sm:p-6">
+        <DialogHeader><DialogTitle className="pr-8 font-display text-xl">{company?.name} ({symbol}) {result ? "investment result" : "profit calculator"}</DialogTitle><DialogDescription>{result ? `${result.shares} ${symbol} shares · ${result.purchaseDate} to ${result.valuationDate}` : "Enter your dates and shares or amount, then calculate."}</DialogDescription></DialogHeader>
+        {!result ? <form className="grid gap-4 sm:grid-cols-2" onSubmit={calculate}>
+          <label className="grid gap-2 text-xs font-medium" htmlFor="investment-date">Investment date<Input id="investment-date" type="date" required value={startDate} disabled={busy} onChange={e => { setStartDate(e.target.value); setResult(null); }} className="h-12 text-base" /></label>
+          <label className="grid gap-2 text-xs font-medium" htmlFor="valuation-date">Valuation date<Input id="valuation-date" type="date" required min={startDate || undefined} value={endDate} disabled={busy} onChange={e => { revision.current += 1; setEndDate(e.target.value); setResult(null); }} className="h-12 text-base" /></label>
+          <label className="grid gap-2 text-xs font-medium" htmlFor="investment-shares">Number of shares<Input id="investment-shares" type="number" min="0.000001" step="any" required value={shares} disabled={busy} onChange={e => updateShares(e.target.value)} className="h-12 text-base" /></label>
+          <label className="grid gap-2 text-xs font-medium" htmlFor="investment-amount">Investment amount (USD)<Input id="investment-amount" type="number" min="0.01" step="any" value={amount} disabled={busy || priceLoading || purchasePrice == null} placeholder={priceLoading ? "Loading purchase price…" : "Pick a date first"} onChange={e => updateAmount(e.target.value)} className="h-12 text-base" /></label>
+          {error && <p role="alert" className="text-sm text-destructive sm:col-span-2">{error}</p>}
+          <Button type="submit" disabled={busy || priceLoading || (entered.current.basis === "amount" && purchasePrice == null)} className="h-12 text-base font-semibold sm:col-span-2">{busy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Calculator className="h-4 w-4" />}{busy ? "Calculating…" : "Calculate Profit"}</Button>
+        </form> : <>
+          <div className="grid gap-4 md:grid-cols-2">
+            {card("Profit today", result.profit, result.roi, [["Valuation price", `${usd(result.endPrice)} · ${result.valuationDate}`], ["Portfolio value", usd(result.value)], ["Investment cost", usd(result.invested)]])}
+            {card("Profit at maximum stock price", result.maxProfit, result.maxRoi, [["Highest price", usd(result.maxPrice)], ["Date reached", result.maxDate], ["Portfolio value", usd(result.maxValue)], ["Investment cost", usd(result.invested)]])}
+          </div>
+          <p className="text-xs text-muted-foreground">Purchase price {usd(result.purchasePrice)} on {result.purchaseDate}. Portfolio value is shares × price; profit is portfolio value minus investment cost.</p>
+          <p className="text-xs leading-relaxed text-muted-foreground">Yahoo Finance prices in USD, split-adjusted; shares are on the current split-adjusted basis. Investment uses the first trading day close on or after your date; valuation uses the last trading day close on or before your date. The maximum uses the highest daily traded price in that period (hypothetical sale). Excludes dividends, taxes and fees. Not financial advice.</p>
+          <Button variant="outline" className="h-12 text-base" onClick={() => setResult(null)}>Edit Investment Details</Button>
+        </>}
       </DialogContent>
     </Dialog>
   </section>;
