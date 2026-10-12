@@ -55,13 +55,23 @@ function CompanyButtons({ symbol, setSymbol, quotes }: { symbol: Symbol; setSymb
         <div className="mt-0.5 text-[10px] font-medium tabular-nums text-on-brand/70" title="Market capitalization in USD">{quote ? formatMarketCap(quote.marketCap) : "—"}</div>
       </div>
       <div className="px-3 py-3 md:px-2 xl:px-3">
+        <div className="session-label">Market :</div>
         <div key={quote?.price} className="quote-tick font-display text-base font-semibold tabular-nums md:text-[13px] xl:text-base" title={quote?.time ? sessionTime(quote.time) : undefined}>{quote?.price != null ? usd(quote.price) : quotes ? "Unavailable" : "—"}</div>
         <Change change={change} percent={percent} className="mt-1 flex-wrap text-xs md:text-[10px] xl:text-xs" />
-        <div className="mt-3 border-t border-border pt-2">
-          <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Pre-market</div>
-          <div key={pre} className="quote-tick mt-0.5 text-sm font-medium tabular-nums md:text-xs xl:text-sm">{pre != null ? usd(pre) : "Unavailable"}</div>
-          <Change change={preChange} percent={prePercent} className="mt-0.5 flex-wrap text-[10px] xl:text-[11px]" />
-          <div className="mt-1 text-[9px] leading-relaxed text-muted-foreground">{quote?.preMarketTime != null ? sessionTime(quote.preMarketTime) : " "}</div>
+        <div className="trading-sessions mt-3 grid grid-cols-2 border-t border-border pt-2">
+          <div className="min-w-0 pr-1">
+            <div className="session-label">Pre-market</div>
+            <div className="session-hours"><span>4:00 AM–</span><span>9:30 AM ET</span></div>
+            {pre != null && <>
+              <div key={pre} className="quote-tick mt-0.5 text-sm font-medium tabular-nums md:text-xs xl:text-sm">{usd(pre)}</div>
+              <Change change={preChange} percent={prePercent} className="mt-0.5 flex-wrap text-[10px] xl:text-[11px]" />
+              <div className="mt-1 text-[9px] leading-relaxed text-muted-foreground">{quote?.preMarketTime != null ? sessionTime(quote.preMarketTime) : " "}</div>
+            </>}
+          </div>
+          <div className="min-w-0 border-l border-border pl-1">
+            <div className="session-label">After-hours</div>
+            <div className="session-hours"><span>4:00 PM–</span><span>8:00 PM ET</span></div>
+          </div>
         </div>
       </div>
     </Button>;
