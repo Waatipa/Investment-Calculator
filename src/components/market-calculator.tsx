@@ -49,9 +49,9 @@ function CompanyButtons({ symbol, setSymbol, quotes }: { symbol: Symbol; setSymb
     return <button key={c.symbol} type="button" aria-pressed={active} onClick={() => setSymbol(c.symbol)}
       className={`min-w-0 overflow-hidden rounded-xl border bg-card text-left shadow-soft transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${active ? "border-primary-deep ring-2 ring-primary" : "border-border"}`}>
       <div className="px-4 py-3 text-center" style={{ background: `linear-gradient(135deg, ${c.brand}, color-mix(in oklab, ${c.brand} 75%, black))` }}>
-        <div className="font-display text-lg font-semibold text-white">{c.name}</div>
-        <div className="text-xs font-medium text-white/80">{c.symbol}</div>
-        <div className="mt-0.5 text-[10px] font-medium tabular-nums text-white/70" title="Market capitalization in USD">{quote ? formatMarketCap(quote.marketCap) : "—"}</div>
+        <div className="font-display text-lg font-semibold text-on-brand">{c.name}</div>
+        <div className="text-xs font-medium text-on-brand/80">{c.symbol}</div>
+        <div className="mt-0.5 text-[10px] font-medium tabular-nums text-on-brand/70" title="Market capitalization in USD">{quote ? formatMarketCap(quote.marketCap) : "—"}</div>
       </div>
       <div className="px-4 py-3">
         <div key={quote?.price} className="quote-tick font-display text-2xl font-semibold tabular-nums" title={quote?.time ? sessionTime(quote.time) : undefined}>{quote?.price != null ? usd(quote.price) : quotes ? "Unavailable" : "—"}</div>
