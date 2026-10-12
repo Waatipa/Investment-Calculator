@@ -177,7 +177,6 @@
 .company-panel-meta { --company-brand: var(--brand-meta); }
 .company-panel-tsla { --company-brand: var(--brand-tsla); }
 .company-panel::after { content: ""; position: absolute; width: 140%; height: 50px; bottom: -28px; left: -15%; border-radius: 50%; background: color-mix(in oklab, var(--on-brand) 12%, transparent); transform: rotate(-8deg); pointer-events: none; }
-.company-logo { filter: brightness(0) invert(1); }
 .company-brand { min-height: 30px; }
 
 @media (width < 768px) {
@@ -185,9 +184,8 @@
   .market-page > div:first-child { font-size: 10px; }
   .company-grid { row-gap: 14px; }
   .company-panel { min-height: 76px; padding: 8px 4px; }
-  .company-brand { min-height: 24px; gap: 3px; }
+  .company-brand { min-height: 24px; }
   .company-brand span { font-size: 12px; }
-  .company-card .company-logo { width: 19px; height: 19px; }
   .company-panel > div:nth-child(2) { font-size: 9px; }
   .company-panel > div:nth-child(3) { font-size: 8px; }
   .company-card > div:last-child { padding: 9px 6px; }
@@ -202,7 +200,6 @@
 }
 @media (width < 360px) {
   .company-brand span { font-size: 10px; }
-  .company-card .company-logo { width: 14px; height: 14px; }
 }
 
 .market-calendar { scrollbar-width: auto; scrollbar-color: var(--primary-deep) var(--muted); }
