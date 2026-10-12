@@ -17,7 +17,7 @@ export function MarketCalculator() {
   const [symbol, setSymbolState] = useState<Symbol>("NVDA");
   const [open, setOpen] = useState(false);
   const setSymbol = (s: Symbol) => { setSymbolState(s); setOpen(true); };
-  return <main className="mx-auto max-w-[1600px] px-4 py-8 sm:px-6 lg:px-10">
+  return <main className="market-page mx-auto max-w-[1600px] px-4 py-8 sm:px-6 lg:px-10">
     <div className="text-xs font-medium uppercase tracking-wide text-primary-deep">Magnificent Seven · Investment Time Machine</div>
     <h1 className="mt-2 font-display text-3xl font-semibold leading-tight md:text-4xl">See What Your <span className="text-primary-deep">Money</span> Would Have Become.</h1>
     <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted-foreground">Pick a company, enter how much you would have invested, drag through time, and instantly see the profit, ROI, and portfolio value. Historical investment math made simple.</p>
@@ -39,7 +39,7 @@ function Change({ change, percent, className }: { change: number | null; percent
 }
 
 function CompanyButtons({ symbol, setSymbol, quotes }: { symbol: Symbol; setSymbol: (s: Symbol) => void; quotes?: MarketQuote[] }) {
-  return <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-7 md:gap-2 xl:gap-4" aria-label="Companies">{COMPANIES.map(c => {
+  return <div className="company-grid mt-6 grid grid-cols-3 gap-2 md:grid-cols-7 md:gap-2 xl:gap-4" aria-label="Companies">{COMPANIES.map(c => {
     const quote = quotes?.find(q => q.symbol === c.symbol);
     const change = quote?.price != null && quote.previousClose != null ? quote.price - quote.previousClose : null;
     const percent = change != null && quote?.previousClose ? change / quote.previousClose * 100 : null;

@@ -180,6 +180,31 @@
 .company-logo { filter: brightness(0) invert(1); }
 .company-brand { min-height: 30px; }
 
+@media (width < 768px) {
+  .market-page { padding-top: 26px; }
+  .market-page > div:first-child { font-size: 10px; }
+  .company-grid { row-gap: 14px; }
+  .company-panel { min-height: 76px; padding: 8px 4px; }
+  .company-brand { min-height: 24px; gap: 3px; }
+  .company-brand span { font-size: 12px; }
+  .company-card .company-logo { width: 19px; height: 19px; }
+  .company-panel > div:nth-child(2) { font-size: 9px; }
+  .company-panel > div:nth-child(3) { font-size: 8px; }
+  .company-card > div:last-child { padding: 9px 6px; }
+  .company-card .quote-tick { font-size: 12px; }
+  .company-card .quote-tick ~ div { font-size: 8px; gap: 1px; }
+  .company-card .quote-tick ~ div svg { width: 9px; height: 9px; }
+  .company-card > div:last-child > div:last-child { margin-top: 10px; padding-top: 7px; }
+  .company-card > div:last-child > div:last-child > div:first-child { font-size: 9px; text-transform: none; }
+  .company-card > div:last-child > div:last-child > div:last-child { font-size: 7px; }
+  .mobile-menu > button:first-child { opacity: 1; display: grid; place-items: center; width: 36px; height: 36px; border-radius: var(--radius-md); background: var(--primary); color: var(--primary-foreground); }
+  .mobile-menu > button:first-child svg { width: 20px; height: 20px; }
+}
+@media (width < 360px) {
+  .company-brand span { font-size: 10px; }
+  .company-card .company-logo { width: 14px; height: 14px; }
+}
+
 .market-calendar { scrollbar-width: auto; scrollbar-color: var(--primary-deep) var(--muted); }
 .market-calendar::-webkit-scrollbar { width: 12px; }
 .market-calendar::-webkit-scrollbar-track { background: var(--muted); }
