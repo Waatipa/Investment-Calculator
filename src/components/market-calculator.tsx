@@ -46,7 +46,7 @@ function CompanyButtons({ symbol, setSymbol, quotes }: { symbol: Symbol; setSymb
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(timer);
   }, []);
-  return <div className="company-grid mt-6 grid grid-cols-3 gap-2 md:grid-cols-7 md:gap-2 xl:gap-4" aria-label="Companies">{COMPANIES.map(c => {
+  return <div className="company-grid mt-6 grid grid-cols-3 gap-2 md:grid-cols-4 md:gap-3 xl:gap-4" aria-label="Companies">{COMPANIES.map(c => {
     const quote = quotes?.find(q => q.symbol === c.symbol);
     const change = quote?.price != null && quote.previousClose != null ? quote.price - quote.previousClose : null;
     const percent = change != null && quote?.previousClose ? change / quote.previousClose * 100 : null;
@@ -54,15 +54,17 @@ function CompanyButtons({ symbol, setSymbol, quotes }: { symbol: Symbol; setSymb
     const active = symbol === c.symbol;
     return <Button key={c.symbol} variant="ghost" type="button" aria-label={`${c.name} (${c.symbol}) calculator`} aria-pressed={active} onClick={() => setSymbol(c.symbol)}
       className={`company-card block h-auto min-w-0 w-full overflow-hidden whitespace-normal rounded-lg border bg-card p-0 text-left font-normal shadow-soft transition-transform hover:-translate-y-0.5 hover:bg-card hover:text-card-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${active ? "border-primary-deep ring-1 ring-primary" : "border-border"}`}>
-      <div className={`company-panel company-panel-${c.symbol.toLowerCase()} relative overflow-hidden px-2 py-3 text-center text-on-brand`}>
+      <div className={`company-panel company-panel-${c.symbol.toLowerCase()} relative overflow-hidden px-2 py-2 text-center text-on-brand`}>
         <CompanyBrand name={c.name} />
         <div className="text-xs font-medium text-on-brand/80">{c.symbol}</div>
         <div className="mt-0.5 text-[10px] font-medium tabular-nums text-on-brand/70" title="Market capitalization in USD">{quote ? formatMarketCap(quote.marketCap) : "—"}</div>
       </div>
-      <div className="px-3 py-3 md:px-2 xl:px-3">
+      <div className="company-details px-3 py-2">
+        <div className="regular-session min-w-0">
         <div className="session-label">{quote ? quote.marketOpen ? "Market Price- Live" : "Market Price at Close" : "Market Price"}</div>
         <div key={quote?.price} className="quote-tick font-display text-base font-semibold tabular-nums md:text-[13px] xl:text-base" title={quote?.time ? sessionTime(quote.time) : undefined}>{quote?.price != null ? usd(quote.price) : quotes ? "Unavailable" : "—"}</div>
         <Change change={change} percent={percent} className="mt-1 flex-wrap text-xs md:text-[10px] xl:text-xs" />
+        </div>
         <div className="trading-sessions mt-3 border-t border-border pt-2">
           <div className="relative min-w-0">
             <div className="invisible" aria-hidden="true"><div className="session-label">After-hours</div><div className="session-hours"><span>4:00 PM–</span><span>8:00 PM ET</span></div></div>
@@ -146,15 +148,15 @@ function InvestmentForm({ symbol, open, setOpen }: { symbol: Symbol; open: boole
     catch (err) { if (submittedRevision === revision.current) setError(err instanceof Error ? err.message : "Prices are unavailable. Please try again."); }
     finally { setBusy(false); }
   }
-  const card = (title: string, profit: number, roi: number, rows: [string, string][]) => <div className="rounded-lg border border-border p-4">
+  const card = (title: string, profit: number, roi: number, rows: [string, string][]) => <div className="company-result rounded-lg border border-border p-4">
     <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{title}</div>
     <div className={`mt-1 font-display text-2xl font-semibold tabular-nums ${profit >= 0 ? "text-success" : "text-destructive"}`}>{profit >= 0 ? "+" : ""}{usd(profit)}</div>
     <div className={`text-sm font-medium ${profit >= 0 ? "text-success" : "text-destructive"}`}>{roi >= 0 ? "+" : ""}{roi.toFixed(2)}% return</div>
     <dl className="mt-3 grid gap-2 border-t border-border pt-3 text-sm">{rows.map(([k, v]) => <div key={k} className="flex justify-between gap-3"><dt className="text-muted-foreground">{k}</dt><dd className="text-right font-medium tabular-nums">{v}</dd></div>)}</dl>
   </div>;
   return <Dialog open={open} onOpenChange={o => { setOpen(o); if (!o) setResult(null); }}>
-      <DialogContent className="max-h-[90dvh] w-[calc(100%-1.5rem)] max-w-3xl overflow-y-auto overflow-x-hidden rounded-lg p-4 sm:p-6">
-        <DialogHeader><DialogTitle className="pr-8 font-display text-xl">{company?.name} ({symbol}) {result ? "investment result" : "profit calculator"}</DialogTitle><DialogDescription>{result ? `${result.shares} ${symbol} shares · ${longDate(result.purchaseDate)} to ${longDate(result.valuationDate)}` : "Enter your dates and shares or amount, then calculate."}</DialogDescription></DialogHeader>
+      <DialogContent className={`company-dialog company-panel-${symbol.toLowerCase()} max-h-[90dvh] w-[calc(100%-1.5rem)] max-w-3xl overflow-y-auto overflow-x-hidden rounded-lg p-4 sm:p-6`}>
+        <DialogHeader className="company-dialog-heading"><div className="mb-2 text-xs font-semibold uppercase text-primary">{company?.name} · {symbol}</div><DialogTitle className="pr-8 font-display text-xl">{company?.name} ({symbol}) {result ? "investment result" : "profit calculator"}</DialogTitle><DialogDescription>{result ? `${result.shares} ${symbol} shares · ${longDate(result.purchaseDate)} to ${longDate(result.valuationDate)}` : "Enter your dates and shares or amount, then calculate."}</DialogDescription></DialogHeader>
         {!result ? <form className="grid gap-4 sm:grid-cols-2" onSubmit={calculate}>
           <label className="grid gap-2 text-xs font-medium" htmlFor="investment-date">Investment date<Input id="investment-date" type="date" required value={startDate} disabled={busy} onChange={e => { setStartDate(e.target.value); setResult(null); }} className="h-12 text-base" /></label>
           <label className="grid gap-2 text-xs font-medium" htmlFor="valuation-date">Valuation date<Input id="valuation-date" type="date" required min={startDate || undefined} value={endDate} disabled={busy} onChange={e => { revision.current += 1; setEndDate(e.target.value); setResult(null); }} className="h-12 text-base" /></label>

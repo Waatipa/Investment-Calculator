@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight, Menu, Home, ChartNoAxesColumnIncreasing, Mail, Phone, ChevronRight, TrendingUp } from "lucide-react";
 import { Sheet, SheetTrigger, SheetContent, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet";
+import { AcademyBrand } from "@/components/academy-brand";
 
 const menuItems = [
   { to: "/about-us", label: "About Us", icon: Home },
@@ -14,8 +15,7 @@ export function SiteHeader() {
   return <header className="border-b border-border bg-background">
     <div className="mx-auto grid max-w-[1600px] grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-5 sm:px-6 lg:px-10">
       <Link to="/" className="flex min-w-0 items-center gap-3" aria-label="Investico Academy home">
-        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground"><ArrowUpRight /></span>
-        <span className="min-w-0 font-display text-lg font-semibold">Investico Academy</span>
+        <AcademyBrand />
       </Link>
       <nav aria-label="Main menu" className="hidden gap-1 md:flex">
         {([
@@ -30,8 +30,7 @@ export function SiteHeader() {
           <SheetTrigger asChild><Button size="icon" aria-label="Open menu" className="h-10 w-10"><Menu /></Button></SheetTrigger>
           <SheetContent className="mobile-menu flex w-[76%] max-w-sm flex-col overflow-y-auto px-5 pb-6 pt-20" aria-describedby="mobile-menu-description">
             <SheetTitle className="flex min-w-0 items-center gap-2 border-b border-border pb-5 font-display text-base">
-              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground"><ArrowUpRight /></span>
-              Investico Academy
+              <AcademyBrand />
             </SheetTitle>
             <SheetDescription id="mobile-menu-description" className="sr-only">Investico Academy navigation</SheetDescription>
             <nav aria-label="Mobile menu" className="grid gap-2 border-b border-border py-4">

@@ -168,7 +168,9 @@
   --on-brand: oklch(1 0 0);
 }
 
-.company-panel { min-height: 94px; background: var(--company-brand); }
+.academy-seal { margin-left: 7px; font-size: 12px; color: var(--primary-deep); vertical-align: middle; }
+.academy-submark { border-top: 1px solid var(--border); padding-top: 5px; }
+.company-panel { min-height: 64px; background: var(--company-brand); }
 .company-panel-nvda { --company-brand: var(--brand-nvda); }
 .company-panel-aapl { --company-brand: var(--brand-aapl); }
 .company-panel-msft { --company-brand: var(--brand-msft); }
@@ -177,7 +179,17 @@
 .company-panel-meta { --company-brand: var(--brand-meta); }
 .company-panel-tsla { --company-brand: var(--brand-tsla); }
 .company-panel::after { content: ""; position: absolute; width: 140%; height: 50px; bottom: -28px; left: -15%; border-radius: 50%; background: color-mix(in oklab, var(--on-brand) 12%, transparent); transform: rotate(-8deg); pointer-events: none; }
-.company-brand { min-height: 30px; }
+.company-brand { min-height: 22px; }
+.company-details { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; align-items: start; }
+.company-details .trading-sessions { margin-top: 0; border-top: 0; padding-top: 0; }
+.company-details .session-label { font-size: 10px; }
+.company-details .session-hours { font-size: 10px; }
+.company-details .quote-tick { font-size: 20px; }
+.company-details .session-live { font-size: 10px; }
+.company-dialog { --primary: var(--company-brand); --primary-foreground: var(--on-brand); --ring: var(--company-brand); --accent: color-mix(in oklab, var(--company-brand) 10%, var(--background)); border-top: 5px solid var(--company-brand); }
+.company-dialog.company-panel-amzn, .company-dialog.company-panel-googl, .company-dialog.company-panel-nvda { --primary-foreground: var(--foreground); }
+.company-dialog-heading { border-bottom: 1px solid var(--border); padding-bottom: 18px; text-align: left; }
+.company-result { border-top: 3px solid var(--company-brand); background: color-mix(in oklab, var(--company-brand) 4%, var(--card)); }
 .session-label { font-family: var(--font-sans); font-size: 9px; font-weight: 500; color: var(--muted-foreground); }
 .session-heading { font-weight: 700; }
 .session-hours { margin-top: 3px; font-family: var(--font-sans); font-size: 9px; font-weight: 400; line-height: 1.5; color: var(--muted-foreground); font-variant-numeric: tabular-nums; }
@@ -189,16 +201,17 @@
   .market-page { padding-top: 26px; }
   .market-page > div:first-child { font-size: 10px; }
   .company-grid { row-gap: 14px; }
-  .company-panel { min-height: 76px; padding: 8px 4px; }
+  .company-panel { min-height: 58px; padding: 6px 4px; }
   .company-brand { min-height: 24px; }
   .company-brand span { font-size: 12px; }
   .company-panel > div:nth-child(2) { font-size: 9px; }
   .company-panel > div:nth-child(3) { font-size: 8px; }
-  .company-card > div:last-child { padding: 9px 6px; }
+  .company-card > div:last-child { padding: 8px 6px; }
+  .company-details { grid-template-columns: minmax(0, 1fr); gap: 6px; }
   .company-card .quote-tick { font-size: 12px; }
   .company-card .quote-tick ~ div:not(.trading-sessions) { font-size: 8px; gap: 1px; }
   .company-card .quote-tick ~ div:not(.trading-sessions) svg { width: 9px; height: 9px; }
-  .company-card > div:last-child > div:last-child { margin-top: 10px; padding-top: 7px; }
+  .company-card .trading-sessions { margin-top: 0; padding-top: 6px; border-top: 1px solid var(--border); }
   .company-card .session-label, .company-card .session-hours { font-size: 8px; }
   .mobile-menu > button:first-child { opacity: 1; display: grid; place-items: center; width: 36px; height: 36px; border-radius: var(--radius-md); background: var(--primary); color: var(--primary-foreground); }
   .mobile-menu > button:first-child svg { width: 20px; height: 20px; }
