@@ -6,6 +6,7 @@ import { COMPANIES, formatMarketCap, quotesQuery, type Symbol } from "@/lib/mark
 import { usd } from "@/lib/calc";
 import { getInvestmentResult, getPriceOnDate, type MarketQuote } from "@/lib/nvda.functions";
 import { longDate } from "@/lib/investment";
+import { marketSession } from "@/lib/market-session";
 import { CompanyBrand } from "@/components/company-brand";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,17 +36,21 @@ const sessionTime = (t: number) => new Date(t).toLocaleString("en-US", { month: 
 
 function Change({ change, percent, className }: { change: number | null; percent: number | null; className?: string }) {
   const tone = change == null || change === 0 ? "text-muted-foreground" : change > 0 ? "text-success" : "text-destructive";
-  return <div className={`flex min-h-4 items-center gap-0.5 tabular-nums ${tone} ${className ?? ""}`}>{change != null && percent != null ? <>{change > 0 ? <ArrowUp className="h-3 w-3 shrink-0" /> : change < 0 ? <ArrowDown className="h-3 w-3 shrink-0" /> : null}{change > 0 ? "+" : "−"}{Math.abs(change).toFixed(2)} ({percent > 0 ? "+" : "−"}{Math.abs(percent).toFixed(2)}%)</> : "—"}</div>;
+  return <div className={`flex min-h-4 items-center gap-0.5 tabular-nums ${tone} ${className ?? ""}`}>{change != null && percent != null ? <>{change > 0 ? <ArrowUp className="h-3 w-3 shrink-0" /> : change < 0 ? <ArrowDown className="h-3 w-3 shrink-0" /> : null}{change > 0 ? "+" : change < 0 ? "−" : ""}{Math.abs(change).toFixed(2)} ({percent > 0 ? "+" : percent < 0 ? "−" : ""}{Math.abs(percent).toFixed(2)}%)</> : "—"}</div>;
 }
 
 function CompanyButtons({ symbol, setSymbol, quotes }: { symbol: Symbol; setSymbol: (s: Symbol) => void; quotes?: MarketQuote[] }) {
+  const [now, setNow] = useState<number | null>(null);
+  useEffect(() => {
+    setNow(Date.now());
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
   return <div className="company-grid mt-6 grid grid-cols-3 gap-2 md:grid-cols-7 md:gap-2 xl:gap-4" aria-label="Companies">{COMPANIES.map(c => {
     const quote = quotes?.find(q => q.symbol === c.symbol);
     const change = quote?.price != null && quote.previousClose != null ? quote.price - quote.previousClose : null;
     const percent = change != null && quote?.previousClose ? change / quote.previousClose * 100 : null;
-    const pre = quote?.preMarketPrice ?? null;
-    const preChange = pre != null && quote?.previousClose != null ? pre - quote.previousClose : null;
-    const prePercent = preChange != null && quote?.previousClose ? preChange / quote.previousClose * 100 : null;
+    const session = now == null ? { label: "After-hours", price: null, change: null, percent: null, time: null } : marketSession(now, quote);
     const active = symbol === c.symbol;
     return <Button key={c.symbol} variant="ghost" type="button" aria-label={`${c.name} (${c.symbol}) calculator`} aria-pressed={active} onClick={() => setSymbol(c.symbol)}
       className={`company-card block h-auto min-w-0 w-full overflow-hidden whitespace-normal rounded-lg border bg-card p-0 text-left font-normal shadow-soft transition-transform hover:-translate-y-0.5 hover:bg-card hover:text-card-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${active ? "border-primary-deep ring-1 ring-primary" : "border-border"}`}>
@@ -59,18 +64,19 @@ function CompanyButtons({ symbol, setSymbol, quotes }: { symbol: Symbol; setSymb
         <div key={quote?.price} className="quote-tick font-display text-base font-semibold tabular-nums md:text-[13px] xl:text-base" title={quote?.time ? sessionTime(quote.time) : undefined}>{quote?.price != null ? usd(quote.price) : quotes ? "Unavailable" : "—"}</div>
         <Change change={change} percent={percent} className="mt-1 flex-wrap text-xs md:text-[10px] xl:text-xs" />
         <div className="trading-sessions mt-3 grid grid-cols-2 border-t border-border pt-2">
-          <div className="min-w-0 pr-1">
+          <div className="invisible min-w-0 pr-1" aria-hidden="true">
             <div className="session-label">Pre-market</div>
             <div className="session-hours"><span>4:00 AM–</span><span>9:30 AM ET</span></div>
-            {pre != null && <>
-              <div key={pre} className="quote-tick mt-0.5 text-sm font-medium tabular-nums md:text-xs xl:text-sm">{usd(pre)}</div>
-              <Change change={preChange} percent={prePercent} className="mt-0.5 flex-wrap text-[10px] xl:text-[11px]" />
-              <div className="mt-1 text-[9px] leading-relaxed text-muted-foreground">{quote?.preMarketTime != null ? sessionTime(quote.preMarketTime) : " "}</div>
-            </>}
           </div>
-          <div className="min-w-0 border-l border-border pl-1">
-            <div className="session-label">After-hours</div>
-            <div className="session-hours"><span>4:00 PM–</span><span>8:00 PM ET</span></div>
+          <div className="relative min-w-0 border-l border-border pl-1">
+            <div className="invisible" aria-hidden="true"><div className="session-label">After-hours</div><div className="session-hours"><span>4:00 PM–</span><span>8:00 PM ET</span></div></div>
+            <div className="absolute inset-0 pl-1" data-session={session.price != null ? "live-premarket" : session.label}>
+              <div className="session-label">{session.label}</div>
+              {session.price == null ? <div className="session-hours"><span>{session.label === "After-hours" ? "4:00 PM–" : "4:00 AM–"}</span><span>{session.label === "After-hours" ? "8:00 PM ET" : "9:30 AM ET"}</span></div> : <div className="session-live" title={session.time != null ? sessionTime(session.time) : undefined}>
+                <div className={session.change == null || session.change === 0 ? "text-muted-foreground" : session.change > 0 ? "text-success" : "text-destructive"}>{usd(session.price)}</div>
+                <Change change={session.change} percent={session.percent} className="flex-wrap" />
+              </div>}
+            </div>
           </div>
         </div>
       </div>

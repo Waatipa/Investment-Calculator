@@ -16,6 +16,7 @@
 - Use a shared date-and-share calculator on home and Markets; clear submitted results when inputs or company change so results never describe stale inputs.
 - Compute date-and-share returns from allowlisted daily closing prices on demand, using source trading dates and disclosing the split-adjusted share basis so share quantities and historical prices stay consistent.
 - Display source-reported after-hours prices with their source timestamps so older sessions are not misrepresented as live trades.
+- Resolve card session content with a browser-safe Eastern-time clock and same-session quote timestamps; retain the session grid and reserve its existing space so timed replacements cannot move cards.
 - Batch all allowlisted company quotes and market caps through a server-only Yahoo anonymous session; coalesce in-flight requests and cache at most one second to avoid duplicate provider traffic.
 - Keep the most recently edited investment basis (USD or shares) when switching companies; derive its equivalent using the first source trading close on or after the investment date.
 - Fetch company quotes together through an allowlisted public market function and refresh without synthesizing ticks; chart stock prices separately from calculated portfolio results so axes remain truthful.

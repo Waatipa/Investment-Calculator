@@ -181,6 +181,8 @@
 .session-label { font-family: var(--font-sans); font-size: 9px; font-weight: 500; color: var(--muted-foreground); }
 .session-hours { margin-top: 3px; font-family: var(--font-sans); font-size: 9px; font-weight: 500; line-height: 1.5; color: var(--success); font-variant-numeric: tabular-nums; }
 .session-hours span { display: block; }
+.session-live { font-family: var(--font-sans); font-size: 8px; font-weight: 500; line-height: 1.4; overflow-wrap: anywhere; }
+.session-live svg { width: 8px; height: 8px; }
 
 @media (width < 768px) {
   .market-page { padding-top: 26px; }
