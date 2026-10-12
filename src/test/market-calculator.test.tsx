@@ -23,7 +23,7 @@ describe("Linked investment calculator", () => {
   it("shows only after-hours timing in the existing session area during regular hours", () => {
     vi.spyOn(Date, "now").mockReturnValue(Date.parse("2026-10-12T14:32:00Z"));
     const client = mount();
-    expect(screen.getAllByText("Market :")).toHaveLength(7);
+    expect(screen.getAllByText("Market Price")).toHaveLength(7);
     expect(document.querySelectorAll('[data-session="After-hours"]')).toHaveLength(7);
     document.querySelectorAll('[data-session]').forEach(session => {
       expect(session).toHaveTextContent("4:00 PM–8:00 PM ET");
@@ -32,6 +32,18 @@ describe("Linked investment calculator", () => {
     document.querySelectorAll(".trading-sessions").forEach(session => expect(session).not.toHaveTextContent("Unavailable"));
     client.clear();
     vi.restoreAllMocks();
+  });
+  it("labels open and closed market quotes and uses the full session area", async () => {
+    const client = mount();
+    const quote = { symbol: "NVDA", price: 100, previousClose: 99, marketOpen: true, marketCap: null };
+    client.setQueryData(["market-quotes"], [quote]);
+    await waitFor(() => expect(screen.getByText("Market Price- Live")).toBeInTheDocument());
+    client.setQueryData(["market-quotes"], [{ ...quote, marketOpen: false }]);
+    await waitFor(() => expect(screen.getByText("Market Price at Close")).toBeInTheDocument());
+    expect(document.querySelectorAll(".trading-sessions .border-l")).toHaveLength(0);
+    expect(document.querySelectorAll(".trading-sessions .grid-cols-2")).toHaveLength(0);
+    document.querySelectorAll("[data-session] > .session-label").forEach(label => expect(label).toHaveClass("session-heading"));
+    client.clear();
   });
   it("links shares and USD amount and preserves the chosen basis across companies", async () => {
     const client = mount();
