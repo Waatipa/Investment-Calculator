@@ -21,7 +21,7 @@ export function MarketCalculator() {
       <div className="reference-copy"><h1>How? When? How Much?<br />Should I Start Investing?</h1>
       <p>Get a free course at Investico Academy to sharpen your skill in choosing the best companies to invest in. Use our <Button variant="link" className="inline-link" onClick={() => setOpen(true)}>investment calculator</Button> to work out your target profit based on the historical returns of the stock you have chosen.</p>
       <p>Need help? <Button variant="link" className="inline-link" asChild><Link to="/contact-us">Email us</Link></Button> and we will guide you step by step to build a portfolio and make your first investment.</p>
-      <div className="intro-actions"><Button>Start Free Course</Button><Button onClick={() => setOpen(true)}>Calculate</Button><Button>Start Investing Now</Button></div>
+      <div className="intro-actions"><Button>Start Free Course</Button><Button onClick={() => setOpen(true)}>Calculate</Button><Button>Invest Now</Button></div>
       </div><MarketArtwork />
     </section>
     <div className="region-tabs" aria-label="Market regions">{["US", "EUROPE", "AFRICA", "ASIA", "AUSTRALIA", "MIDDLE EAST"].map(region => <Button key={region} variant="outline" className={region === "US" ? "region-active" : ""} aria-pressed={region === "US"}>{region}</Button>)}</div>
