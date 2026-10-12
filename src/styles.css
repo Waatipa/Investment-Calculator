@@ -61,6 +61,7 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --color-primary-deep: var(--primary-deep);
   --color-success: var(--success);
+  --color-on-brand: var(--on-brand);
   --font-display: "Space Grotesk", sans-serif;
   --font-sans: "DM Sans", sans-serif;
   --shadow-soft: 0 1px 2px oklch(0.2 0.03 220 / 6%), 0 8px 24px -12px oklch(0.6 0.1 210 / 25%);
@@ -164,6 +165,7 @@
   --brand-googl: oklch(0.72 0.12 195);
   --brand-meta: oklch(0.55 0.2 255);
   --brand-tsla: oklch(0.55 0.22 25);
+  --on-brand: oklch(1 0 0);
 }
 
 .market-calendar { scrollbar-width: auto; scrollbar-color: var(--primary-deep) var(--muted); }
