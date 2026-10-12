@@ -180,7 +180,7 @@
 .company-brand { min-height: 30px; }
 .session-label { font-family: var(--font-sans); font-size: 9px; font-weight: 500; color: var(--muted-foreground); }
 .session-hours { margin-top: 3px; font-family: var(--font-sans); font-size: 9px; font-weight: 500; line-height: 1.5; color: var(--success); font-variant-numeric: tabular-nums; }
-.session-hours span { display: block; white-space: nowrap; }
+.session-hours span { display: block; }
 
 @media (width < 768px) {
   .market-page { padding-top: 26px; }
