@@ -6,6 +6,7 @@ import { formatMarketCap } from "@/lib/markets";
 
 const api = vi.hoisted(() => ({ price: vi.fn(), result: vi.fn(), quotes: vi.fn() }));
 vi.mock("@/lib/nvda.functions", () => ({ getPriceOnDate: api.price, getInvestmentResult: api.result, getMarketQuotes: api.quotes, getMarketHistory: vi.fn() }));
+vi.mock("@tanstack/react-router", () => ({ Link: ({ to, children, ...props }: { to: string; children: React.ReactNode }) => <a href={to} {...props}>{children}</a> }));
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -20,29 +21,24 @@ function mount() {
   return client;
 }
 describe("Linked investment calculator", () => {
-  it("shows only after-hours timing in the existing session area during regular hours", () => {
-    vi.spyOn(Date, "now").mockReturnValue(Date.parse("2026-10-12T14:32:00Z"));
+  it("matches reference labels and never invents missing off-hours prices", () => {
     const client = mount();
-    expect(screen.getAllByText("Market Price")).toHaveLength(7);
-    expect(document.querySelectorAll('[data-session="After-hours"]')).toHaveLength(7);
-    document.querySelectorAll('[data-session]').forEach(session => {
-      expect(session).toHaveTextContent("4:00 PM–8:00 PM ET");
-      expect(session).not.toHaveTextContent("Pre-market");
-    });
-    document.querySelectorAll(".trading-sessions").forEach(session => expect(session).not.toHaveTextContent("Unavailable"));
+    expect(screen.getAllByText("Close")).toHaveLength(7);
+    expect(screen.getAllByText("Off-Hours")).toHaveLength(7);
+    expect(screen.getByRole("button", { name: "Calculate", exact: true })).toBeInTheDocument();
+    document.querySelectorAll(".off-hours .quote-price").forEach(price => expect(price).toHaveTextContent("—"));
     client.clear();
-    vi.restoreAllMocks();
   });
-  it("labels open and closed market quotes and uses the full session area", async () => {
+  it("shows sourced regular and off-hours prices with correct movement", async () => {
     const client = mount();
-    const quote = { symbol: "NVDA", price: 100, previousClose: 99, marketOpen: true, marketCap: null };
+    const quote = { symbol: "NVDA", price: 100, previousClose: 99, marketOpen: true, marketCap: null, postMarketPrice: 98, postMarketTime: Date.parse("2026-10-12T23:59:00Z") };
     client.setQueryData(["market-quotes"], [quote]);
-    await waitFor(() => expect(screen.getByText("Market Price- Live")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("Live")).toBeInTheDocument());
+    expect(screen.getByText("$98.00")).toBeInTheDocument();
+    expect(document.querySelector(".off-hours .quote-change")).toHaveClass("text-destructive");
+    expect(document.querySelector(".off-hours .quote-time")).toHaveTextContent("7:59 PM ET");
     client.setQueryData(["market-quotes"], [{ ...quote, marketOpen: false }]);
-    await waitFor(() => expect(screen.getByText("Market Price at Close")).toBeInTheDocument());
-    expect(document.querySelectorAll(".trading-sessions .border-l")).toHaveLength(0);
-    expect(document.querySelectorAll(".trading-sessions .grid-cols-2")).toHaveLength(0);
-    document.querySelectorAll("[data-session] > .session-label").forEach(label => expect(label).toHaveClass("session-heading"));
+    await waitFor(() => expect(screen.queryByText("Live")).not.toBeInTheDocument());
     client.clear();
   });
   it("links shares and USD amount and preserves the chosen basis across companies", async () => {
