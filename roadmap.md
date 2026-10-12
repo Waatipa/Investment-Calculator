@@ -1,4 +1,6 @@
 # Website update
+- [ ] Fit seven compact branded company cards in one desktop row and stack mobile navigation.
+- [ ] Verify company pop-ups and desktop/mobile layout.
 - [x] Finish the linked investment amount field and verify company switching.
 - [x] Remove premarket information, add compact genuine market caps inside company buttons, and check quotes every second.
 - [x] Verify quote data, layout, calculator behavior and relevant tests.
