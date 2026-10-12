@@ -155,6 +155,17 @@
   box-shadow: var(--shadow-soft);
 }
 
+/* Company brand colors (fixed brand identities, not theme tokens) */
+:root {
+  --brand-nvda: oklch(0.62 0.19 145);
+  --brand-aapl: oklch(0.28 0.02 260);
+  --brand-msft: oklch(0.58 0.16 250);
+  --brand-amzn: oklch(0.7 0.16 65);
+  --brand-googl: oklch(0.72 0.12 195);
+  --brand-meta: oklch(0.55 0.2 255);
+  --brand-tsla: oklch(0.55 0.22 25);
+}
+
 .market-calendar { scrollbar-width: auto; scrollbar-color: var(--primary-deep) var(--muted); }
 .market-calendar::-webkit-scrollbar { width: 12px; }
 .market-calendar::-webkit-scrollbar-track { background: var(--muted); }

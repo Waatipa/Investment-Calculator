@@ -2,13 +2,13 @@ import { queryOptions } from "@tanstack/react-query";
 import { getMarketHistory, getMarketQuotes } from "./nvda.functions";
 
 export const COMPANIES = [
-  { symbol: "NVDA", name: "NVIDIA" },
-  { symbol: "AAPL", name: "Apple" },
-  { symbol: "MSFT", name: "Microsoft" },
-  { symbol: "AMZN", name: "Amazon" },
-  { symbol: "GOOGL", name: "Alphabet" },
-  { symbol: "META", name: "Meta" },
-  { symbol: "TSLA", name: "Tesla" },
+  { symbol: "NVDA", name: "NVIDIA", brand: "var(--brand-nvda)" },
+  { symbol: "AAPL", name: "Apple", brand: "var(--brand-aapl)" },
+  { symbol: "MSFT", name: "Microsoft", brand: "var(--brand-msft)" },
+  { symbol: "AMZN", name: "Amazon", brand: "var(--brand-amzn)" },
+  { symbol: "GOOGL", name: "Alphabet", brand: "var(--brand-googl)" },
+  { symbol: "META", name: "Meta", brand: "var(--brand-meta)" },
+  { symbol: "TSLA", name: "Tesla", brand: "var(--brand-tsla)" },
 ] as const;
 export type Symbol = typeof COMPANIES[number]["symbol"];
 export function formatMarketCap(value: number | null | undefined) {
