@@ -158,15 +158,27 @@
 
 /* Company brand colors (fixed brand identities, not theme tokens) */
 :root {
-  --brand-nvda: oklch(0.62 0.19 145);
+  --brand-nvda: oklch(0.65 0.2 128);
   --brand-aapl: oklch(0.28 0.02 260);
-  --brand-msft: oklch(0.58 0.16 250);
-  --brand-amzn: oklch(0.7 0.16 65);
+  --brand-msft: oklch(0.61 0.21 255);
+  --brand-amzn: oklch(0.74 0.18 62);
   --brand-googl: oklch(0.72 0.12 195);
   --brand-meta: oklch(0.55 0.2 255);
   --brand-tsla: oklch(0.55 0.22 25);
   --on-brand: oklch(1 0 0);
 }
+
+.company-panel { min-height: 94px; background: var(--company-brand); }
+.company-panel-nvda { --company-brand: var(--brand-nvda); }
+.company-panel-aapl { --company-brand: var(--brand-aapl); }
+.company-panel-msft { --company-brand: var(--brand-msft); }
+.company-panel-amzn { --company-brand: var(--brand-amzn); }
+.company-panel-googl { --company-brand: var(--brand-googl); }
+.company-panel-meta { --company-brand: var(--brand-meta); }
+.company-panel-tsla { --company-brand: var(--brand-tsla); }
+.company-panel::after { content: ""; position: absolute; width: 140%; height: 50px; bottom: -28px; left: -15%; border-radius: 50%; background: color-mix(in oklab, var(--on-brand) 12%, transparent); transform: rotate(-8deg); pointer-events: none; }
+.company-logo { filter: brightness(0) invert(1); }
+.company-brand { min-height: 30px; }
 
 .market-calendar { scrollbar-width: auto; scrollbar-color: var(--primary-deep) var(--muted); }
 .market-calendar::-webkit-scrollbar { width: 12px; }

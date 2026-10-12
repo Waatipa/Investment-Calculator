@@ -6,6 +6,7 @@ import { COMPANIES, formatMarketCap, quotesQuery, type Symbol } from "@/lib/mark
 import { usd } from "@/lib/calc";
 import { getInvestmentResult, getPriceOnDate, type MarketQuote } from "@/lib/nvda.functions";
 import { longDate } from "@/lib/investment";
+import { CompanyBrand } from "@/components/company-brand";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -16,9 +17,9 @@ export function MarketCalculator() {
   const [symbol, setSymbolState] = useState<Symbol>("NVDA");
   const [open, setOpen] = useState(false);
   const setSymbol = (s: Symbol) => { setSymbolState(s); setOpen(true); };
-  return <main className="mx-auto max-w-6xl px-6 py-8">
+  return <main className="mx-auto max-w-[1600px] px-4 py-8 sm:px-6 lg:px-10">
     <div className="text-xs font-medium uppercase tracking-wide text-primary-deep">Magnificent Seven · Investment Time Machine</div>
-    <h1 className="mt-2 max-w-3xl font-display text-3xl font-semibold leading-tight md:text-4xl">See What Your Money Would Have Become.</h1>
+    <h1 className="mt-2 font-display text-3xl font-semibold leading-tight md:text-4xl">See What Your <span className="text-primary-deep">Money</span> Would Have Become.</h1>
     <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted-foreground">Pick a company, enter how much you would have invested, drag through time, and instantly see the profit, ROI, and portfolio value. Historical investment math made simple.</p>
     <Suspense fallback={<CompanyButtons symbol={symbol} setSymbol={setSymbol} />}><LiveCompanies symbol={symbol} setSymbol={setSymbol} /></Suspense>
     <InvestmentForm symbol={symbol} open={open} setOpen={setOpen} />
@@ -38,7 +39,7 @@ function Change({ change, percent, className }: { change: number | null; percent
 }
 
 function CompanyButtons({ symbol, setSymbol, quotes }: { symbol: Symbol; setSymbol: (s: Symbol) => void; quotes?: MarketQuote[] }) {
-  return <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7" aria-label="Companies">{COMPANIES.map(c => {
+  return <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-7 md:gap-2 xl:gap-4" aria-label="Companies">{COMPANIES.map(c => {
     const quote = quotes?.find(q => q.symbol === c.symbol);
     const change = quote?.price != null && quote.previousClose != null ? quote.price - quote.previousClose : null;
     const percent = change != null && quote?.previousClose ? change / quote.previousClose * 100 : null;
@@ -46,24 +47,24 @@ function CompanyButtons({ symbol, setSymbol, quotes }: { symbol: Symbol; setSymb
     const preChange = pre != null && quote?.previousClose != null ? pre - quote.previousClose : null;
     const prePercent = preChange != null && quote?.previousClose ? preChange / quote.previousClose * 100 : null;
     const active = symbol === c.symbol;
-    return <button key={c.symbol} type="button" aria-pressed={active} onClick={() => setSymbol(c.symbol)}
-      className={`min-w-0 overflow-hidden rounded-xl border bg-card text-left shadow-soft transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${active ? "border-primary-deep ring-2 ring-primary" : "border-border"}`}>
-      <div className="px-4 py-3 text-center" style={{ background: `linear-gradient(135deg, ${c.brand}, color-mix(in oklab, ${c.brand} 75%, black))` }}>
-        <div className="font-display text-lg font-semibold text-on-brand">{c.name}</div>
+    return <Button key={c.symbol} variant="ghost" type="button" aria-label={`${c.name} (${c.symbol}) calculator`} aria-pressed={active} onClick={() => setSymbol(c.symbol)}
+      className={`company-card block h-auto min-w-0 w-full overflow-hidden whitespace-normal rounded-lg border bg-card p-0 text-left font-normal shadow-soft transition-transform hover:-translate-y-0.5 hover:bg-card hover:text-card-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${active ? "border-primary-deep ring-1 ring-primary" : "border-border"}`}>
+      <div className={`company-panel company-panel-${c.symbol.toLowerCase()} relative overflow-hidden px-2 py-3 text-center text-on-brand`}>
+        <CompanyBrand symbol={c.symbol} name={c.name} />
         <div className="text-xs font-medium text-on-brand/80">{c.symbol}</div>
         <div className="mt-0.5 text-[10px] font-medium tabular-nums text-on-brand/70" title="Market capitalization in USD">{quote ? formatMarketCap(quote.marketCap) : "—"}</div>
       </div>
-      <div className="px-4 py-3">
-        <div key={quote?.price} className="quote-tick font-display text-2xl font-semibold tabular-nums" title={quote?.time ? sessionTime(quote.time) : undefined}>{quote?.price != null ? usd(quote.price) : quotes ? "Unavailable" : "—"}</div>
-        <Change change={change} percent={percent} className="mt-1 text-xs" />
+      <div className="px-3 py-3 md:px-2 xl:px-3">
+        <div key={quote?.price} className="quote-tick font-display text-base font-semibold tabular-nums md:text-[13px] xl:text-base" title={quote?.time ? sessionTime(quote.time) : undefined}>{quote?.price != null ? usd(quote.price) : quotes ? "Unavailable" : "—"}</div>
+        <Change change={change} percent={percent} className="mt-1 flex-wrap text-xs md:text-[10px] xl:text-xs" />
         <div className="mt-3 border-t border-border pt-2">
           <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Pre-market</div>
-          <div key={pre} className="quote-tick mt-0.5 text-sm font-medium tabular-nums">{pre != null ? usd(pre) : "Unavailable"}</div>
-          <Change change={preChange} percent={prePercent} className="mt-0.5 text-[11px]" />
+          <div key={pre} className="quote-tick mt-0.5 text-sm font-medium tabular-nums md:text-xs xl:text-sm">{pre != null ? usd(pre) : "Unavailable"}</div>
+          <Change change={preChange} percent={prePercent} className="mt-0.5 flex-wrap text-[10px] xl:text-[11px]" />
           <div className="mt-1 text-[9px] leading-relaxed text-muted-foreground">{quote?.preMarketTime != null ? sessionTime(quote.preMarketTime) : " "}</div>
         </div>
       </div>
-    </button>;
+    </Button>;
   })}</div>;
 }
 
