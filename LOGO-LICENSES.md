@@ -1,11 +1,5 @@
-# Company logo sources
+# Company logos — removed
 
-The company SVGs used by Investico Academy were obtained from Simple Icons v11, distributed under CC0 1.0 Universal.
+Investico Academy previously displayed the NVIDIA, Apple, Microsoft, Amazon, Meta and Tesla marks sourced from Simple Icons v11 (CC0 1.0 Universal). Those images have been removed from the project. The company cards now identify each company by its plain text name and a solid brand-tinted colour panel only; no logo artwork, icon, or other company-owned graphic is shipped or rendered anywhere in the app.
 
-- License: https://cdn.jsdelivr.net/npm/simple-icons@11/LICENSE.md
-- Disclaimer: https://cdn.jsdelivr.net/npm/simple-icons@11/DISCLAIMER.md
-- Source: https://github.com/simple-icons/simple-icons/tree/11.0.0/icons
-
-Assets: NVIDIA, Apple, Microsoft, Amazon, Meta and Tesla. Alphabet is identified by its company name.
-
-CC0 applies to the icon artwork distribution; it does not waive trademark rights or guarantee permission to use a company's identity. Company names and logos belong to their respective owners. Review each company's brand guidelines for the intended use and obtain permission where required. This notice is not legal advice.
+Company names remain text on the cards and are the property of their respective owners. This notice is not legal advice.

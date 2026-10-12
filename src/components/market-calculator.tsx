@@ -50,7 +50,7 @@ function CompanyButtons({ symbol, setSymbol, quotes }: { symbol: Symbol; setSymb
     return <Button key={c.symbol} variant="ghost" type="button" aria-label={`${c.name} (${c.symbol}) calculator`} aria-pressed={active} onClick={() => setSymbol(c.symbol)}
       className={`company-card block h-auto min-w-0 w-full overflow-hidden whitespace-normal rounded-lg border bg-card p-0 text-left font-normal shadow-soft transition-transform hover:-translate-y-0.5 hover:bg-card hover:text-card-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${active ? "border-primary-deep ring-1 ring-primary" : "border-border"}`}>
       <div className={`company-panel company-panel-${c.symbol.toLowerCase()} relative overflow-hidden px-2 py-3 text-center text-on-brand`}>
-        <CompanyBrand symbol={c.symbol} name={c.name} />
+        <CompanyBrand name={c.name} />
         <div className="text-xs font-medium text-on-brand/80">{c.symbol}</div>
         <div className="mt-0.5 text-[10px] font-medium tabular-nums text-on-brand/70" title="Market capitalization in USD">{quote ? formatMarketCap(quote.marketCap) : "—"}</div>
       </div>
