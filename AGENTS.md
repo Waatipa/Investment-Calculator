@@ -10,7 +10,7 @@
 <!-- LOVABLE:END -->
 
 - Share navigation in the root layout and give each named section its own leaf route, so direct links and metadata remain independent.
-- Use a shared brand-label component with hosted logo assets and CSS brand tokens, so compact company cards stay recognizable without changing market data or calculator behavior.
+- Use a shared brand-label component that renders only the plain company name over CSS brand colour tokens, with no logo or icon artwork, so compact company cards stay recognizable without changing market data or calculator behavior.
 - Keep mobile navigation in the shared Radix Sheet with focus trapping and link-triggered dismissal, so the compact menu remains accessible without changing desktop navigation.
 - Keep ticker and timeline query options in a browser-safe market module and validate the public price request with an allowlist, so controls cannot request arbitrary instruments.
 - Use a shared date-and-share calculator on home and Markets; clear submitted results when inputs or company change so results never describe stale inputs.
