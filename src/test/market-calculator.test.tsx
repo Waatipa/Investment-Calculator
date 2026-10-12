@@ -20,6 +20,18 @@ function mount() {
   return client;
 }
 describe("Linked investment calculator", () => {
+  it("shows market labels and both exchange sessions without unavailable session prices", () => {
+    const client = mount();
+    expect(screen.getAllByText("Market :")).toHaveLength(7);
+    expect(screen.getAllByText("Pre-market")).toHaveLength(7);
+    expect(screen.getAllByText("After-hours")).toHaveLength(7);
+    expect(screen.getAllByText("4:00 AM–")).toHaveLength(7);
+    expect(screen.getAllByText("9:30 AM ET")).toHaveLength(7);
+    expect(screen.getAllByText("4:00 PM–")).toHaveLength(7);
+    expect(screen.getAllByText("8:00 PM ET")).toHaveLength(7);
+    document.querySelectorAll(".trading-sessions").forEach(session => expect(session).not.toHaveTextContent("Unavailable"));
+    client.clear();
+  });
   it("links shares and USD amount and preserves the chosen basis across companies", async () => {
     const client = mount();
     fireEvent.click(screen.getByRole("button", { name: /NVIDIA/ }));
