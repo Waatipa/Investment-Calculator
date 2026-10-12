@@ -1,13 +1,11 @@
 import { Suspense, useEffect, useRef, useState, type FormEvent } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { ArrowUp, ArrowDown, Radio, Calculator, LoaderCircle } from "lucide-react";
-import { COMPANIES, formatMarketCap, quotesQuery, type Symbol } from "@/lib/markets";
+import { Triangle, Calculator, LoaderCircle } from "lucide-react";
+import { COMPANIES, quotesQuery, type Symbol } from "@/lib/markets";
 import { usd } from "@/lib/calc";
 import { getInvestmentResult, getPriceOnDate, type MarketQuote } from "@/lib/nvda.functions";
 import { longDate } from "@/lib/investment";
-import { marketSession } from "@/lib/market-session";
-import { CompanyBrand } from "@/components/company-brand";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -18,66 +16,51 @@ export function MarketCalculator() {
   const [symbol, setSymbolState] = useState<Symbol>("NVDA");
   const [open, setOpen] = useState(false);
   const setSymbol = (s: Symbol) => { setSymbolState(s); setOpen(true); };
-  return <main className="market-page mx-auto max-w-[1600px] px-4 py-8 sm:px-6 lg:px-10">
-    <div className="text-xs font-medium uppercase tracking-wide text-primary-deep">Magnificent Seven · Investment Time Machine</div>
-    <h1 className="mt-2 font-display text-3xl font-semibold leading-tight md:text-4xl">See What Your <span className="text-primary-deep">Money</span> Would Have Become.</h1>
-    <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted-foreground">Pick a company, enter how much you would have invested, drag through time, and instantly see the profit, ROI, and portfolio value. Historical investment math made simple.</p>
+  return <main className="market-page">
+    <section className="reference-intro">
+      <div className="reference-copy"><h1>How? When? How Much?<br />Should I Start Investing?</h1>
+      <p>Get a free course at Investico Academy to sharpen your skill in choosing the best companies to invest in. Use our <Button variant="link" className="inline-link" onClick={() => setOpen(true)}>investment calculator</Button> to work out your target profit based on the historical returns of the stock you have chosen.</p>
+      <p>Need help? <Button variant="link" className="inline-link" asChild><Link to="/contact-us">Email us</Link></Button> and we will guide you step by step to build a portfolio and make your first investment.</p>
+      <div className="intro-actions"><Button>Start Free Course</Button><Button onClick={() => setOpen(true)}>Calculate</Button><Button>Start Investing Now</Button></div>
+      </div><MarketArtwork />
+    </section>
+    <div className="region-tabs" aria-label="Market regions">{["US", "EUROPE", "AFRICA", "ASIA", "AUSTRALIA", "MIDDLE EAST"].map(region => <Button key={region} variant="outline" className={region === "US" ? "region-active" : ""} aria-pressed={region === "US"}>{region}</Button>)}</div>
     <Suspense fallback={<CompanyButtons symbol={symbol} setSymbol={setSymbol} />}><LiveCompanies symbol={symbol} setSymbol={setSymbol} /></Suspense>
     <InvestmentForm symbol={symbol} open={open} setOpen={setOpen} />
   </main>;
 }
 
-function LiveCompanies({ symbol, setSymbol }: { symbol: Symbol; setSymbol: (s: Symbol) => void }) {
-  const { data, isFetching } = useSuspenseQuery(quotesQuery());
-  return <><CompanyButtons symbol={symbol} setSymbol={setSymbol} quotes={data} /><div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground"><Radio className={`h-3 w-3 ${isFetching ? "text-primary-deep" : ""}`} />{data.some(q => q.marketOpen) ? "Market open" : "Market closed"} · Checked every second · Yahoo Finance data may be delayed</div></>;
+function MarketArtwork() {
+  const dots = Array.from({length: 48}, (_, row) => Array.from({length: 45}, (_, col) => {
+    const x = col * 7 + 85, y = row * 6 + 65;
+    const land = ((x-172)**2/7500+(y-130)**2/2500<1 && x+y<345) || ((x-225)**2/2200+(y-250)**2/5200<1) || ((x-330)**2/6700+(y-145)**2/1800<1) || ((x-345)**2/1600+(y-325)**2/700<1);
+    return land ? <circle key={`${row}-${col}`} cx={x} cy={y} r="1.2" /> : null;
+  }));
+  return <svg className="market-artwork" viewBox="0 0 500 450" aria-hidden="true"><circle cx="290" cy="225" r="205" /><circle cx="290" cy="225" r="175" /><g className="map-dots">{dots}</g><g className="art-candles">{[0,1,2,3,4,5,6].map((n)=><g key={n}><path d={`M${220+n*30} ${355-n*n*5}v${70+n*10}`} /><rect x={213+n*30} y={375-n*n*5} width="14" height={30+n*7} rx="1" /></g>)}</g></svg>;
 }
-
-const sessionTime = (t: number) => new Date(t).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/New_York" }) + " ET";
-
+function LiveCompanies({ symbol, setSymbol }: { symbol: Symbol; setSymbol: (s: Symbol) => void }) {
+  const { data } = useSuspenseQuery(quotesQuery());
+  return <><CompanyButtons symbol={symbol} setSymbol={setSymbol} quotes={data} /><p className="market-footer">Market data provided by Yahoo Finance. Data may be delayed. Prices in USD.</p></>;
+}
+const sourceDate = (t: number | null | undefined) => t ? new Date(t).toLocaleDateString("en-US", {month:"short",day:"numeric",timeZone:"America/New_York"}) : "—";
+const sourceTime = (t: number | null | undefined) => t ? new Date(t).toLocaleTimeString("en-US", {hour:"numeric",minute:"2-digit",timeZone:"America/New_York"}) + " ET" : "—";
 function Change({ change, percent, className }: { change: number | null; percent: number | null; className?: string }) {
   const tone = change == null || change === 0 ? "text-muted-foreground" : change > 0 ? "text-success" : "text-destructive";
-  return <div className={`flex min-h-4 items-center gap-0.5 tabular-nums ${tone} ${className ?? ""}`}>{change != null && percent != null ? <>{change > 0 ? <ArrowUp className="h-3 w-3 shrink-0" /> : change < 0 ? <ArrowDown className="h-3 w-3 shrink-0" /> : null}{change > 0 ? "+" : change < 0 ? "−" : ""}{Math.abs(change).toFixed(2)} ({percent > 0 ? "+" : percent < 0 ? "−" : ""}{Math.abs(percent).toFixed(2)}%)</> : "—"}</div>;
+  return <div className={`quote-change ${tone} ${className ?? ""}`}>{change != null && percent != null ? <>{change !== 0 && <Triangle className={change < 0 ? "rotate-180" : ""} />}{change > 0 ? "+" : change < 0 ? "−" : ""}{Math.abs(change).toFixed(2)} ({percent > 0 ? "+" : percent < 0 ? "−" : ""}{Math.abs(percent).toFixed(2)}%)</> : "—"}</div>;
 }
-
+const initials: Record<Symbol,string> = {NVDA:"NV", AAPL:"AA", MSFT:"MS", AMZN:"AM", GOOGL:"GO", META:"ME", TSLA:"TS"};
 function CompanyButtons({ symbol, setSymbol, quotes }: { symbol: Symbol; setSymbol: (s: Symbol) => void; quotes?: MarketQuote[] }) {
-  const [now, setNow] = useState<number | null>(null);
-  useEffect(() => {
-    setNow(Date.now());
-    const timer = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(timer);
-  }, []);
-  return <div className="company-grid mt-6 grid grid-cols-3 gap-2 md:grid-cols-4 md:gap-3 xl:gap-4" aria-label="Companies">{COMPANIES.map(c => {
+  return <div className="company-grid" aria-label="Companies">{COMPANIES.map(c => {
     const quote = quotes?.find(q => q.symbol === c.symbol);
     const change = quote?.price != null && quote.previousClose != null ? quote.price - quote.previousClose : null;
     const percent = change != null && quote?.previousClose ? change / quote.previousClose * 100 : null;
-    const session = now == null ? { label: "After-hours", price: null, change: null, percent: null, time: null } : marketSession(now, quote);
-    const active = symbol === c.symbol;
-    return <Button key={c.symbol} variant="ghost" type="button" aria-label={`${c.name} (${c.symbol}) calculator`} aria-pressed={active} onClick={() => setSymbol(c.symbol)}
-      className={`company-card block h-auto min-w-0 w-full overflow-hidden whitespace-normal rounded-lg border bg-card p-0 text-left font-normal shadow-soft transition-transform hover:-translate-y-0.5 hover:bg-card hover:text-card-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${active ? "border-primary-deep ring-1 ring-primary" : "border-border"}`}>
-      <div className={`company-panel company-panel-${c.symbol.toLowerCase()} relative overflow-hidden px-2 py-2 text-center text-on-brand`}>
-        <CompanyBrand name={c.name} />
-        <div className="text-xs font-medium text-on-brand/80">{c.symbol}</div>
-        <div className="mt-0.5 text-[10px] font-medium tabular-nums text-on-brand/70" title="Market capitalization in USD">{quote ? formatMarketCap(quote.marketCap) : "—"}</div>
-      </div>
-      <div className="company-details px-3 py-2">
-        <div className="regular-session min-w-0">
-        <div className="session-label">{quote ? quote.marketOpen ? "Market Price- Live" : "Market Price at Close" : "Market Price"}</div>
-        <div key={quote?.price} className="quote-tick font-display text-base font-semibold tabular-nums md:text-[13px] xl:text-base" title={quote?.time ? sessionTime(quote.time) : undefined}>{quote?.price != null ? usd(quote.price) : quotes ? "Unavailable" : "—"}</div>
-        <Change change={change} percent={percent} className="mt-1 flex-wrap text-xs md:text-[10px] xl:text-xs" />
-        </div>
-        <div className="trading-sessions mt-3 border-t border-border pt-2">
-          <div className="relative min-w-0">
-            <div className="invisible" aria-hidden="true"><div className="session-label">After-hours</div><div className="session-hours"><span>4:00 PM–</span><span>8:00 PM ET</span></div></div>
-            <div className="absolute inset-0" data-session={session.price != null ? "live-premarket" : session.label}>
-              <div className="session-label session-heading">{session.label}</div>
-              {session.price == null ? <div className="session-hours"><span>{session.label === "After-hours" ? "4:00 PM–" : "4:00 AM–"}</span><span>{session.label === "After-hours" ? "8:00 PM ET" : "9:30 AM ET"}</span></div> : <div className="session-live" title={session.time != null ? sessionTime(session.time) : undefined}>
-                <div className={session.change == null || session.change === 0 ? "text-muted-foreground" : session.change > 0 ? "text-success" : "text-destructive"}>{usd(session.price)}</div>
-                <Change change={session.change} percent={session.percent} className="flex-wrap" />
-              </div>}
-            </div>
-          </div>
-        </div>
-      </div>
+    const post = quote?.postMarketPrice ?? null;
+    const postChange = post != null && quote?.price != null ? post - quote.price : null;
+    const postPercent = postChange != null && quote?.price ? postChange / quote.price * 100 : null;
+    return <Button key={c.symbol} variant="ghost" type="button" aria-label={`${c.name} (${c.symbol}) calculator`} aria-pressed={symbol === c.symbol} onClick={() => setSymbol(c.symbol)} className={`company-card company-panel-${c.symbol.toLowerCase()}`}>
+      <div className="company-panel"><span className="company-initials">{initials[c.symbol]}</span><div><div className="company-name">{c.name}</div><div className="company-symbol">{c.symbol}</div></div></div>
+      <div className="quote-section"><div className="quote-meta"><span>{quote?.marketOpen ? "Live" : "Close"}</span><span>{sourceDate(quote?.time)}</span></div><div className="quote-price">{quote?.price != null ? usd(quote.price) : "—"}</div><Change change={change} percent={percent} /><div className="quote-time">{sourceTime(quote?.time)}</div></div>
+      <div className="quote-section off-hours"><div className="quote-meta"><span>Off-Hours</span><span>{sourceDate(quote?.postMarketTime)}</span></div><div className="quote-price">{post != null ? usd(post) : "—"}</div><Change change={postChange} percent={postPercent} /><div className="quote-time">{sourceTime(quote?.postMarketTime)}</div></div>
     </Button>;
   })}</div>;
 }

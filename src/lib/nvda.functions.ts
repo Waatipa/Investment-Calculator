@@ -65,6 +65,7 @@ async function fetchHistory(data: { symbol: string; range: string }): Promise<Nv
 
 export type MarketQuote = {
   symbol: string; price: number | null; time: number | null; opening: number | null; previousClose: number | null; marketOpen: boolean;
+  postMarketPrice: number | null; postMarketTime: number | null;
   marketCap: number | null; preMarketPrice: number | null; preMarketTime: number | null;
 };
 
@@ -78,7 +79,8 @@ export const getMarketQuotes = createServerFn({ method: "GET" }).handler(async (
     const usdQuote = quote?.['currency'] === "USD" ? quote : undefined;
     const time = positive(usdQuote?.['regularMarketTime']);
     const preTime = positive(usdQuote?.['preMarketTime']);
-    return { symbol, price: positive(usdQuote?.['regularMarketPrice']), time: time == null ? null : time * 1000, opening: positive(usdQuote?.['regularMarketOpen']), previousClose: positive(usdQuote?.['regularMarketPreviousClose']), marketOpen: usdQuote?.['marketState'] === "REGULAR", marketCap: positive(usdQuote?.['marketCap']), preMarketPrice: preTime != null ? positive(usdQuote?.['preMarketPrice']) : null, preMarketTime: preTime == null ? null : preTime * 1000 };
+    const postTime = positive(usdQuote?.['postMarketTime']);
+    return { symbol, postMarketPrice: postTime != null ? positive(usdQuote?.['postMarketPrice']) : null, postMarketTime: postTime == null ? null : postTime * 1000, price: positive(usdQuote?.['regularMarketPrice']), time: time == null ? null : time * 1000, opening: positive(usdQuote?.['regularMarketOpen']), previousClose: positive(usdQuote?.['regularMarketPreviousClose']), marketOpen: usdQuote?.['marketState'] === "REGULAR", marketCap: positive(usdQuote?.['marketCap']), preMarketPrice: preTime != null ? positive(usdQuote?.['preMarketPrice']) : null, preMarketTime: preTime == null ? null : preTime * 1000 };
   });
 });
 
