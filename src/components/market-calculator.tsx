@@ -1,5 +1,6 @@
 import { Suspense, useEffect, useRef, useState, type FormEvent } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { ArrowUp, ArrowDown, Radio, Calculator, LoaderCircle } from "lucide-react";
 import { COMPANIES, formatMarketCap, quotesQuery, type Symbol } from "@/lib/markets";
 import { usd } from "@/lib/calc";
@@ -41,7 +42,7 @@ function CompanyButtons({ symbol, setSymbol, quotes }: { symbol: Symbol; setSymb
       <div className="px-1 pt-2">
         <div key={quote?.price} className="quote-tick text-sm font-semibold tabular-nums" title={quote?.time ? sessionTime(quote.time) : undefined}>{quote?.price != null ? usd(quote.price) : quotes ? "Unavailable" : "—"}</div>
         <div className={`mt-1 flex min-h-4 items-center gap-0.5 text-[10px] tabular-nums ${change == null || change === 0 ? "text-muted-foreground" : change > 0 ? "text-success" : "text-destructive"}`}>{change != null && percent != null ? <>{change > 0 ? <ArrowUp className="h-3 w-3 shrink-0" /> : change < 0 ? <ArrowDown className="h-3 w-3 shrink-0" /> : null}{Math.abs(change).toFixed(2)} ({percent > 0 ? "+" : ""}{percent.toFixed(2)}%)</> : "—"}</div>
-        <SessionPrice label="After-hours" price={quote?.postMarketPrice ?? null} time={quote?.postMarketTime ?? null} />
+        <SessionPrice label="Pre-market" price={quote?.preMarketPrice ?? null} time={quote?.preMarketTime ?? null} />
       </div>
     </div>;
   })}</div>;
@@ -141,6 +142,7 @@ function InvestmentForm({ symbol, open, setOpen }: { symbol: Symbol; open: boole
           <p className="text-xs text-muted-foreground">Portfolio value is shares × price on each date; profit is the later portfolio value minus the portfolio value at the investment date.</p>
           <p className="text-xs leading-relaxed text-muted-foreground">Yahoo Finance prices in USD, split-adjusted; shares are on the current split-adjusted basis. Investment uses the first trading day close on or after your date; valuation uses the last trading day close on or before your date. The maximum uses the highest daily traded price in that period (hypothetical sale). Excludes dividends, taxes and fees. Not financial advice.</p>
           <Button variant="outline" className="h-12 text-base" onClick={() => setResult(null)}>Edit Investment Details</Button>
+          <Button asChild className="h-12 text-base font-semibold"><Link to="/subscribe">Invest in {company?.name} Now</Link></Button>
         </>}
       </DialogContent>
     </Dialog>;
