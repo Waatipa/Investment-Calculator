@@ -1,4 +1,6 @@
 # Website update
+- [ ] Match mobile three-column company cards and hamburger slide-out menu; preserve desktop.
+- [ ] Verify logo licensing and mobile menu/card interactions.
 - [x] Fit seven compact branded company cards in one desktop row and stack mobile navigation.
 - [x] Verify company pop-ups and desktop/mobile layout.
 - [x] Finish the linked investment amount field and verify company switching.
