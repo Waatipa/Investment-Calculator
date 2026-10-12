@@ -1,4 +1,6 @@
 # Website update
+- [ ] Match the latest desktop/mobile reference design, copy, navigation and branding while keeping all seven companies.
+- [ ] Show sourced closing/off-hours prices and verify calculator, menus and screen layouts.
 - [x] Shorten cards with four desktop columns; brand calculator forms and results.
 - [x] Add premium Investico Academy identity and matching favicon; verify layout and calculations.
 - [x] Match mobile three-column company cards and hamburger slide-out menu; preserve desktop.
