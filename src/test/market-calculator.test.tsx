@@ -20,17 +20,18 @@ function mount() {
   return client;
 }
 describe("Linked investment calculator", () => {
-  it("shows market labels and both exchange sessions without unavailable session prices", () => {
+  it("shows only after-hours timing in the existing session area during regular hours", () => {
+    vi.spyOn(Date, "now").mockReturnValue(Date.parse("2026-10-12T14:32:00Z"));
     const client = mount();
     expect(screen.getAllByText("Market :")).toHaveLength(7);
-    expect(screen.getAllByText("Pre-market")).toHaveLength(7);
-    expect(screen.getAllByText("After-hours")).toHaveLength(7);
-    expect(screen.getAllByText("4:00 AM–")).toHaveLength(7);
-    expect(screen.getAllByText("9:30 AM ET")).toHaveLength(7);
-    expect(screen.getAllByText("4:00 PM–")).toHaveLength(7);
-    expect(screen.getAllByText("8:00 PM ET")).toHaveLength(7);
+    expect(document.querySelectorAll('[data-session="After-hours"]')).toHaveLength(7);
+    document.querySelectorAll('[data-session]').forEach(session => {
+      expect(session).toHaveTextContent("4:00 PM–8:00 PM ET");
+      expect(session).not.toHaveTextContent("Pre-market");
+    });
     document.querySelectorAll(".trading-sessions").forEach(session => expect(session).not.toHaveTextContent("Unavailable"));
     client.clear();
+    vi.restoreAllMocks();
   });
   it("links shares and USD amount and preserves the chosen basis across companies", async () => {
     const client = mount();
