@@ -32,24 +32,39 @@ function LiveCompanies({ symbol, setSymbol }: { symbol: Symbol; setSymbol: (s: S
 
 const sessionTime = (t: number) => new Date(t).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/New_York" }) + " ET";
 
+function Change({ change, percent, className }: { change: number | null; percent: number | null; className?: string }) {
+  const tone = change == null || change === 0 ? "text-muted-foreground" : change > 0 ? "text-success" : "text-destructive";
+  return <div className={`flex min-h-4 items-center gap-0.5 tabular-nums ${tone} ${className ?? ""}`}>{change != null && percent != null ? <>{change > 0 ? <ArrowUp className="h-3 w-3 shrink-0" /> : change < 0 ? <ArrowDown className="h-3 w-3 shrink-0" /> : null}{change > 0 ? "+" : "−"}{Math.abs(change).toFixed(2)} ({percent > 0 ? "+" : "−"}{Math.abs(percent).toFixed(2)}%)</> : "—"}</div>;
+}
+
 function CompanyButtons({ symbol, setSymbol, quotes }: { symbol: Symbol; setSymbol: (s: Symbol) => void; quotes?: MarketQuote[] }) {
-  return <div className="mt-6 grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-4 lg:grid-cols-7" aria-label="Companies">{COMPANIES.map(c => {
+  return <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7" aria-label="Companies">{COMPANIES.map(c => {
     const quote = quotes?.find(q => q.symbol === c.symbol);
     const change = quote?.price != null && quote.previousClose != null ? quote.price - quote.previousClose : null;
     const percent = change != null && quote?.previousClose ? change / quote.previousClose * 100 : null;
-    return <div key={c.symbol} className="min-w-0">
-      <Button className="h-24 w-full flex-col gap-1 px-1 font-display text-base font-semibold" variant={symbol === c.symbol ? "default" : "outline"} aria-pressed={symbol === c.symbol} onClick={() => setSymbol(c.symbol)}>{c.name}<span className="text-[10px] font-normal opacity-70">{c.symbol}</span><span className="mt-1 text-xs font-medium tabular-nums" title="Market capitalization in USD">{quote ? formatMarketCap(quote.marketCap) : "—"}</span><span className="text-[9px] font-normal opacity-70">Market cap · USD</span></Button>
-      <div className="px-1 pt-2">
-        <div key={quote?.price} className="quote-tick text-sm font-semibold tabular-nums" title={quote?.time ? sessionTime(quote.time) : undefined}>{quote?.price != null ? usd(quote.price) : quotes ? "Unavailable" : "—"}</div>
-        <div className={`mt-1 flex min-h-4 items-center gap-0.5 text-[10px] tabular-nums ${change == null || change === 0 ? "text-muted-foreground" : change > 0 ? "text-success" : "text-destructive"}`}>{change != null && percent != null ? <>{change > 0 ? <ArrowUp className="h-3 w-3 shrink-0" /> : change < 0 ? <ArrowDown className="h-3 w-3 shrink-0" /> : null}{Math.abs(change).toFixed(2)} ({percent > 0 ? "+" : ""}{percent.toFixed(2)}%)</> : "—"}</div>
-        <SessionPrice label="Pre-market" price={quote?.preMarketPrice ?? null} time={quote?.preMarketTime ?? null} />
+    const pre = quote?.preMarketPrice ?? null;
+    const preChange = pre != null && quote?.previousClose != null ? pre - quote.previousClose : null;
+    const prePercent = preChange != null && quote?.previousClose ? preChange / quote.previousClose * 100 : null;
+    const active = symbol === c.symbol;
+    return <button key={c.symbol} type="button" aria-pressed={active} onClick={() => setSymbol(c.symbol)}
+      className={`min-w-0 overflow-hidden rounded-xl border bg-card text-left shadow-soft transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${active ? "border-primary-deep ring-2 ring-primary" : "border-border"}`}>
+      <div className="px-4 py-3 text-center" style={{ background: `linear-gradient(135deg, ${c.brand}, color-mix(in oklab, ${c.brand} 75%, black))` }}>
+        <div className="font-display text-lg font-semibold text-on-brand">{c.name}</div>
+        <div className="text-xs font-medium text-on-brand/80">{c.symbol}</div>
+        <div className="mt-0.5 text-[10px] font-medium tabular-nums text-on-brand/70" title="Market capitalization in USD">{quote ? formatMarketCap(quote.marketCap) : "—"}</div>
       </div>
-    </div>;
+      <div className="px-4 py-3">
+        <div key={quote?.price} className="quote-tick font-display text-2xl font-semibold tabular-nums" title={quote?.time ? sessionTime(quote.time) : undefined}>{quote?.price != null ? usd(quote.price) : quotes ? "Unavailable" : "—"}</div>
+        <Change change={change} percent={percent} className="mt-1 text-xs" />
+        <div className="mt-3 border-t border-border pt-2">
+          <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Pre-market</div>
+          <div key={pre} className="quote-tick mt-0.5 text-sm font-medium tabular-nums">{pre != null ? usd(pre) : "Unavailable"}</div>
+          <Change change={preChange} percent={prePercent} className="mt-0.5 text-[11px]" />
+          <div className="mt-1 text-[9px] leading-relaxed text-muted-foreground">{quote?.preMarketTime != null ? sessionTime(quote.preMarketTime) : " "}</div>
+        </div>
+      </div>
+    </button>;
   })}</div>;
-}
-
-function SessionPrice({ label, price, time }: { label: string; price?: number | null; time?: number | null }) {
-  return <div className="mt-2 border-t border-border pt-2"><div className="text-[10px] text-muted-foreground">{label}</div><div key={price} className="quote-tick text-xs font-medium tabular-nums">{price != null ? usd(price) : "Unavailable"}</div>{time != null && <div className="mt-0.5 text-[9px] leading-relaxed text-muted-foreground">{sessionTime(time)}</div>}</div>;
 }
 
 function InvestmentForm({ symbol, open, setOpen }: { symbol: Symbol; open: boolean; setOpen: (o: boolean) => void }) {
