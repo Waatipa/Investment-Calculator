@@ -1,4 +1,6 @@
 # Website update
+- [x] Shorten cards with four desktop columns; brand calculator forms and results.
+- [x] Add premium Investico Academy identity and matching favicon; verify layout and calculations.
 - [x] Match mobile three-column company cards and hamburger slide-out menu; preserve desktop.
 - [x] Verify logo licensing and mobile menu/card interactions.
 - [x] Fit seven compact branded company cards in one desktop row and stack mobile navigation.
