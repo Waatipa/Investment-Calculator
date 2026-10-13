@@ -19,7 +19,7 @@ describe("Regional cards", () => {
     expect(screen.getByRole("dialog")).toHaveAttribute("data-company", "FSR.JO");
     fireEvent.click(screen.getByRole("button", { name: /ROE Return on equity/ }));
     fireEvent.change(screen.getByLabelText("Net income (ZAR millions)"), { target: { value: "10" } });
-    fireEvent.change(screen.getByLabelText("Average equity (ZAR millions)"), { target: { value: "100" } });
+    fireEvent.change(screen.getByLabelText("Average shareholders’ equity (ZAR millions)"), { target: { value: "100" } });
     fireEvent.click(screen.getByRole("button", { name: "Calculate ROE" }));
     expect(screen.getAllByText("10.00%").length).toBeGreaterThan(0);
     expect(screen.getByRole("link", { name: "Invest Now" })).toBeInTheDocument();

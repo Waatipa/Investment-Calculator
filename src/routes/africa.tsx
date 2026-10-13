@@ -17,6 +17,6 @@ function AfricaPage() {
     <section className="reference-intro"><div className="reference-copy"><h1>Africa Markets</h1><p>Eight leading African listed companies across technology, banking, mining and telecommunications. A large-cap selection, not a live continent-wide ranking.</p></div><MarketArtwork /></section>
     <RegionTabs active="AFRICA" />
     <RegionalMarketCards companies={AF_COMPANIES} quotes={data} region="African" />
-    <p className="market-footer">Market data provided by Yahoo Finance; may be delayed. JSE share prices in South African cents (ZAc), market caps in rand (ZAR). Calculators use rand and clearly labeled provider summaries; missing figures remain user-entered. Quote timestamps shown in ET.</p>
+    <p className="market-footer">Market data provided by Yahoo Finance; may be delayed. JSE share prices in South African cents (ZAc), market caps in rand (ZAR). Calculators use labeled provider summaries in the reporting currency. Attijariwafa Bank and Dangote Cement are not covered by this feed: prices and market caps are unavailable; their calculators accept user-entered figures. Quote timestamps shown in ET.</p>
   </main>;
 }

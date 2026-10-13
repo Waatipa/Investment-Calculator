@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { FilingTutorMark } from "@/components/filing-chat";
+import { pageHead } from "@/lib/markets";
 
 export const Route = createFileRoute("/_authenticated/ask/")({
+  head: () => pageHead("Ask company filings", "Start a company-specific conversation about verified SEC financial figures at Investico Academy."),
   component: () => <div className="flex h-full min-h-[50vh] flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card/40 p-8 text-center">
     <FilingTutorMark />
     <h1 className="font-serif text-2xl font-bold text-foreground">Ask about the filings</h1>
