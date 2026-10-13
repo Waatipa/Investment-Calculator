@@ -36,16 +36,25 @@ async function history(symbol: string, start: string, end: string) {
     const c = q?.close?.[i], h = q?.high?.[i];
     return valid(c) ? [{ t: t * 1000, c: c / divisor, h: valid(h) ? h / divisor : null }] : [];
   });
-  const liveTime = r.meta?.regularMarketTime;
-  const livePrice = r.meta?.regularMarketPrice;
-  // For today's valuation, use the actual latest regular-session trade, never a simulated tick.
-  if (end === today && valid(liveTime) && valid(livePrice) && tradingDate(liveTime * 1000, timeZone) === today) {
-    const todayPoint = points.find(p => tradingDate(p.t, timeZone) === today);
-    const high = r.meta?.regularMarketDayHigh;
-    const live = { t: liveTime * 1000, c: livePrice / divisor, h: valid(high) ? high / divisor : todayPoint?.h ?? null };
-    if (todayPoint) Object.assign(todayPoint, live); else points.push(live);
+  let latestUsed = false;
+  if (end >= today) {
+    const { fetchCompanyQuotes } = await import("./market-quotes.server");
+    const quote = (await fetchCompanyQuotes(symbol).catch(() => [])).find(q => q['symbol'] === symbol && q['currency'] === rawCurrency);
+    const liveTime = quote?.['regularMarketTime'] ?? r.meta?.regularMarketTime;
+    const livePrice = quote?.['regularMarketPrice'] ?? r.meta?.regularMarketPrice;
+    if (valid(liveTime) && valid(livePrice)) {
+      const liveDate = tradingDate(liveTime * 1000, timeZone);
+      const lastTime = Math.max(0, ...points.map(p => p.t));
+      if (liveDate >= start && liveDate <= end && liveTime * 1000 >= lastTime) {
+        const point = points.find(p => tradingDate(p.t, timeZone) === liveDate);
+        const high = quote?.['regularMarketDayHigh'] ?? r.meta?.regularMarketDayHigh;
+        const live = { t: liveTime * 1000, c: livePrice / divisor, h: valid(high) ? high / divisor : point?.h ?? null };
+        if (point) Object.assign(point, live); else points.push(live);
+        latestUsed = true;
+      }
+    }
   }
-  return { points, currency, timeZone, today, sourceUrl: `https://finance.yahoo.com/quote/${encodeURIComponent(symbol)}/history/` };
+  return { points, currency, timeZone, today, latestUsed, sourceUrl: `https://finance.yahoo.com/quote/${encodeURIComponent(symbol)}/history/` };
 }
 export const getRegionalPurchasePrice = createServerFn({ method: "GET" })
   .inputValidator(d => z.object({ symbol, date }).parse(d))
@@ -63,5 +72,5 @@ export const getRegionalInvestmentResult = createServerFn({ method: "GET" })
     if (data.endDate > h.today) throw new Error("The valuation date cannot be in the future.");
     const baseline = calculateShares(h.points, data.startDate, data.endDate, 1, h.timeZone);
     const shares = data.amount != null ? data.amount / baseline.purchasePrice : data.shares ?? 0;
-    return { ...calculateShares(h.points, data.startDate, data.endDate, shares, h.timeZone), currency: h.currency, timeZone: h.timeZone, sourceUrl: h.sourceUrl, asOf: Math.max(...h.points.filter(p => tradingDate(p.t, h.timeZone) <= data.endDate).map(p => p.t)), usesLatestPrice: data.endDate === h.today };
+    return { ...calculateShares(h.points, data.startDate, data.endDate, shares, h.timeZone), currency: h.currency, timeZone: h.timeZone, sourceUrl: h.sourceUrl, asOf: Math.max(...h.points.filter(p => tradingDate(p.t, h.timeZone) <= data.endDate).map(p => p.t)), usesLatestPrice: h.latestUsed && data.endDate === h.today };
   });
