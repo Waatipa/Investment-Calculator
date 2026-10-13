@@ -27,13 +27,21 @@ export function MarketCalculator() {
       <div className="intro-actions"><Button>Start Free Course</Button><Button onClick={() => setOpen(true)}>Calculate</Button><Button>Invest Now</Button></div>
       </div><MarketArtwork />
     </section>
-    <div className="region-tabs" aria-label="Market regions">{["US", "EUROPE", "AFRICA", "ASIA", "AUSTRALIA", "MIDDLE EAST"].map(region => <Button key={region} variant="outline" className={region === "US" ? "region-active" : ""} aria-pressed={region === "US"}>{region}</Button>)}</div>
+    <RegionTabs active="US" />
     <Suspense fallback={<CompanyButtons symbol={symbol} setSymbol={setSymbol} />}><LiveCompanies symbol={symbol} setSymbol={setSymbol} /></Suspense>
     <InvestmentForm symbol={symbol} open={open} setOpen={setOpen} />
   </main>;
 }
 
-function MarketArtwork() {
+export function RegionTabs({ active }: { active: "US" | "MIDDLE EAST" }) {
+  return <div className="region-tabs" aria-label="Market regions">{["US", "EUROPE", "AFRICA", "ASIA", "AUSTRALIA", "MIDDLE EAST"].map(region => {
+    const cls = region === active ? "region-active" : "";
+    if (region === "US") return <Button key={region} variant="outline" className={cls} asChild><Link to="/markets" aria-current={active === region ? "page" : undefined}>{region}</Link></Button>;
+    if (region === "MIDDLE EAST") return <Button key={region} variant="outline" className={cls} asChild><Link to="/middle-east" aria-current={active === region ? "page" : undefined}>{region}</Link></Button>;
+    return <Button key={region} variant="outline" className={cls}>{region}</Button>;
+  })}</div>;
+}
+export function MarketArtwork() {
   const dots = Array.from({length: 48}, (_, row) => Array.from({length: 45}, (_, col) => {
     const x = col * 7 + 85, y = row * 6 + 65;
     const land = ((x-172)**2/7500+(y-130)**2/2500<1 && x+y<345) || ((x-225)**2/2200+(y-250)**2/5200<1) || ((x-330)**2/6700+(y-145)**2/1800<1) || ((x-345)**2/1600+(y-325)**2/700<1);
@@ -45,9 +53,9 @@ function LiveCompanies({ symbol, setSymbol }: { symbol: Symbol; setSymbol: (s: S
   const { data } = useSuspenseQuery(quotesQuery());
   return <><CompanyButtons symbol={symbol} setSymbol={setSymbol} quotes={data} /><p className="market-footer">Market data provided by Yahoo Finance. Data may be delayed. Prices in USD.</p></>;
 }
-const sourceDate = (t: number | null | undefined) => t ? new Date(t).toLocaleDateString("en-US", {month:"short",day:"numeric",timeZone:"America/New_York"}) : "—";
-const sourceTime = (t: number | null | undefined) => t ? new Date(t).toLocaleTimeString("en-US", {hour:"numeric",minute:"2-digit",timeZone:"America/New_York"}) + " ET" : "—";
-function Change({ change, percent, className }: { change: number | null; percent: number | null; className?: string }) {
+export const sourceDate = (t: number | null | undefined) => t ? new Date(t).toLocaleDateString("en-US", {month:"short",day:"numeric",timeZone:"America/New_York"}) : "—";
+export const sourceTime = (t: number | null | undefined) => t ? new Date(t).toLocaleTimeString("en-US", {hour:"numeric",minute:"2-digit",timeZone:"America/New_York"}) + " ET" : "—";
+export function Change({ change, percent, className }: { change: number | null; percent: number | null; className?: string }) {
   const tone = change == null || change === 0 ? "text-muted-foreground" : change > 0 ? "text-success" : "text-destructive";
   return <div className={`quote-change ${tone} ${className ?? ""}`}>{change != null && percent != null ? <>{change !== 0 && <Triangle className={change < 0 ? "rotate-180" : ""} />}{change > 0 ? "+" : change < 0 ? "−" : ""}{Math.abs(change).toFixed(2)} ({percent > 0 ? "+" : percent < 0 ? "−" : ""}{Math.abs(percent).toFixed(2)}%)</> : "—"}</div>;
 }
