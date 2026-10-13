@@ -49,12 +49,12 @@ export function FinancialMetricForm({ metric, onBack, onStageChange }: { metric:
       const live = `Yahoo Finance quote · ${apple?.time ? new Date(apple.time).toLocaleString("en-GB", { timeZone: "America/New_York" }) + " ET" : "timestamp unavailable"}`;
       if (metric.fields.some(f => f.key === "price") && apple?.price != null) { next["price"] = String(apple.price); tags["price"] = { live }; }
       if (metric.fields.some(f => f.key === "cap") && apple?.marketCap != null) { next["cap"] = String(apple.marketCap / 1e6); tags["cap"] = { live }; }
-      const sec = period === "Custom period" ? null : await fetchFigures({ data: { metric: metric.id, keys: metric.fields.map(f => f.key).filter(k => !(k in next)), period: period === "Quarterly" ? "quarterly" : "annual" } });
+      const sec = period === "Custom period" ? null : await fetchFigures({ data: { metric: metric.id, keys: metric.fields.map(f => f.key).filter(k => !(k in next)), period: period === "Quarterly" ? "quarterly" : "annual", marketCapM: apple?.marketCap ? apple.marketCap / 1e6 : null, price: apple?.price ?? null } });
       for (const fig of sec?.figures ?? []) { next[fig.key] = String(Number(fig.value.toFixed(6))); tags[fig.key] = fig; }
       if (!Object.keys(next).length) throw new Error(sec?.error ?? "No verified source reports these figures for this period. Enter Apple’s reported figures.");
       setInputs(v => ({ ...v, ...next })); setVerified(v => ({ ...v, ...tags })); setResult(null); onStageChange(false);
       const missing = metric.fields.filter(f => !(f.key in next)).map(f => f.label);
-      setSource(`${sec?.error ? sec.error + " " : ""}Verified figures filled from SEC EDGAR filings and Yahoo Finance.${missing.length ? ` Not reported as a single filed figure — enter manually: ${missing.join(", ")}.` : ""}`);
+      setSource(`${sec?.error ? sec.error + " " : ""}Verified figures filled from SEC EDGAR filings and Yahoo Finance.${missing.length ? ` Your own assumptions (not reported in filings) — enter manually: ${missing.join(", ")}.` : ""}`);
     } catch (e) { setError(e instanceof Error ? e.message : "Live price unavailable. Try again."); }
     finally { setLoading(false); }
   }

@@ -41,7 +41,8 @@ function makeResolver(data: Facts, mode: Mode) {
     const latestEnd = latestByEnd(list)[0]?.end;
     const direct = quarters.find(q => q.end === latestEnd);
     if (direct && skip === 0) return toFig(direct, `us-gaap:${concept}`);
-    if (!additive || skip > 0) return quarters[skip] ? toFig(quarters[skip], `us-gaap:${concept}`) : null;
+    if (skip > 0) { const ref = quarters[0]; const ago = ref && quarters.find(q => { const d = (Date.parse(ref.end) - Date.parse(q.end)) / 86_400_000; return d > 355 && d < 375; }); return ago ? toFig(ago, `us-gaap:${concept}`, ago.val, "Same quarter one year earlier") : null; }
+    if (!additive) return quarters[0] ? toFig(quarters[0], `us-gaap:${concept}`) : null;
     const ytd = latestByEnd(list.filter(x => x.end === latestEnd))[0];
     if (!ytd) return null;
     const before = latestByEnd(list.filter(x => x.start === ytd.start && x.end < ytd.end))[0];
@@ -111,7 +112,7 @@ export const getAppleFilingFigures = createServerFn({ method: "GET" })
         operating: { income: () => scale(flow("OperatingIncomeLoss"), M) },
         current: { assets: () => scale(instant("AssetsCurrent"), M) },
         de: { equity: () => scale(instant("StockholdersEquity"), M) },
-        dcf: { shares: sharesOut, debt: netDebt, fcf: () => makeAnnualFcf() },
+        dcf: { years: () => null, shares: sharesOut, debt: netDebt, fcf: () => makeAnnualFcf() },
         interest: { interest: () => { const i = flow("InterestExpense"), o = flow("OperatingIncomeLoss"); return i && o && i.periodEnd === o.periodEnd ? scale(i, M) : null; } },
       };
       const makeAnnualFcf = () => combine([annual.flow("NetCashProvidedByUsedInOperatingActivities"), annual.flow("PaymentsToAcquirePropertyPlantAndEquipment")], ([a, b]) => (a! - b!) * M, "OperatingCashFlow − PaymentsToAcquirePP&E", "Annual free cash flow from the latest 10-K");
