@@ -93,4 +93,11 @@ describe("Linked investment calculator", () => {
     expect(formatMarketCap(null)).toBe("Unavailable");
     expect(formatMarketCap(NaN)).toBe("Unavailable");
   });
+  it("shows actual market capitalization inside the company-name section", async () => {
+    const client = mount();
+    client.setQueryData(["market-quotes"], [{ symbol: "NVDA", marketCap: 3.544e12 }]);
+    await waitFor(() => expect(document.querySelector(".company-panel-nvda .company-panel")).toHaveTextContent("Market cap · $3.54 T"));
+    expect(screen.getByRole("link", { name: "AFRICA" })).toHaveAttribute("href", "/africa");
+    client.clear();
+  });
 });
