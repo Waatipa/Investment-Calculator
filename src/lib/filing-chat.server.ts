@@ -3,7 +3,7 @@ import { convertToModelMessages, streamText, type UIMessage } from "ai";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import type { Database } from "@/integrations/supabase/types";
-import { loadFacts, makeResolver } from "./sec-facts.functions";
+import { loadFacts, makeResolver, SEC_CIKS, type SecSymbol } from "./sec-facts.functions";
 import { createLovableAiGatewayRunIdFetch, getLovableAiGatewayRunId, withLovableAiGatewayRunIdHeader } from "./run-id.server";
 
 export type FilingReference = { id: string; label: string; period: "Annual" | "Quarterly"; value: number; unit: string; concept: string; form: string; filed: string; periodStart: string | null; periodEnd: string; url: string; note?: string };
@@ -25,8 +25,13 @@ const FIGURES: { label: string; concept: string; kind: "flow" | "instant"; unit?
   { label: "Cash and cash equivalents", concept: "CashAndCashEquivalentsAtCarryingValue", kind: "instant", scale: 1e-6, unitLabel: "USD millions" },
 ];
 
-export async function buildAppleReferences(): Promise<FilingReference[]> {
-  const facts = await loadFacts();
+export const FILING_COMPANIES: Record<SecSymbol, string> = {
+  AAPL: "Apple Inc.", NVDA: "NVIDIA Corporation", MSFT: "Microsoft Corporation",
+  AMZN: "Amazon.com, Inc.", GOOGL: "Alphabet Inc.", META: "Meta Platforms, Inc.", TSLA: "Tesla, Inc.",
+};
+
+export async function buildReferences(symbol: SecSymbol = "AAPL"): Promise<FilingReference[]> {
+  const facts = await loadFacts(symbol);
   const refs: FilingReference[] = [];
   for (const mode of ["annual", "quarterly"] as const) {
     const r = makeResolver(facts, mode);
