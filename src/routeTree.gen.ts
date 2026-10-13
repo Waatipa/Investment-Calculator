@@ -10,19 +10,34 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AboutUsRouteImport } from './routes/about-us'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ContactUsRouteImport } from './routes/contact-us'
 import { Route as MarketsRouteImport } from './routes/markets'
 import { Route as SubscribeRouteImport } from './routes/subscribe'
+import { Route as AuthenticatedAskRouteImport } from './routes/_authenticated/ask'
+import { Route as ApiFilingChatRouteImport } from './routes/api/filing-chat'
+import { Route as AuthenticatedAskIndexRouteImport } from './routes/_authenticated/ask.index'
+import { Route as AuthenticatedAskThreadIdRouteImport } from './routes/_authenticated/ask.$threadId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutUsRoute = AboutUsRouteImport.update({
   id: '/about-us',
   path: '/about-us',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactUsRoute = ContactUsRouteImport.update({
@@ -40,43 +55,113 @@ const SubscribeRoute = SubscribeRouteImport.update({
   path: '/subscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAskRoute = AuthenticatedAskRouteImport.update({
+  id: '/ask',
+  path: '/ask',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const ApiFilingChatRoute = ApiFilingChatRouteImport.update({
+  id: '/api/filing-chat',
+  path: '/api/filing-chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAskIndexRoute = AuthenticatedAskIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedAskRoute,
+} as any)
+const AuthenticatedAskThreadIdRoute =
+  AuthenticatedAskThreadIdRouteImport.update({
+    id: '/$threadId',
+    path: '/$threadId',
+    getParentRoute: () => AuthenticatedAskRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about-us': typeof AboutUsRoute
+  '/auth': typeof AuthRoute
   '/contact-us': typeof ContactUsRoute
   '/markets': typeof MarketsRoute
   '/subscribe': typeof SubscribeRoute
+  '/ask': typeof AuthenticatedAskRouteWithChildren
+  '/api/filing-chat': typeof ApiFilingChatRoute
+  '/ask/$threadId': typeof AuthenticatedAskThreadIdRoute
+  '/ask/': typeof AuthenticatedAskIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about-us': typeof AboutUsRoute
+  '/auth': typeof AuthRoute
   '/contact-us': typeof ContactUsRoute
   '/markets': typeof MarketsRoute
   '/subscribe': typeof SubscribeRoute
+  '/api/filing-chat': typeof ApiFilingChatRoute
+  '/ask/$threadId': typeof AuthenticatedAskThreadIdRoute
+  '/ask': typeof AuthenticatedAskIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/about-us': typeof AboutUsRoute
+  '/auth': typeof AuthRoute
   '/contact-us': typeof ContactUsRoute
   '/markets': typeof MarketsRoute
   '/subscribe': typeof SubscribeRoute
+  '/_authenticated/ask': typeof AuthenticatedAskRouteWithChildren
+  '/api/filing-chat': typeof ApiFilingChatRoute
+  '/_authenticated/ask/$threadId': typeof AuthenticatedAskThreadIdRoute
+  '/_authenticated/ask/': typeof AuthenticatedAskIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about-us' | '/contact-us' | '/markets' | '/subscribe'
+  fullPaths:
+    | '/'
+    | '/about-us'
+    | '/auth'
+    | '/contact-us'
+    | '/markets'
+    | '/subscribe'
+    | '/ask'
+    | '/api/filing-chat'
+    | '/ask/$threadId'
+    | '/ask/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about-us' | '/contact-us' | '/markets' | '/subscribe'
-  id: '__root__' | '/' | '/about-us' | '/contact-us' | '/markets' | '/subscribe'
+  to:
+    | '/'
+    | '/about-us'
+    | '/auth'
+    | '/contact-us'
+    | '/markets'
+    | '/subscribe'
+    | '/api/filing-chat'
+    | '/ask/$threadId'
+    | '/ask'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/about-us'
+    | '/auth'
+    | '/contact-us'
+    | '/markets'
+    | '/subscribe'
+    | '/_authenticated/ask'
+    | '/api/filing-chat'
+    | '/_authenticated/ask/$threadId'
+    | '/_authenticated/ask/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AboutUsRoute: typeof AboutUsRoute
+  AuthRoute: typeof AuthRoute
   ContactUsRoute: typeof ContactUsRoute
   MarketsRoute: typeof MarketsRoute
   SubscribeRoute: typeof SubscribeRoute
+  ApiFilingChatRoute: typeof ApiFilingChatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -88,11 +173,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about-us': {
       id: '/about-us'
       path: '/about-us'
       fullPath: '/about-us'
       preLoaderRoute: typeof AboutUsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact-us': {
@@ -116,15 +215,70 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/ask': {
+      id: '/_authenticated/ask'
+      path: '/ask'
+      fullPath: '/ask'
+      preLoaderRoute: typeof AuthenticatedAskRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/filing-chat': {
+      id: '/api/filing-chat'
+      path: '/api/filing-chat'
+      fullPath: '/api/filing-chat'
+      preLoaderRoute: typeof ApiFilingChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/ask/': {
+      id: '/_authenticated/ask/'
+      path: '/'
+      fullPath: '/ask/'
+      preLoaderRoute: typeof AuthenticatedAskIndexRouteImport
+      parentRoute: typeof AuthenticatedAskRoute
+    }
+    '/_authenticated/ask/$threadId': {
+      id: '/_authenticated/ask/$threadId'
+      path: '/$threadId'
+      fullPath: '/ask/$threadId'
+      preLoaderRoute: typeof AuthenticatedAskThreadIdRouteImport
+      parentRoute: typeof AuthenticatedAskRoute
+    }
   }
 }
 
+interface AuthenticatedAskRouteChildren {
+  AuthenticatedAskThreadIdRoute: typeof AuthenticatedAskThreadIdRoute
+  AuthenticatedAskIndexRoute: typeof AuthenticatedAskIndexRoute
+}
+
+const AuthenticatedAskRouteChildren: AuthenticatedAskRouteChildren = {
+  AuthenticatedAskThreadIdRoute: AuthenticatedAskThreadIdRoute,
+  AuthenticatedAskIndexRoute: AuthenticatedAskIndexRoute,
+}
+
+const AuthenticatedAskRouteWithChildren =
+  AuthenticatedAskRoute._addFileChildren(AuthenticatedAskRouteChildren)
+
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAskRoute: typeof AuthenticatedAskRouteWithChildren
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAskRoute: AuthenticatedAskRouteWithChildren,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AboutUsRoute: AboutUsRoute,
+  AuthRoute: AuthRoute,
   ContactUsRoute: ContactUsRoute,
   MarketsRoute: MarketsRoute,
   SubscribeRoute: SubscribeRoute,
+  ApiFilingChatRoute: ApiFilingChatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
