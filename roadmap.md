@@ -1,8 +1,8 @@
 # Website update
-- [ ] Add Africa page with eight major African public companies, real quotes and staged calculators.
-- [ ] Apply individual company colors to Africa, Europe and Middle East cards and calculator stages.
-- [ ] Show genuine market caps in company-name sections across all regions, including US.
-- [ ] Verify regional navigation, calculator results, sources and narrow-screen layout.
+- [x] Add Africa page with eight major African public companies and staged calculators; unavailable provider data clearly labeled.
+- [x] Apply individual company colors to Africa, Europe and Middle East cards and calculator stages.
+- [x] Show genuine available market caps in company-name sections across all regions, including US.
+- [x] Verify regional navigation, calculator results, sources and narrow-screen layout; all 30 tests pass.
 - [x] Add Apple-only metric selection, input and result stages matching the three uploaded screens.
 - [x] Keep historical profit calculations, add financial metric calculations with honest input/source handling and calendar controls.
 - [x] Add Invest Now, subtle company-card interaction and verify calculator flows.

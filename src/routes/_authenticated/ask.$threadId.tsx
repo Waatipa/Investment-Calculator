@@ -3,10 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { FilingChat } from "@/components/filing-chat";
 import { getFilingThread } from "@/lib/filing-threads.functions";
-import { pageHead } from "@/lib/markets";
 
 export const Route = createFileRoute("/_authenticated/ask/$threadId")({
-  head: () => pageHead("Filings conversation", "Your company-specific questions and explanations citing verified SEC filings at Investico Academy."),
   component: ThreadPage,
 });
 
