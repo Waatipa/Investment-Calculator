@@ -93,7 +93,6 @@ ${referenceText}`;
   const response = result.toUIMessageStreamResponse({
     originalMessages: messages,
     sendReasoning: true,
-    messageMetadata: ({ part }) => (part.type === "start" ? { references: refs } : undefined),
     onError: (error) => {
       const status = (error as { statusCode?: number })?.statusCode;
       if (status === 429) return "Too many questions right now. Please wait a moment and try again.";
