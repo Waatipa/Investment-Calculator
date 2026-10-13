@@ -28,9 +28,15 @@ async function loadSeries(symbol: string): Promise<Record<string, Obs[]>> {
   return data;
 }
 
+export const EU_FUNDAMENTAL_SYMBOLS = ["ASML.AS", "MC.PA", "SAP.DE", "NESN.SW", "NOVO-B.CO", "RO.SW", "AZN.L", "HSBA.L"] as const;
+export type RegionalArgs = { symbol: string; metric: string; keys: string[]; period: "annual" | "quarterly"; marketCapM?: number | null | undefined; price?: number | null | undefined; currency?: string | null | undefined };
+
 export const getRegionalFigures = createServerFn({ method: "GET" })
   .inputValidator(d => z.object({ symbol: z.enum(ME_FUNDAMENTAL_SYMBOLS), metric: z.string().max(20), keys: z.array(z.string().max(20)).max(10), period: z.enum(["annual", "quarterly"]), marketCapM: z.number().positive().nullable().optional(), price: z.number().positive().nullable().optional(), currency: z.string().max(5).nullable().optional() }).parse(d))
-  .handler(async ({ data }) => {
+  .handler(({ data }) => regionalFigures(data));
+
+export async function regionalFigures(data: RegionalArgs) {
+  {
     try {
       const s = await loadSeries(data.symbol);
       const url = `https://finance.yahoo.com/quote/${encodeURIComponent(data.symbol)}/financials/`;
@@ -88,4 +94,5 @@ export const getRegionalFigures = createServerFn({ method: "GET" })
       console.error("Yahoo fundamentals failed", e);
       return { figures: [] as VerifiedFigure[], error: "Company figures are unavailable right now. Try again shortly." };
     }
-  });
+  }
+}
