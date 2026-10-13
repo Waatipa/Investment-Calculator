@@ -437,3 +437,5 @@ body { background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
   .pro-filters > * { font-size: 10px; padding-inline: 9px; }
 }
 @media (prefers-reduced-motion: reduce) { .company-card { transition: none; } .company-card:hover, .company-card:focus-visible, .company-card:active { transform: none; } }
+.pro-figure-source { display: block; margin-top: 4px; font-size: 11px; line-height: 1.35; color: var(--muted-foreground); font-weight: 400; }
+.pro-figure-source a { color: var(--primary); text-decoration: underline; }

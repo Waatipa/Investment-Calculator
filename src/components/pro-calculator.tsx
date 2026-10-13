@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, Calculator, ArrowRight, RefreshCw } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { FINANCIAL_METRICS, calculateMetric, type FinancialMetric } from "@/lib/financial-metrics";
@@ -8,6 +9,10 @@ import { usd } from "@/lib/calc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CalculatorDateField } from "./calculator-date-field";
+import { getAppleFilingFigures, type VerifiedFigure } from "@/lib/sec-facts.functions";
+import { longDate } from "@/lib/investment";
+
+const figureSource = (f: VerifiedFigure) => `SEC ${f.form} filed ${longDate(f.filed)} · period ${f.periodStart ? `${longDate(f.periodStart)} – ` : "as of "}${longDate(f.periodEnd)}${f.note ? ` · ${f.note}` : ""}`;
 
 export function ProCalculatorChoices({ onChoose }: { onChoose: (metric: FinancialMetric | "profit") => void }) {
   const [group, setGroup] = useState("All");
@@ -22,27 +27,34 @@ export function ProCalculatorChoices({ onChoose }: { onChoose: (metric: Financia
 
 export function FinancialMetricForm({ metric, onBack, onStageChange }: { metric: FinancialMetric; onBack: () => void; onStageChange: (result: boolean) => void }) {
   const [inputs, setInputs] = useState<Record<string, string>>({});
-  const [period, setPeriod] = useState("Trailing 12 months (TTM)");
+  const [period, setPeriod] = useState("Annual");
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
   const [result, setResult] = useState<ReturnType<typeof calculateMetric> | null>(null);
   const [error, setError] = useState("");
   const [source, setSource] = useState("");
   const [loading, setLoading] = useState(false);
+  const [verified, setVerified] = useState<Record<string, VerifiedFigure | { live: string }>>({});
+  const fetchFigures = useServerFn(getAppleFilingFigures);
   const client = useQueryClient();
   const display = (value: number) => metric.unit === "usd" ? usd(value) : `${value.toFixed(2)}${metric.unit === "percent" ? "%" : "×"}`;
-  const update = (key: string, value: string) => { setInputs(v => ({ ...v, [key]: value })); setSource(""); setResult(null); onStageChange(false); };
+  const update = (key: string, value: string) => { setInputs(v => ({ ...v, [key]: value })); setVerified(v => { const n = { ...v }; delete n[key]; return n; }); setSource(""); setResult(null); onStageChange(false); };
   async function autofill() {
     setLoading(true); setError("");
     try {
       const quotes = await client.fetchQuery(quotesQuery());
       const apple = quotes.find(q => q.symbol === "AAPL");
       const next: Record<string, string> = {};
-      if (metric.fields.some(f => f.key === "price") && apple?.price != null) next["price"] = String(apple.price);
-      if (metric.fields.some(f => f.key === "cap") && apple?.marketCap != null) next["cap"] = String(apple.marketCap / 1e6);
-      if (!Object.keys(next).length) throw new Error("This data feed does not provide the financial statements required for this metric. Enter Apple’s reported figures.");
-      setInputs(v => ({ ...v, ...next }));
-      setSource(`Yahoo Finance · ${apple?.time ? new Date(apple.time).toLocaleString("en-GB", { timeZone: "America/New_York" }) + " ET" : "source timestamp unavailable"}. Financial-statement figures must be entered from Apple’s reports.`);
+      const tags: Record<string, VerifiedFigure | { live: string }> = {};
+      const live = `Yahoo Finance quote · ${apple?.time ? new Date(apple.time).toLocaleString("en-GB", { timeZone: "America/New_York" }) + " ET" : "timestamp unavailable"}`;
+      if (metric.fields.some(f => f.key === "price") && apple?.price != null) { next["price"] = String(apple.price); tags["price"] = { live }; }
+      if (metric.fields.some(f => f.key === "cap") && apple?.marketCap != null) { next["cap"] = String(apple.marketCap / 1e6); tags["cap"] = { live }; }
+      const sec = period === "Custom period" ? null : await fetchFigures({ data: { metric: metric.id, keys: metric.fields.map(f => f.key).filter(k => !(k in next)), period: period === "Quarterly" ? "quarterly" : "annual" } });
+      for (const fig of sec?.figures ?? []) { next[fig.key] = String(Number(fig.value.toFixed(6))); tags[fig.key] = fig; }
+      if (!Object.keys(next).length) throw new Error(sec?.error ?? "No verified source reports these figures for this period. Enter Apple’s reported figures.");
+      setInputs(v => ({ ...v, ...next })); setVerified(v => ({ ...v, ...tags })); setResult(null); onStageChange(false);
+      const missing = metric.fields.filter(f => !(f.key in next)).map(f => f.label);
+      setSource(`${sec?.error ? sec.error + " " : ""}Verified figures filled from SEC EDGAR filings and Yahoo Finance.${missing.length ? ` Not reported as a single filed figure — enter manually: ${missing.join(", ")}.` : ""}`);
     } catch (e) { setError(e instanceof Error ? e.message : "Live price unavailable. Try again."); }
     finally { setLoading(false); }
   }
@@ -62,18 +74,18 @@ export function FinancialMetricForm({ metric, onBack, onStageChange }: { metric:
     { tone: result.value < 0 ? "risk" : "good", label: result.value < 0 ? "WATCH" : "CHECK", text: result.value < 0 ? "The result is negative. Review the underlying figures and business context." : "A positive result alone does not establish whether the stock is fairly valued." },
     ...(growth != null ? [{ tone: growth > 0 ? "good" : "risk", label: growth > 0 ? "GROWTH" : "WATCH", text: `EPS changed ${growth > 0 ? "+" : ""}${growth.toFixed(2)}% versus the prior comparable period.` }] : []),
     ...(peg != null ? [{ tone: peg > 2 ? "risk" : "neutral", label: "PEG", text: `PEG is ${peg.toFixed(2)}. This simple growth comparison is not a verified sector benchmark or a forecast.` }] : []),
-    { tone: "neutral", label: "SOURCE", text: "Financial-statement inputs are user-provided, not independently verified. Use matching reporting periods and consistent share bases." },
+    { tone: "neutral", label: "SOURCE", text: Object.keys(verified).length ? "Figures marked with a source come from SEC EDGAR filings or Yahoo Finance; any others are user-entered and unverified." : "Financial-statement inputs are user-provided, not independently verified. Use matching reporting periods and consistent share bases." },
   ] : [];
   return <div className="pro-stage">
     <Button variant="link" className="pro-back" onClick={() => { if (result) { setResult(null); onStageChange(false); } else onBack(); }}><ArrowLeft />{result ? "Edit inputs" : "All calculators"}</Button>
     {!result ? <>
       <div className="pro-formula"><h3>FORMULA</h3><strong>{metric.formula}</strong><p>Use reported figures from the same period and consistent units.</p></div>
-      <p className="pro-source-note">Enter Apple’s reported figures. No sample financial numbers are pre-filled.</p>
-      <Button variant="outline" className="pro-autofill" disabled={loading} onClick={autofill}><RefreshCw className={loading ? "animate-spin" : ""} />{loading ? "Checking source…" : "Auto-fill available live data"}</Button>
+      <p className="pro-source-note">Auto-fill pulls Apple’s filed figures from SEC EDGAR for the chosen period, or enter them yourself. No sample numbers are pre-filled.</p>
+      <Button variant="outline" className="pro-autofill" disabled={loading} onClick={autofill}><RefreshCw className={loading ? "animate-spin" : ""} />{loading ? "Checking source…" : "Auto-fill verified data"}</Button>
       {source && <p role="status" className="pro-source-note">{source}</p>}
       <form onSubmit={submit} className="pro-input-grid">
-        <label>Reporting period<select value={period} onChange={e => setPeriod(e.target.value)}>{["Trailing 12 months (TTM)", "Annual", "Quarterly", "Custom period"].map(p => <option key={p}>{p}</option>)}</select><small>Use the same period for every figure below.</small></label>
-        {metric.fields.map(field => <label key={field.key} htmlFor={`metric-${field.key}`}>{field.label}{field.optional ? " (optional)" : ""}<Input id={`metric-${field.key}`} type="number" step="any" required={!field.optional} value={inputs[field.key] ?? ""} onChange={e => update(field.key, e.target.value)} placeholder="Enter reported figure" /></label>)}
+        <label>Reporting period<select value={period} onChange={e => { setPeriod(e.target.value); setVerified({}); setSource(""); }}>{["Annual", "Quarterly", "Custom period"].map(p => <option key={p}>{p}</option>)}</select><small>Use the same period for every figure below.</small></label>
+        {metric.fields.map(field => <label key={field.key} htmlFor={`metric-${field.key}`}>{field.label}{field.optional ? " (optional)" : ""}<Input id={`metric-${field.key}`} type="number" step="any" required={!field.optional} value={inputs[field.key] ?? ""} onChange={e => update(field.key, e.target.value)} placeholder="Enter reported figure" /><SourceTag tag={verified[field.key]} /></label>)}
         {period === "Custom period" && <><CalculatorDateField id="report-start" label="Reporting period start" value={start} onChange={setStart} /><CalculatorDateField id="report-end" label="Reporting period end" value={end} min={start} onChange={setEnd} /></>}
         {error && <p role="alert" className="text-destructive pro-full-width">{error}</p>}
         <Button type="submit" className="pro-full-width pro-submit"><Calculator />Calculate {metric.badge}</Button>
@@ -82,11 +94,16 @@ export function FinancialMetricForm({ metric, onBack, onStageChange }: { metric:
       <div className="pro-result-grid"><div className="pro-result-panel"><h3>{metric.badge} · {period}</h3><div className={`pro-big-number ${result.value < 0 ? "text-destructive" : ""}`}>{display(result.value)}</div>{growth != null && <span className={growth >= 0 ? "text-success" : "text-destructive"}>{growth > 0 ? "+" : ""}{growth.toFixed(2)}% vs prior {usd(prior ?? 0)}</span>}<p>{metric.formula}</p></div><div className="pro-result-panel pro-assessment"><h3>DECISION CONTEXT</h3><div className="pro-verdict">REVIEW</div><p>One metric cannot justify buying or selling. Verify reported figures, valuation, risk and your investment goals.</p></div></div>
       <div className="pro-formula"><h3>WHAT THIS MEANS</h3><p>{metric.name} is {display(result.value)} for the selected period, based on your inputs.{eps != null ? ` Each Apple share earned ${usd(eps)}.${pe != null ? ` At ${usd(result.values["price"] ?? 0)} per share, P/E is ${pe.toFixed(2)}.` : " P/E is not meaningful with non-positive earnings."}${peg != null ? ` PEG is ${peg.toFixed(2)}.` : " PEG requires positive comparable EPS growth."}` : " This is a calculation, not a prediction of future market performance."}</p></div>
       <div className="pro-result-grid">{eps != null && <><div className="pro-result-panel"><h4>EPS: prior vs current</h4><div className="pro-comparison"><span>Prior period</span><strong>{prior != null ? usd(prior) : "Not supplied"}</strong></div>{prior != null && <progress max={Math.max(Math.abs(prior), Math.abs(eps), 1)} value={Math.abs(prior)} aria-label="Prior EPS magnitude" />}<div className="pro-comparison"><span>Current</span><strong>{usd(eps)}</strong></div><progress max={Math.max(Math.abs(prior ?? 0), Math.abs(eps), 1)} value={Math.abs(eps)} aria-label="Current EPS magnitude" /></div><div className="pro-result-panel"><h4>P/E ratio: {pe?.toFixed(2) ?? "Not meaningful"}</h4><p>{pe != null ? "Price paid per dollar of current earnings. Compare against verified peers and growth prospects." : "Positive earnings are required."}</p><h4>PEG ratio: {peg?.toFixed(2) ?? "Not meaningful"}</h4><p>No sector median is supplied by the current data source.</p></div></>}
-      <div className="pro-result-panel"><h4>Inputs used</h4><dl>{metric.fields.map(f => <div className="pro-comparison" key={f.key}><dt>{f.label}</dt><dd>{result.values[f.key]?.toLocaleString("en-US", { maximumFractionDigits: 6 }) ?? "Not supplied"}</dd></div>)}</dl>{period === "Custom period" && <p>{start} to {end}</p>}<p>{source || "User-entered figures · not independently verified"}</p></div></div>
+      <div className="pro-result-panel"><h4>Inputs used</h4><dl>{metric.fields.map(f => <div className="pro-comparison" key={f.key}><dt>{f.label}</dt><dd>{result.values[f.key]?.toLocaleString("en-US", { maximumFractionDigits: 6 }) ?? "Not supplied"}<SourceTag tag={verified[f.key]} /></dd></div>)}</dl>{period === "Custom period" && <p>{start} to {end}</p>}<p>{source || "User-entered figures · not independently verified"}</p></div></div>
       <h3 className="pro-section-label">RED FLAGS AND CHECKS</h3><div className="pro-checks">{checks.map(c => <div className={`pro-check pro-check-${c.tone}`} key={c.label}><strong>{c.label}</strong><span>{c.text}</span></div>)}</div>
       <div className="pro-formula"><h3>DECISION SCALE</h3><div className="pro-decision-scale"><span>BUY</span><span>WAIT</span><span>HOLD</span><span>SELL</span></div><p>No recommendation assigned. These outcomes require more than a single calculated metric.</p></div>
       <p className="pro-disclaimer">Markets change quickly. Financial inputs must be checked against Apple’s filings. Forecasts and growth rates are assumptions, not guarantees. Investico Academy is not an investment advisor. Do your own research and consult a licensed advisor before investing.</p>
       <Button asChild className="pro-submit"><Link to="/subscribe">Invest Now<ArrowRight /></Link></Button>
     </>}
   </div>;
+}
+function SourceTag({ tag }: { tag: VerifiedFigure | { live: string } | undefined }) {
+  if (!tag) return null;
+  if ("live" in tag) return <small className="pro-figure-source">{tag.live}</small>;
+  return <small className="pro-figure-source"><a href={tag.url} target="_blank" rel="noreferrer">{figureSource(tag)}</a> · {tag.concept}</small>;
 }
