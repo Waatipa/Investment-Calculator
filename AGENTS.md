@@ -27,5 +27,5 @@
 - Transfer the request-scoped Query cache through router dehydration/hydration so live market prices match the server-rendered snapshot on first load.
 - Render candlesticks only from source OHLC observations; quote-only endpoints have no fabricated candle and below-close shading uses the latest session's previous close.
 - Use a responsive SVG price plot for baseline clipping and source OHLC candles so the chart is visible on first render and both views share the calendar cursor.
-- Source Apple financial-statement figures from SEC EDGAR companyfacts (server-side, cached 1h) and tag every auto-filled input with its filing form, filed date and reporting period; unmapped or composite fields stay user-entered.
+- Source each company's financial-statement figures from SEC EDGAR companyfacts by CIK, with concept aliases and a staleness cutoff (server-side, cached 1h) and tag every auto-filled input with its filing form, filed date and reporting period; unmapped or composite fields stay user-entered.
 - Apple filings Q&A: threads/messages stored per user in Lovable Cloud; /api/filing-chat verifies the bearer and thread ownership, and the model only receives server-built SEC EDGAR references [S#] so answers cite filings rather than invented figures.
