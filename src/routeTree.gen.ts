@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AboutUsRouteImport } from './routes/about-us'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ContactUsRouteImport } from './routes/contact-us'
+import { Route as EuropeRouteImport } from './routes/europe'
 import { Route as MarketsRouteImport } from './routes/markets'
 import { Route as MiddleEastRouteImport } from './routes/middle-east'
 import { Route as SubscribeRouteImport } from './routes/subscribe'
@@ -44,6 +45,11 @@ const AuthRoute = AuthRouteImport.update({
 const ContactUsRoute = ContactUsRouteImport.update({
   id: '/contact-us',
   path: '/contact-us',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EuropeRoute = EuropeRouteImport.update({
+  id: '/europe',
+  path: '/europe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarketsRoute = MarketsRouteImport.update({
@@ -88,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/about-us': typeof AboutUsRoute
   '/auth': typeof AuthRoute
   '/contact-us': typeof ContactUsRoute
+  '/europe': typeof EuropeRoute
   '/markets': typeof MarketsRoute
   '/middle-east': typeof MiddleEastRoute
   '/subscribe': typeof SubscribeRoute
@@ -101,6 +108,7 @@ export interface FileRoutesByTo {
   '/about-us': typeof AboutUsRoute
   '/auth': typeof AuthRoute
   '/contact-us': typeof ContactUsRoute
+  '/europe': typeof EuropeRoute
   '/markets': typeof MarketsRoute
   '/middle-east': typeof MiddleEastRoute
   '/subscribe': typeof SubscribeRoute
@@ -115,6 +123,7 @@ export interface FileRoutesById {
   '/about-us': typeof AboutUsRoute
   '/auth': typeof AuthRoute
   '/contact-us': typeof ContactUsRoute
+  '/europe': typeof EuropeRoute
   '/markets': typeof MarketsRoute
   '/middle-east': typeof MiddleEastRoute
   '/subscribe': typeof SubscribeRoute
@@ -130,6 +139,7 @@ export interface FileRouteTypes {
     | '/about-us'
     | '/auth'
     | '/contact-us'
+    | '/europe'
     | '/markets'
     | '/middle-east'
     | '/subscribe'
@@ -143,6 +153,7 @@ export interface FileRouteTypes {
     | '/about-us'
     | '/auth'
     | '/contact-us'
+    | '/europe'
     | '/markets'
     | '/middle-east'
     | '/subscribe'
@@ -156,6 +167,7 @@ export interface FileRouteTypes {
     | '/about-us'
     | '/auth'
     | '/contact-us'
+    | '/europe'
     | '/markets'
     | '/middle-east'
     | '/subscribe'
@@ -171,6 +183,7 @@ export interface RootRouteChildren {
   AboutUsRoute: typeof AboutUsRoute
   AuthRoute: typeof AuthRoute
   ContactUsRoute: typeof ContactUsRoute
+  EuropeRoute: typeof EuropeRoute
   MarketsRoute: typeof MarketsRoute
   MiddleEastRoute: typeof MiddleEastRoute
   SubscribeRoute: typeof SubscribeRoute
@@ -212,6 +225,13 @@ declare module '@tanstack/react-router' {
       path: '/contact-us'
       fullPath: '/contact-us'
       preLoaderRoute: typeof ContactUsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/europe': {
+      id: '/europe'
+      path: '/europe'
+      fullPath: '/europe'
+      preLoaderRoute: typeof EuropeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/markets': {
@@ -296,6 +316,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutUsRoute: AboutUsRoute,
   AuthRoute: AuthRoute,
   ContactUsRoute: ContactUsRoute,
+  EuropeRoute: EuropeRoute,
   MarketsRoute: MarketsRoute,
   MiddleEastRoute: MiddleEastRoute,
   SubscribeRoute: SubscribeRoute,

@@ -33,10 +33,11 @@ export function MarketCalculator() {
   </main>;
 }
 
-export function RegionTabs({ active }: { active: "US" | "MIDDLE EAST" }) {
+export function RegionTabs({ active }: { active: "US" | "EUROPE" | "MIDDLE EAST" }) {
   return <div className="region-tabs" aria-label="Market regions">{["US", "EUROPE", "AFRICA", "ASIA", "AUSTRALIA", "MIDDLE EAST"].map(region => {
     const cls = region === active ? "region-active" : "";
     if (region === "US") return <Button key={region} variant="outline" className={cls} asChild><Link to="/markets" aria-current={active === region ? "page" : undefined}>{region}</Link></Button>;
+    if (region === "EUROPE") return <Button key={region} variant="outline" className={cls} asChild><Link to="/europe" aria-current={active === region ? "page" : undefined}>{region}</Link></Button>;
     if (region === "MIDDLE EAST") return <Button key={region} variant="outline" className={cls} asChild><Link to="/middle-east" aria-current={active === region ? "page" : undefined}>{region}</Link></Button>;
     return <Button key={region} variant="outline" className={cls}>{region}</Button>;
   })}</div>;
