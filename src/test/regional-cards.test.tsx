@@ -17,6 +17,14 @@ describe("Regional cards", () => {
     render(<QueryClientProvider client={client}><RegionalMarketCards companies={AF_COMPANIES} quotes={[]} region="African" /></QueryClientProvider>);
     fireEvent.click(screen.getByRole("button", { name: "FirstRand calculator" }));
     expect(screen.getByRole("dialog")).toHaveAttribute("data-company", "FSR.JO");
+    const profit = screen.getByRole("button", { name: /Profit calculator Investment date/ });
+    expect(profit.compareDocumentPosition(screen.getByRole("button", { name: /ROE Return on equity/ })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    fireEvent.click(profit);
+    expect(screen.getByLabelText("Investment date")).toBeInTheDocument();
+    expect(screen.getByLabelText("Valuation date")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Choose investment date" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Number of shares")).toHaveValue(10);
+    fireEvent.click(screen.getByRole("button", { name: "← All calculators" }));
     fireEvent.click(screen.getByRole("button", { name: /ROE Return on equity/ }));
     fireEvent.change(screen.getByLabelText("Net income (ZAR millions)"), { target: { value: "10" } });
     fireEvent.change(screen.getByLabelText("Average shareholders’ equity (ZAR millions)"), { target: { value: "100" } });

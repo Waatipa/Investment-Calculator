@@ -1,4 +1,6 @@
 # Website update
+- [x] Add top-positioned profit calculators to every regional company using real historical/current quotes, correct currencies and exchange dates.
+- [x] Verify regional profit, linked amount, calendars, unavailable-data handling and existing tests (31 passed); source coverage gaps block calculations honestly.
 - [x] Add Africa page with eight major African public companies and staged calculators; unavailable provider data clearly labeled.
 - [x] Apply individual company colors to Africa, Europe and Middle East cards and calculator stages.
 - [x] Show genuine available market caps in company-name sections across all regions, including US.
