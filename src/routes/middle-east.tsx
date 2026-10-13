@@ -27,7 +27,7 @@ function MiddleEastPage() {
 }
 function LiveCards() {
   const { data } = useSuspenseQuery(middleEastQuotesQuery());
-  return <><Cards quotes={data} /><p className="market-footer">Market data provided by Yahoo Finance. Data may be delayed. Prices in local currency (SAR / AED); market caps in local currency.</p></>;
+  return <><Cards quotes={data} /><p className="market-footer">Market data provided by Yahoo Finance. Data may be delayed. Prices and market caps in local currency (SAR / AED). Abu Dhabi (ADX) listings are not yet carried by our data provider, so their prices show "—" rather than estimates.</p></>;
 }
 const money = (v: number, c: string | null) => `${c ?? ""} ${v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`.trim();
 function Cards({ quotes }: { quotes?: RegionalQuote[] }) {
