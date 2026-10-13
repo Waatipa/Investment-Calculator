@@ -9,6 +9,9 @@ import { longDate } from "@/lib/investment";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { ProCalculatorChoices, FinancialMetricForm } from "@/components/pro-calculator";
+import { CalculatorDateField } from "@/components/calculator-date-field";
+import type { FinancialMetric } from "@/lib/financial-metrics";
 
 type Result = Awaited<ReturnType<typeof getInvestmentResult>>;
 
@@ -75,9 +78,12 @@ function InvestmentForm({ symbol, open, setOpen }: { symbol: Symbol; open: boole
   const [busy, setBusy] = useState(false);
   const [priceLoading, setPriceLoading] = useState(false);
   const [error, setError] = useState("");
+  const [metric, setMetric] = useState<FinancialMetric | "profit" | null>(null);
+  const [metricResult, setMetricResult] = useState(false);
   const entered = useRef({ shares: "10", amount: "", basis: "shares" as "shares" | "amount" });
   const revision = useRef(0);
   const company = COMPANIES.find(c => c.symbol === symbol);
+  useEffect(() => { setMetric(null); setMetricResult(false); }, [symbol, open]);
   useEffect(() => { revision.current += 1; setResult(null); setError(""); setPurchasePrice(null); }, [symbol, startDate]);
   useEffect(() => {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate)) { setPriceLoading(false); return; }
@@ -138,11 +144,13 @@ function InvestmentForm({ symbol, open, setOpen }: { symbol: Symbol; open: boole
     <dl className="mt-3 grid gap-2 border-t border-border pt-3 text-sm">{rows.map(([k, v]) => <div key={k} className="flex justify-between gap-3"><dt className="text-muted-foreground">{k}</dt><dd className="text-right font-medium tabular-nums">{v}</dd></div>)}</dl>
   </div>;
   return <Dialog open={open} onOpenChange={o => { setOpen(o); if (!o) setResult(null); }}>
-      <DialogContent className={`company-dialog company-panel-${symbol.toLowerCase()} max-h-[90dvh] w-[calc(100%-1.5rem)] max-w-3xl overflow-y-auto overflow-x-hidden rounded-lg p-4 sm:p-6`}>
-        <DialogHeader className="company-dialog-heading"><div className="mb-2 text-xs font-semibold uppercase text-primary">{company?.name} · {symbol}</div><DialogTitle className="pr-8 font-display text-xl">{company?.name} ({symbol}) {result ? "investment result" : "profit calculator"}</DialogTitle><DialogDescription>{result ? `${result.shares} ${symbol} shares · ${longDate(result.purchaseDate)} to ${longDate(result.valuationDate)}` : "Enter your dates and shares or amount, then calculate."}</DialogDescription></DialogHeader>
+      <DialogContent className={`company-dialog ${symbol === "AAPL" ? "pro-dialog" : ""} company-panel-${symbol.toLowerCase()} max-h-[90dvh] w-[calc(100%-1.5rem)] max-w-3xl overflow-y-auto overflow-x-hidden rounded-lg p-4 sm:p-6`}>
+        <DialogHeader className="company-dialog-heading"><div className="pro-heading-row">{symbol === "AAPL" && <span className="company-initials">AA</span>}<div><div className="mb-2 text-xs font-semibold uppercase text-muted-foreground">{company?.name} · {symbol}{symbol === "AAPL" ? ` · ${metric && metric !== "profit" ? (metricResult ? "RESULT" : metric.group.toUpperCase()) : "NASDAQ"}` : ""}</div><DialogTitle className="pr-8 font-display text-xl">{symbol === "AAPL" && metric !== "profit" ? metric?.name ?? "Apple (AAPL) pro calculator" : `${company?.name} (${symbol}) ${result ? "investment result" : "profit calculator"}`}</DialogTitle></div></div><DialogDescription>{symbol === "AAPL" && metric == null ? "Choose a calculator." : result ? `${result.shares} ${symbol} shares · ${longDate(result.purchaseDate)} to ${longDate(result.valuationDate)}` : metric && metric !== "profit" ? "Apple financial analysis" : "Enter your dates and shares or amount, then calculate."}</DialogDescription></DialogHeader>
+        {symbol === "AAPL" && metric == null ? <ProCalculatorChoices onChoose={setMetric} /> : symbol === "AAPL" && metric && metric !== "profit" ? <FinancialMetricForm key={metric.id} metric={metric} onBack={() => setMetric(null)} onStageChange={setMetricResult} /> : <>
+        {symbol === "AAPL" && <Button variant="link" className="pro-back" onClick={() => { setMetric(null); setResult(null); }}>← All calculators</Button>}
         {!result ? <form className="grid gap-4 sm:grid-cols-2" onSubmit={calculate}>
-          <label className="grid gap-2 text-xs font-medium" htmlFor="investment-date">Investment date<Input id="investment-date" type="date" required value={startDate} disabled={busy} onChange={e => { setStartDate(e.target.value); setResult(null); }} className="h-12 text-base" /></label>
-          <label className="grid gap-2 text-xs font-medium" htmlFor="valuation-date">Valuation date<Input id="valuation-date" type="date" required min={startDate || undefined} value={endDate} disabled={busy} onChange={e => { revision.current += 1; setEndDate(e.target.value); setResult(null); }} className="h-12 text-base" /></label>
+          <CalculatorDateField id="investment-date" label="Investment date" value={startDate} disabled={busy} onChange={v => { revision.current += 1; setStartDate(v); setResult(null); }} />
+          <CalculatorDateField id="valuation-date" label="Valuation date" value={endDate} min={startDate || undefined} disabled={busy} onChange={v => { revision.current += 1; setEndDate(v); setResult(null); }} />
           <label className="grid gap-2 text-xs font-medium" htmlFor="investment-shares">Number of shares<Input id="investment-shares" type="number" min="0.000001" step="any" required value={shares} disabled={busy} onChange={e => updateShares(e.target.value)} className="h-12 text-base" /></label>
           <label className="grid gap-2 text-xs font-medium" htmlFor="investment-amount">Investment amount (USD)<Input id="investment-amount" type="number" min="0.01" step="any" value={amount} disabled={busy || priceLoading || purchasePrice == null} placeholder={priceLoading ? "Loading purchase price…" : "Pick a date first"} onChange={e => updateAmount(e.target.value)} className="h-12 text-base" /></label>
           {error && <p role="alert" className="text-sm text-destructive sm:col-span-2">{error}</p>}
@@ -155,7 +163,8 @@ function InvestmentForm({ symbol, open, setOpen }: { symbol: Symbol; open: boole
           <p className="text-xs text-muted-foreground">Portfolio value is shares × price on each date; profit is the later portfolio value minus the portfolio value at the investment date.</p>
           <p className="text-xs leading-relaxed text-muted-foreground">Yahoo Finance prices in USD, split-adjusted; shares are on the current split-adjusted basis. Investment uses the first trading day close on or after your date; valuation uses the last trading day close on or before your date. The maximum uses the highest daily traded price in that period (hypothetical sale). Excludes dividends, taxes and fees. Not financial advice.</p>
           <Button variant="outline" className="h-12 text-base" onClick={() => setResult(null)}>Edit Investment Details</Button>
-          <Button asChild className="h-12 text-base font-semibold"><Link to="/subscribe">Invest in {company?.name} Now</Link></Button>
+          <Button asChild className="h-12 text-base font-semibold"><Link to="/subscribe">{symbol === "AAPL" ? "Invest Now" : `Invest in ${company?.name} Now`}</Link></Button>
+        </>}
         </>}
       </DialogContent>
     </Dialog>;

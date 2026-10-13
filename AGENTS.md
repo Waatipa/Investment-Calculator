@@ -13,6 +13,8 @@
 - Render company names with letter-monogram badges, not company logo artwork, so the reference design remains recognizable without trademark graphics.
 - Use a shared AcademyBrand pillar-and-growth wordmark and pillar-derived favicon for the site's own identity, keeping it separate from company labels.
 - Scope calculator theme tokens to the selected company on the shared dialog, preserving semantic profit/loss colors and shared calculation state.
+- Keep the Apple pro-calculator stages inside the existing shared dialog and financial formulas in a browser-safe pure module; other companies retain their investment calculator during the staged rollout.
+- Never treat reference sample figures, sector medians or decision recommendations as sourced facts; financial-statement fields stay user-entered until a verified provider supplies them.
 - Keep mobile navigation in the shared Radix Sheet with focus trapping and link-triggered dismissal, so the compact menu remains accessible without changing desktop navigation.
 - Keep ticker and timeline query options in a browser-safe market module and validate the public price request with an allowlist, so controls cannot request arbitrary instruments.
 - Use a shared date-and-share calculator on home and Markets; clear submitted results when inputs or company change so results never describe stale inputs.

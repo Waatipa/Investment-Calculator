@@ -295,6 +295,9 @@ body { background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
 .company-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 16px; margin-top: 0; }
 .company-card { display: block; min-width: 0; width: 100%; height: auto; padding: 0; overflow: hidden; white-space: normal; text-align: left; font-weight: 400; border: 1px solid color-mix(in oklab,var(--company-brand) 60%,var(--border)); border-radius: 14px; background: var(--card); color: var(--foreground); box-shadow: none; }
 .company-card:hover { background: var(--card); color: var(--foreground); }
+.company-card { transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease; }
+.company-card:hover, .company-card:focus-visible { transform: translateY(-3px); border-color: var(--primary); box-shadow: var(--shadow-soft); }
+.company-card:active { transform: translateY(-1px); }
 .company-panel { display: flex; align-items: center; gap: 10px; padding: 11px 13px; min-height: 54px; background: var(--company-brand); color: var(--on-brand); position: relative; }
 .company-panel::after { display: none; }
 .company-panel-googl .company-panel { border-bottom: 3px solid var(--brand-nvda); }
@@ -356,3 +359,81 @@ body { background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
   .quote-time { font-size: 9px; }
   .market-footer { text-align: center; font-size: 9px; max-width: 270px; margin: 14px auto 0; }
 }
+
+/* Three-stage financial calculator, separate from the market cards. */
+:root { --pro-surface: oklch(0.17 0.025 245); --pro-panel: oklch(0.20 0.028 245); --pro-info: oklch(0.25 0.05 230); --pro-warning: oklch(0.82 0.16 85); --pro-warning-surface: oklch(0.25 0.06 85); }
+.pro-dialog { --primary: var(--primary-deep); --primary-foreground: var(--badge-dark); --ring: var(--primary-deep); background: var(--pro-surface); border-top: 1px solid var(--border); padding: 28px; }
+.pro-dialog .company-dialog-heading { border: 0; padding-bottom: 0; }
+.pro-heading-row { display: flex; align-items: center; gap: 14px; }
+.pro-heading-row > div { min-width: 0; }
+.pro-heading-row .company-initials { width: 46px; height: 46px; font-size: 15px; }
+.pro-dialog .company-dialog-heading h2 { font-size: 24px; line-height: 1.25; }
+.pro-stage { display: grid; gap: 18px; min-width: 0; }
+.pro-filters { display: flex; flex-wrap: wrap; gap: 6px; }
+.pro-filters > * { font-size: 11px; padding-inline: 12px; }
+.pro-profit-choice, .pro-metric-choice { white-space: normal; height: auto; justify-content: flex-start; text-align: left; background: var(--pro-panel); border-color: var(--border); }
+.pro-profit-choice { padding: 18px; background: var(--pro-info); border-color: color-mix(in oklab,var(--primary) 35%,var(--border)); gap: 15px; }
+.pro-profit-choice > span:nth-child(2), .pro-metric-choice > span:nth-child(2) { min-width: 0; }
+.pro-metric-icon { display: grid; place-items: center; flex-shrink: 0; width: 35px; height: 35px; border-radius: 8px; background: var(--muted); color: var(--primary); font-size: 10px; font-weight: 700; }
+.pro-profit-choice .pro-metric-icon { width: 44px; height: 44px; background: var(--primary); color: var(--primary-foreground); }
+.pro-profit-choice strong, .pro-metric-choice strong { display: block; font-size: 12px; }
+.pro-profit-choice strong { font-size: 15px; }
+.pro-profit-choice small, .pro-metric-choice small { display: block; font-size: 10px; line-height: 1.4; color: var(--muted-foreground); margin-top: 4px; }
+.pro-most-used { margin-left: auto; color: var(--primary); font-size: 9px; flex-shrink: 0; }
+.pro-metric-section { display: grid; gap: 10px; }
+.pro-section-label { display: flex; justify-content: space-between; gap: 8px; color: var(--muted-foreground); font-size: 10px; text-transform: uppercase; font-weight: 600; }
+.pro-section-label span { text-transform: none; font-weight: 400; }
+.pro-metric-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; }
+.pro-metric-choice { padding: 12px; gap: 10px; min-height: 65px; }
+.pro-back { justify-self: start; padding: 0; height: 28px; font-size: 12px; }
+.pro-formula { padding: 16px; border: 1px solid color-mix(in oklab,var(--primary) 30%,var(--border)); border-radius: 8px; background: var(--pro-info); }
+.pro-formula h3, .pro-result-panel h3 { color: var(--primary); font-size: 10px; font-weight: 700; margin-bottom: 8px; }
+.pro-formula strong { font-size: 14px; }
+.pro-formula p, .pro-result-panel p { font-size: 12px; line-height: 1.65; margin-top: 7px; color: var(--muted-foreground); }
+.pro-source-note { font-size: 12px; color: var(--muted-foreground); line-height: 1.5; }
+.pro-autofill { justify-self: start; color: var(--primary); border-color: var(--primary); }
+.pro-input-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px 16px; }
+.pro-input-grid > label { display: grid; align-content: start; gap: 8px; font-size: 12px; font-weight: 600; min-width: 0; }
+.pro-input-grid input, .pro-input-grid select { height: 44px; background: var(--background); border: 1px solid var(--input); border-radius: 8px; padding: 0 12px; font-size: 14px; width: 100%; min-width: 0; color: var(--foreground); }
+.pro-input-grid small { font-size: 10px; color: var(--muted-foreground); font-weight: 400; }
+.pro-full-width { grid-column: 1 / -1; }
+.pro-submit { width: 100%; height: 46px; font-size: 15px; font-weight: 700; }
+.pro-result-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+.pro-result-panel { background: var(--pro-panel); padding: 18px; border: 1px solid var(--border); border-radius: 8px; min-width: 0; }
+.pro-result-panel h3 { color: var(--muted-foreground); }
+.pro-result-panel h4 { font-size: 12px; margin-bottom: 10px; }
+.pro-big-number { font-size: 42px; font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; }
+.pro-assessment { background: var(--pro-warning-surface); border-color: color-mix(in oklab,var(--pro-warning) 30%,var(--border)); }
+.pro-assessment h3, .pro-verdict { color: var(--pro-warning); }
+.pro-verdict { font-size: 36px; font-weight: 700; }
+.pro-comparison { display: flex; justify-content: space-between; gap: 14px; font-size: 11px; color: var(--muted-foreground); line-height: 1.55; margin-top: 7px; }
+.pro-comparison dd, .pro-comparison strong { text-align: right; color: var(--foreground); overflow-wrap: anywhere; }
+.pro-result-panel progress { width: 100%; height: 10px; accent-color: var(--primary); }
+.pro-result-panel progress::-webkit-progress-bar { background: var(--muted); border-radius: 6px; }
+.pro-result-panel progress::-webkit-progress-value { background: var(--primary); border-radius: 6px; }
+.pro-result-panel progress::-moz-progress-bar { background: var(--primary); border-radius: 6px; }
+.pro-checks { display: grid; gap: 8px; }
+.pro-check { display: flex; align-items: start; gap: 12px; padding: 12px; font-size: 12px; border: 1px solid var(--border); border-radius: 8px; line-height: 1.5; background: var(--pro-panel); }
+.pro-check strong { font-size: 10px; flex-shrink: 0; color: var(--primary); }
+.pro-check-risk { background: color-mix(in oklab,var(--destructive) 12%,var(--pro-surface)); border-color: color-mix(in oklab,var(--destructive) 30%,var(--border)); }
+.pro-check-risk strong { color: var(--destructive); }
+.pro-check-good strong { color: var(--success); }
+.pro-decision-scale { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 6px; }
+.pro-decision-scale span { padding: 10px 4px; text-align: center; font-size: 11px; background: var(--pro-panel); color: var(--muted-foreground); border: 1px solid var(--border); border-radius: 6px; }
+.pro-disclaimer { font-size: 10px; color: var(--muted-foreground); line-height: 1.65; border-top: 1px solid var(--border); padding-top: 14px; }
+.calculator-date-input { position: relative; min-width: 0; }
+.calculator-date-input input { padding-right: 42px; width: 100%; }
+.calculator-date-input input::-webkit-calendar-picker-indicator { display: none; }
+.calculator-date-input > button { position: absolute; right: 4px; top: 6px; color: var(--primary); }
+@media (width < 640px) {
+  .pro-dialog { padding: 20px 16px; }
+  .pro-dialog .company-dialog-heading h2 { font-size: 20px; }
+  .pro-metric-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .pro-metric-choice { padding: 10px; gap: 7px; }
+  .pro-metric-choice strong { font-size: 11px; }
+  .pro-metric-icon { width: 29px; height: 32px; }
+  .pro-most-used { display: none; }
+  .pro-input-grid, .pro-result-grid { grid-template-columns: minmax(0,1fr); }
+  .pro-filters > * { font-size: 10px; padding-inline: 9px; }
+}
+@media (prefers-reduced-motion: reduce) { .company-card { transition: none; } .company-card:hover, .company-card:focus-visible, .company-card:active { transform: none; } }

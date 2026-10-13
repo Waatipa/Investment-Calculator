@@ -21,6 +21,24 @@ function mount() {
   return client;
 }
 describe("Linked investment calculator", () => {
+  it("opens Apple choices first, then a metric form and its results in the same dialog", () => {
+    const client = mount();
+    fireEvent.click(screen.getByRole("button", { name: /Apple \(AAPL\) calculator/ }));
+    expect(screen.getByText("Apple (AAPL) pro calculator")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /EPS Earnings per share/ }));
+    fireEvent.change(screen.getByLabelText("Current share price (USD)"), { target: { value: "230" } });
+    fireEvent.change(screen.getByLabelText("Net income (USD millions)"), { target: { value: "112000" } });
+    fireEvent.change(screen.getByLabelText("Preferred dividends (USD millions)"), { target: { value: "0" } });
+    fireEvent.change(screen.getByLabelText("Weighted average shares (millions)"), { target: { value: "15000" } });
+    fireEvent.change(screen.getByLabelText("Prior-period EPS (USD) (optional)"), { target: { value: "6.6" } });
+    fireEvent.click(screen.getByRole("button", { name: "Calculate EPS" }));
+    expect(screen.getAllByText("$7.47")).toHaveLength(2);
+    expect(screen.getByRole("link", { name: "Invest Now" })).toHaveAttribute("href", "/subscribe");
+    expect(screen.getAllByRole("dialog")).toHaveLength(1);
+    fireEvent.click(screen.getByRole("button", { name: "Edit inputs" }));
+    expect(screen.getByLabelText("Net income (USD millions)")).toHaveValue(112000);
+    client.clear();
+  });
   it("matches reference labels and never invents missing off-hours prices", () => {
     const client = mount();
     expect(screen.getAllByText("Close")).toHaveLength(7);
