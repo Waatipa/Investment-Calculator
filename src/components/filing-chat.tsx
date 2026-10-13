@@ -10,8 +10,11 @@ import { PromptInput, PromptInputFooter, PromptInputSubmit, PromptInputTextarea 
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { getAppleFilingReferences } from "@/lib/filing-threads.functions";
+import { getFilingReferences } from "@/lib/filing-threads.functions";
 import { longDate } from "@/lib/investment";
+import { COMPANIES } from "@/lib/markets";
+
+const companyName = (symbol: string) => COMPANIES.find(c => c.symbol === symbol)?.name ?? "Apple";
 
 export function FilingTutorMark({ small = false }: { small?: boolean }) {
   const s = small ? 28 : 48;
@@ -23,18 +26,19 @@ export function FilingTutorMark({ small = false }: { small?: boolean }) {
   </svg>;
 }
 
-const SUGGESTIONS = [
-  "How profitable was Apple in its latest fiscal year?",
-  "Explain Apple's free cash flow from the latest 10-K.",
-  "What was Apple's net margin and how is it calculated?",
-  "How does Apple's latest quarter compare with its annual figures?",
+const suggestions = (name: string) => [
+  `How profitable was ${name} in its latest fiscal year?`,
+  `Explain ${name}'s free cash flow from the latest 10-K.`,
+  `What was ${name}'s net margin and how is it calculated?`,
+  `How does ${name}'s latest quarter compare with its annual figures?`,
 ];
 
-export function FilingChat({ threadId, initialMessages }: { threadId: string; initialMessages: UIMessage[] }) {
+export function FilingChat({ threadId, symbol, initialMessages }: { threadId: string; symbol: string; initialMessages: UIMessage[] }) {
   const qc = useQueryClient();
   const [input, setInput] = useState("");
-  const fetchRefs = useServerFn(getAppleFilingReferences);
-  const { data: refData } = useQuery({ queryKey: ["apple-filing-refs"], queryFn: () => fetchRefs(), staleTime: 3_600_000 });
+  const name = companyName(symbol);
+  const fetchRefs = useServerFn(getFilingReferences);
+  const { data: refData } = useQuery({ queryKey: ["filing-refs", symbol], queryFn: () => fetchRefs({ data: { symbol: symbol as "AAPL" } }), staleTime: 3_600_000 });
   const transport = useMemo(() => new DefaultChatTransport({
     api: "/api/filing-chat",
     body: { threadId },
@@ -55,22 +59,22 @@ export function FilingChat({ threadId, initialMessages }: { threadId: string; in
 
   return <div className="grid gap-4 lg:grid-cols-[1fr_280px]">
     <div className="flex h-[calc(100vh-140px)] min-h-[480px] flex-col rounded-xl border border-border bg-card/40">
-      <div className="flex items-center gap-3 border-b border-border px-4 py-3"><FilingTutorMark small /><div><h1 className="text-sm font-semibold text-foreground">Apple filings tutor</h1><p className="text-xs text-muted-foreground">Answers cite SEC EDGAR references like [S1] · Educational, not investment advice</p></div></div>
+      <div className="flex items-center gap-3 border-b border-border px-4 py-3"><FilingTutorMark small /><div><h1 className="text-sm font-semibold text-foreground">{name} filings tutor</h1><p className="text-xs text-muted-foreground">Answers cite SEC EDGAR references like [S1] · Educational, not investment advice</p></div></div>
       <Conversation className="flex-1">
         <ConversationContent>
-          {messages.length === 0 ? <ConversationEmptyState icon={<FilingTutorMark />} title="Ask about Apple's verified figures" description="Pick a starter question or type your own.">
-            <div className="flex flex-col items-center gap-3"><FilingTutorMark /><p className="text-sm font-medium text-foreground">Ask about Apple's verified figures</p><div className="grid gap-2 sm:grid-cols-2">{SUGGESTIONS.map(s => <Button key={s} variant="outline" className="h-auto whitespace-normal py-2 text-left text-xs" onClick={() => ask(s)}>{s}</Button>)}</div></div>
+          {messages.length === 0 ? <ConversationEmptyState icon={<FilingTutorMark />} title={`Ask about ${name}'s verified figures`} description="Pick a starter question or type your own.">
+            <div className="flex flex-col items-center gap-3"><FilingTutorMark /><p className="text-sm font-medium text-foreground">Ask about {name}'s verified figures</p><div className="grid gap-2 sm:grid-cols-2">{suggestions(name).map(s => <Button key={s} variant="outline" className="h-auto whitespace-normal py-2 text-left text-xs" onClick={() => ask(s)}>{s}</Button>)}</div></div>
           </ConversationEmptyState> : messages.map(m => <Message key={m.id} from={m.role}>
             <MessageContent>{m.parts.map((p, i) => p.type === "text" ? (m.role === "assistant" ? <MessageResponse key={i}>{p.text}</MessageResponse> : <span key={i}>{p.text}</span>) : null)}</MessageContent>
           </Message>)}
-          {status === "submitted" && <Message from="assistant"><MessageContent><Shimmer>Reading Apple's filings…</Shimmer></MessageContent></Message>}
+          {status === "submitted" && <Message from="assistant"><MessageContent><Shimmer>{`Reading ${name}'s filings…`}</Shimmer></MessageContent></Message>}
           {error && !busy && <p role="alert" className="text-sm text-destructive">{error.message}</p>}
         </ConversationContent>
         <ConversationScrollButton />
       </Conversation>
       <div className="p-3">
         <PromptInput onSubmit={(msg) => ask(msg.text ?? "")}>
-          <PromptInputTextarea autoFocus value={input} onChange={e => setInput(e.target.value)} placeholder="e.g. What drove Apple's operating cash flow?" maxLength={2000} />
+          <PromptInputTextarea autoFocus value={input} onChange={e => setInput(e.target.value)} placeholder={`e.g. What drove ${name}'s operating cash flow?`} maxLength={2000} />
           <PromptInputFooter className="justify-end"><PromptInputSubmit status={status} onStop={stop} disabled={!busy && !input.trim()} /></PromptInputFooter>
         </PromptInput>
       </div>
