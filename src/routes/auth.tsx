@@ -47,7 +47,7 @@ function AuthPage() {
   }
 
   return <main className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center gap-5 px-5 py-12">
-    <div><h1 className="font-serif text-3xl font-bold text-foreground">{mode === "signin" ? "Sign in" : "Create your account"}</h1><p className="mt-2 text-sm text-muted-foreground">Save your questions about Apple's SEC filings and come back to them anytime.</p></div>
+    <div><h1 className="font-serif text-3xl font-bold text-foreground">{mode === "signin" ? "Sign in" : "Create your account"}</h1><p className="mt-2 text-sm text-muted-foreground">Save your questions about each company's SEC filings and come back to them anytime.</p></div>
     <Button variant="outline" onClick={google}>Continue with Google</Button>
     <div className="text-center text-xs text-muted-foreground">or use email</div>
     <form onSubmit={submit} className="flex flex-col gap-3">
