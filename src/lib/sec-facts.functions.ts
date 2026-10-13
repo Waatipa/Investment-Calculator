@@ -7,20 +7,25 @@ export type VerifiedFigure = { key: string; value: number; concept: string; form
 type Mode = "annual" | "quarterly";
 type Fig = Omit<VerifiedFigure, "key">;
 
-const APPLE_CIK = "0000320193";
-let cache: { at: number; data: Facts } | null = null;
+export const SEC_CIKS = { AAPL: "0000320193", NVDA: "0001045810", MSFT: "0000789019", AMZN: "0001018724", GOOGL: "0001652044", META: "0001326801", TSLA: "0001318605" } as const;
+export type SecSymbol = keyof typeof SEC_CIKS;
+const caches = new Map<string, { at: number; data: Facts }>();
 
-export async function loadFacts(): Promise<Facts> {
+export async function loadFacts(symbol: SecSymbol = "AAPL"): Promise<Facts> {
+  const cik = SEC_CIKS[symbol];
+  const cache = caches.get(cik);
   if (cache && Date.now() - cache.at < 3_600_000) return cache.data;
-  const res = await fetch(`https://data.sec.gov/api/xbrl/companyfacts/CIK${APPLE_CIK}.json`, { headers: { "User-Agent": "Investico Academy contact@nvestico.academy", Accept: "application/json" } });
+  const res = await fetch(`https://data.sec.gov/api/xbrl/companyfacts/CIK${cik}.json`, { headers: { "User-Agent": "Investico Academy contact@nvestico.academy", Accept: "application/json" } });
   if (!res.ok) throw new Error(`SEC EDGAR responded ${res.status}`);
   const data = (await res.json()) as Facts;
-  cache = { at: Date.now(), data };
+  (data as Facts & { cik?: string }).cik = String(Number(cik));
+  caches.set(cik, { at: Date.now(), data });
   return data;
 }
 
 const days = (f: Fact) => (f.start ? (Date.parse(f.end) - Date.parse(f.start)) / 86_400_000 : 0);
-const url = (accn: string) => `https://www.sec.gov/Archives/edgar/data/320193/${accn.replace(/-/g, "")}/`;
+let currentCik = "320193";
+const url = (accn: string) => `https://www.sec.gov/Archives/edgar/data/${currentCik}/${accn.replace(/-/g, "")}/`;
 const latestByEnd = (list: Fact[]) => {
   const byEnd = new Map<string, Fact>();
   for (const f of list) { const k = `${f.start ?? ""}|${f.end}`; const p = byEnd.get(k); if (!p || f.filed > p.filed) byEnd.set(k, f); }
@@ -28,8 +33,25 @@ const latestByEnd = (list: Fact[]) => {
 };
 const toFig = (f: Fact, concept: string, value = f.val, note?: string): Fig => ({ value, concept, form: f.form, filed: f.filed, periodStart: f.start ?? null, periodEnd: f.end, accession: f.accn, url: url(f.accn), ...(note ? { note } : {}) });
 
+const ALIASES: Record<string, string[]> = {
+  RevenueFromContractWithCustomerExcludingAssessedTax: ["RevenueFromContractWithCustomerExcludingAssessedTax", "Revenues", "SalesRevenueNet"],
+  PaymentsToAcquirePropertyPlantAndEquipment: ["PaymentsToAcquirePropertyPlantAndEquipment", "PaymentsToAcquireProductiveAssets"],
+  LongTermDebt: ["LongTermDebt", "LongTermDebtNoncurrent"],
+  DepreciationDepletionAndAmortization: ["DepreciationDepletionAndAmortization", "DepreciationAmortizationAndOther", "DepreciationAndAmortization", "DepreciationAmortizationAndAccretionNet"],
+  PaymentsOfDividends: ["PaymentsOfDividends", "PaymentsOfDividendsCommonStock"],
+  CashAndCashEquivalentsAtCarryingValue: ["CashAndCashEquivalentsAtCarryingValue"],
+};
+
 export function makeResolver(data: Facts, mode: Mode) {
-  const series = (concept: string, unit = "USD", tax = "us-gaap") => data.facts[tax]?.[concept]?.units[unit] ?? [];
+  currentCik = (data as Facts & { cik?: string }).cik ?? "320193";
+  const raw = (concept: string, unit: string, tax: string) => data.facts[tax]?.[concept]?.units[unit] ?? [];
+  const series = (concept: string, unit = "USD", tax = "us-gaap") => {
+    const names = tax === "us-gaap" ? ALIASES[concept] ?? [concept] : [concept];
+    let best: Fact[] = [];
+    let bestEnd = "";
+    for (const n of names) { const l = raw(n, unit, tax).filter(f => ["10-K", "10-Q"].includes(f.form)); const end = l.reduce((m, f) => (f.end > m ? f.end : m), ""); if (end > bestEnd) { best = l; bestEnd = end; } }
+    return best;
+  };
   /** Duration figure (income / cash-flow). Quarterly cash-flow items are filed year-to-date, so the quarter is derived as YTD minus the prior YTD. */
   function flow(concept: string, unit = "USD", skip = 0, additive = true): Fig | null {
     const list = series(concept, unit).filter(f => f.start && ["10-K", "10-Q"].includes(f.form));
@@ -65,16 +87,17 @@ const combine = (parts: (Fig | null)[], value: (v: number[]) => number, concept:
 };
 const scale = (f: Fig | null, k: number): Fig | null => (f ? { ...f, value: f.value * k } : null);
 
-export const getAppleFilingFigures = createServerFn({ method: "GET" })
-  .inputValidator(d => z.object({ metric: z.string().max(20), keys: z.array(z.string().max(20)).max(10), period: z.enum(["annual", "quarterly"]), marketCapM: z.number().positive().nullable().optional(), price: z.number().positive().nullable().optional() }).parse(d))
+export const getFilingFigures = createServerFn({ method: "GET" })
+  .inputValidator(d => z.object({ symbol: z.enum(["AAPL", "NVDA", "MSFT", "AMZN", "GOOGL", "META", "TSLA"]).default("AAPL"), metric: z.string().max(20), keys: z.array(z.string().max(20)).max(10), period: z.enum(["annual", "quarterly"]), marketCapM: z.number().positive().nullable().optional(), price: z.number().positive().nullable().optional() }).parse(d))
   .handler(async ({ data }) => {
     try {
-      const facts = await loadFacts();
+      const facts = await loadFacts(data.symbol);
       const { flow, instant } = makeResolver(facts, data.period);
       const annual = makeResolver(facts, "annual");
       const M = 1e-6;
-      const totalDebt = () => combine([instant("LongTermDebt"), instant("CommercialPaper")], ([a, b]) => (a! + b!) * M, "us-gaap:LongTermDebt + us-gaap:CommercialPaper", "Total debt = long-term debt (incl. current portion) + commercial paper");
-      const netDebt = () => combine([instant("LongTermDebt"), instant("CommercialPaper"), instant("CashAndCashEquivalentsAtCarryingValue")], ([a, b, c]) => (a! + b! - c!) * M, "LongTermDebt + CommercialPaper − CashAndCashEquivalents", "Net debt = total debt − cash and cash equivalents");
+      const cp = () => { const d = instant("LongTermDebt"), c = instant("CommercialPaper"); return c && d && c.periodEnd === d.periodEnd ? c : null; };
+      const totalDebt = () => { const d = instant("LongTermDebt"), c = cp(); return d ? { ...d, value: (d.value + (c?.value ?? 0)) * M, note: c ? "Total debt = long-term debt + commercial paper" : "Total debt = reported long-term debt" } : null; };
+      const netDebt = () => { const t = totalDebt(), c = instant("CashAndCashEquivalentsAtCarryingValue"); return t && c ? { ...t, value: t.value - c.value * M, concept: "Total debt − CashAndCashEquivalents", note: "Net debt = total debt − cash and cash equivalents" } : null; };
       const fcf = () => combine([flow("NetCashProvidedByUsedInOperatingActivities"), flow("PaymentsToAcquirePropertyPlantAndEquipment")], ([a, b]) => (a! - b!) * M, "OperatingCashFlow − PaymentsToAcquirePP&E", "Free cash flow = operating cash flow − capital expenditure");
       const eps = () => flow("EarningsPerShareDiluted", "USD/shares", 0, false);
       const priorEps = () => flow("EarningsPerShareDiluted", "USD/shares", data.period === "annual" ? 1 : 4, false);
@@ -84,7 +107,7 @@ export const getAppleFilingFigures = createServerFn({ method: "GET" })
 
       const common: Record<string, () => Fig | null> = {
         revenue: () => scale(flow("RevenueFromContractWithCustomerExcludingAssessedTax"), M),
-        profit: () => scale(flow("GrossProfit"), M),
+        profit: () => scale(flow("GrossProfit"), M) ?? combine([flow("RevenueFromContractWithCustomerExcludingAssessedTax"), flow("CostOfRevenue")], ([a, b]) => (a! - b!) * M, "Revenue − us-gaap:CostOfRevenue", "Gross profit = revenue − cost of revenue"),
         cash: () => scale(flow("NetCashProvidedByUsedInOperatingActivities"), M),
         capex: () => scale(flow("PaymentsToAcquirePropertyPlantAndEquipment"), M),
         dividends: () => scale(flow("PaymentsOfDividends"), M),
@@ -129,3 +152,5 @@ export const getAppleFilingFigures = createServerFn({ method: "GET" })
       return { figures: [] as VerifiedFigure[], error: "SEC EDGAR filings are unavailable right now. Try again shortly." };
     }
   });
+
+export const getAppleFilingFigures = getFilingFigures;
