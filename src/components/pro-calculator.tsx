@@ -83,6 +83,7 @@ export function FinancialMetricForm({ metric, onBack, onStageChange }: { metric:
       <p className="pro-source-note">Auto-fill pulls Apple’s filed figures from SEC EDGAR for the chosen period, or enter them yourself. No sample numbers are pre-filled.</p>
       <Button variant="outline" className="pro-autofill" disabled={loading} onClick={autofill}><RefreshCw className={loading ? "animate-spin" : ""} />{loading ? "Checking source…" : "Auto-fill verified data"}</Button>
       {source && <p role="status" className="pro-source-note">{source}</p>}
+      <Button asChild variant="link" className="pro-back"><Link to="/ask">Ask AI about Apple’s SEC figures<ArrowRight /></Link></Button>
       <form onSubmit={submit} className="pro-input-grid">
         <label>Reporting period<select value={period} onChange={e => { setPeriod(e.target.value); setVerified({}); setSource(""); }}>{["Annual", "Quarterly", "Custom period"].map(p => <option key={p}>{p}</option>)}</select><small>Use the same period for every figure below.</small></label>
         {metric.fields.map(field => <label key={field.key} htmlFor={`metric-${field.key}`}>{field.label}{field.optional ? " (optional)" : ""}<Input id={`metric-${field.key}`} type="number" step="any" required={!field.optional} value={inputs[field.key] ?? ""} onChange={e => update(field.key, e.target.value)} placeholder="Enter reported figure" /><SourceTag tag={verified[field.key]} /></label>)}
@@ -98,6 +99,7 @@ export function FinancialMetricForm({ metric, onBack, onStageChange }: { metric:
       <h3 className="pro-section-label">RED FLAGS AND CHECKS</h3><div className="pro-checks">{checks.map(c => <div className={`pro-check pro-check-${c.tone}`} key={c.label}><strong>{c.label}</strong><span>{c.text}</span></div>)}</div>
       <div className="pro-formula"><h3>DECISION SCALE</h3><div className="pro-decision-scale"><span>BUY</span><span>WAIT</span><span>HOLD</span><span>SELL</span></div><p>No recommendation assigned. These outcomes require more than a single calculated metric.</p></div>
       <p className="pro-disclaimer">Markets change quickly. Financial inputs must be checked against Apple’s filings. Forecasts and growth rates are assumptions, not guarantees. Investico Academy is not an investment advisor. Do your own research and consult a licensed advisor before investing.</p>
+      <Button asChild variant="outline" className="pro-submit"><Link to="/ask">Ask AI to explain these figures<ArrowRight /></Link></Button>
       <Button asChild className="pro-submit"><Link to="/subscribe">Invest Now<ArrowRight /></Link></Button>
     </>}
   </div>;
