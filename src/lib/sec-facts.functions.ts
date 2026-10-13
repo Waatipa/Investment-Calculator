@@ -38,6 +38,7 @@ const ALIASES: Record<string, string[]> = {
   PaymentsToAcquirePropertyPlantAndEquipment: ["PaymentsToAcquirePropertyPlantAndEquipment", "PaymentsToAcquireProductiveAssets"],
   LongTermDebt: ["LongTermDebt", "LongTermDebtNoncurrent"],
   DepreciationDepletionAndAmortization: ["DepreciationDepletionAndAmortization", "DepreciationAmortizationAndOther", "DepreciationAndAmortization", "DepreciationAmortizationAndAccretionNet"],
+  CostOfRevenue: ["CostOfRevenue", "CostOfGoodsAndServicesSold"],
   PaymentsOfDividends: ["PaymentsOfDividends", "PaymentsOfDividendsCommonStock"],
   CashAndCashEquivalentsAtCarryingValue: ["CashAndCashEquivalentsAtCarryingValue"],
 };
@@ -45,11 +46,12 @@ const ALIASES: Record<string, string[]> = {
 export function makeResolver(data: Facts, mode: Mode) {
   currentCik = (data as Facts & { cik?: string }).cik ?? "320193";
   const raw = (concept: string, unit: string, tax: string) => data.facts[tax]?.[concept]?.units[unit] ?? [];
+  const cutoff = new Date(Date.now() - 6 * 365 * 86_400_000).toISOString().slice(0, 10);
   const series = (concept: string, unit = "USD", tax = "us-gaap") => {
     const names = tax === "us-gaap" ? ALIASES[concept] ?? [concept] : [concept];
     let best: Fact[] = [];
     let bestEnd = "";
-    for (const n of names) { const l = raw(n, unit, tax).filter(f => ["10-K", "10-Q"].includes(f.form)); const end = l.reduce((m, f) => (f.end > m ? f.end : m), ""); if (end > bestEnd) { best = l; bestEnd = end; } }
+    for (const n of names) { const l = raw(n, unit, tax).filter(f => ["10-K", "10-Q"].includes(f.form) && f.end >= cutoff); const end = l.reduce((m, f) => (f.end > m ? f.end : m), ""); if (end > bestEnd) { best = l; bestEnd = end; } }
     return best;
   };
   /** Duration figure (income / cash-flow). Quarterly cash-flow items are filed year-to-date, so the quarter is derived as YTD minus the prior YTD. */
