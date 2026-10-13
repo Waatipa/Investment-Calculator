@@ -11,6 +11,9 @@ import { CalculatorDateField } from "./calculator-date-field";
 import { getFilingFigures, type VerifiedFigure } from "@/lib/sec-facts.functions";
 import { getRegionalFigures, ME_FUNDAMENTAL_SYMBOLS } from "@/lib/yahoo-fundamentals.functions";
 import { middleEastQuotesQuery } from "@/lib/middle-east";
+import { europeQuotesQuery } from "@/lib/europe";
+import { getEuropeFilingFigures } from "@/lib/eu-filings.functions";
+import { EU_FUNDAMENTAL_SYMBOLS } from "@/lib/yahoo-fundamentals.functions";
 import { longDate } from "@/lib/investment";
 
 const figureSource = (f: VerifiedFigure) => f.form === "Yahoo Finance" ? `Yahoo Finance fundamentals · ${f.note ?? ""}` : `SEC ${f.form} filed ${longDate(f.filed)} · period ${f.periodStart ? `${longDate(f.periodStart)} – ` : "as of "}${longDate(f.periodEnd)}${f.note ? ` · ${f.note}` : ""}`;
@@ -27,7 +30,8 @@ export function ProCalculatorChoices({ onChoose, hideProfit = false }: { onChoos
 }
 
 export function FinancialMetricForm({ metric, onBack, onStageChange, symbol = "AAPL", companyName = "Apple", currency = "USD" }: { metric: FinancialMetric; onBack: () => void; onStageChange: (result: boolean) => void; symbol?: string; companyName?: string | undefined; currency?: string }) {
-  const regional = (ME_FUNDAMENTAL_SYMBOLS as readonly string[]).includes(symbol);
+  const european = (EU_FUNDAMENTAL_SYMBOLS as readonly string[]).includes(symbol);
+  const regional = european || (ME_FUNDAMENTAL_SYMBOLS as readonly string[]).includes(symbol);
   const usd = (n: number) => n.toLocaleString("en-US", { style: "currency", currency, minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const label = (l: string) => currency === "USD" ? l : l.replace("USD", currency);
   const [inputs, setInputs] = useState<Record<string, string>>({});
@@ -41,13 +45,14 @@ export function FinancialMetricForm({ metric, onBack, onStageChange, symbol = "A
   const [verified, setVerified] = useState<Record<string, VerifiedFigure | { live: string }>>({});
   const fetchFigures = useServerFn(getFilingFigures);
   const fetchRegional = useServerFn(getRegionalFigures);
+  const fetchEurope = useServerFn(getEuropeFilingFigures);
   const client = useQueryClient();
   const display = (value: number) => metric.unit === "usd" ? usd(value) : `${value.toFixed(2)}${metric.unit === "percent" ? "%" : "×"}`;
   const update = (key: string, value: string) => { setInputs(v => ({ ...v, [key]: value })); setVerified(v => { const n = { ...v }; delete n[key]; return n; }); setSource(""); setResult(null); onStageChange(false); };
   async function autofill() {
     setLoading(true); setError("");
     try {
-      const quotes: { symbol: string; price: number | null; marketCap: number | null; time: number | null }[] = regional ? await client.fetchQuery(middleEastQuotesQuery()) : await client.fetchQuery(quotesQuery());
+      const quotes: { symbol: string; price: number | null; marketCap: number | null; time: number | null }[] = european ? await client.fetchQuery(europeQuotesQuery()) : regional ? await client.fetchQuery(middleEastQuotesQuery()) : await client.fetchQuery(quotesQuery());
       const apple = quotes.find(q => q.symbol === symbol);
       const next: Record<string, string> = {};
       const tags: Record<string, VerifiedFigure | { live: string }> = {};
@@ -55,12 +60,12 @@ export function FinancialMetricForm({ metric, onBack, onStageChange, symbol = "A
       if (metric.fields.some(f => f.key === "price") && apple?.price != null) { next["price"] = String(apple.price); tags["price"] = { live }; }
       if (metric.fields.some(f => f.key === "cap") && apple?.marketCap != null) { next["cap"] = String(apple.marketCap / 1e6); tags["cap"] = { live }; }
       const args = { metric: metric.id, keys: metric.fields.map(f => f.key).filter(k => !(k in next)), period: period === "Quarterly" ? "quarterly" : "annual", marketCapM: apple?.marketCap ? apple.marketCap / 1e6 : null, price: apple?.price ?? null };
-      const sec = period === "Custom period" ? null : regional ? await fetchRegional({ data: { ...args, symbol: symbol as typeof ME_FUNDAMENTAL_SYMBOLS[number], currency } }) : await fetchFigures({ data: { ...args, symbol: symbol as "AAPL" } });
+      const sec = period === "Custom period" ? null : european ? await fetchEurope({ data: { ...args, symbol: symbol as typeof EU_FUNDAMENTAL_SYMBOLS[number], currency } }) : regional ? await fetchRegional({ data: { ...args, symbol: symbol as typeof ME_FUNDAMENTAL_SYMBOLS[number], currency } }) : await fetchFigures({ data: { ...args, symbol: symbol as "AAPL" } });
       for (const fig of sec?.figures ?? []) { next[fig.key] = String(Number(fig.value.toFixed(6))); tags[fig.key] = fig; }
       if (!Object.keys(next).length) throw new Error(sec?.error ?? `No verified source reports these figures for this period. Enter ${companyName}’s reported figures.`);
       setInputs(v => ({ ...v, ...next })); setVerified(v => ({ ...v, ...tags })); setResult(null); onStageChange(false);
       const missing = metric.fields.filter(f => !(f.key in next)).map(f => f.label);
-      setSource(`${sec?.error ? sec.error + " " : ""}${regional ? "Figures filled from Yahoo Finance fundamentals (provider summaries of company reports, not the filings themselves)." : "Verified figures filled from SEC EDGAR filings and Yahoo Finance."}${missing.length ? ` Your own assumptions (not reported in filings) — enter manually: ${missing.join(", ")}.` : ""}`);
+      setSource(`${sec?.error ? sec.error + " " : ""}${european && sec && "note" in sec ? `${sec.note} Fields tagged with a 20-F filing come from the company’s own report; others are Yahoo Finance summaries.` : regional ? "Figures filled from Yahoo Finance fundamentals (provider summaries of company reports, not the filings themselves)." : "Verified figures filled from SEC EDGAR filings and Yahoo Finance."}${missing.length ? ` Your own assumptions (not reported in filings) — enter manually: ${missing.join(", ")}.` : ""}`);
     } catch (e) { setError(e instanceof Error ? e.message : "Live price unavailable. Try again."); }
     finally { setLoading(false); }
   }
@@ -80,13 +85,13 @@ export function FinancialMetricForm({ metric, onBack, onStageChange, symbol = "A
     { tone: result.value < 0 ? "risk" : "good", label: result.value < 0 ? "WATCH" : "CHECK", text: result.value < 0 ? "The result is negative. Review the underlying figures and business context." : "A positive result alone does not establish whether the stock is fairly valued." },
     ...(growth != null ? [{ tone: growth > 0 ? "good" : "risk", label: growth > 0 ? "GROWTH" : "WATCH", text: `EPS changed ${growth > 0 ? "+" : ""}${growth.toFixed(2)}% versus the prior comparable period.` }] : []),
     ...(peg != null ? [{ tone: peg > 2 ? "risk" : "neutral", label: "PEG", text: `PEG is ${peg.toFixed(2)}. This simple growth comparison is not a verified sector benchmark or a forecast.` }] : []),
-    { tone: "neutral", label: "SOURCE", text: Object.keys(verified).length ? `Figures marked with a source come from ${regional ? "Yahoo Finance fundamentals and quotes" : "SEC EDGAR filings or Yahoo Finance"}; any others are user-entered and unverified.` : "Financial-statement inputs are user-provided, not independently verified. Use matching reporting periods and consistent share bases." },
+    { tone: "neutral", label: "SOURCE", text: Object.keys(verified).length ? `Figures marked with a source come from ${european ? "SEC EDGAR 20-F filings, Yahoo Finance summaries or live quotes (see each tag)" : regional ? "Yahoo Finance fundamentals and quotes" : "SEC EDGAR filings or Yahoo Finance"}; any others are user-entered and unverified.` : "Financial-statement inputs are user-provided, not independently verified. Use matching reporting periods and consistent share bases." },
   ] : [];
   return <div className="pro-stage">
     <Button variant="link" className="pro-back" onClick={() => { if (result) { setResult(null); onStageChange(false); } else onBack(); }}><ArrowLeft />{result ? "Edit inputs" : "All calculators"}</Button>
     {!result ? <>
       <div className="pro-formula"><h3>FORMULA</h3><strong>{metric.formula}</strong><p>Use reported figures from the same period and consistent units.</p></div>
-      <p className="pro-source-note">Auto-fill pulls {companyName}’s reported figures from {regional ? `Yahoo Finance fundamentals (in ${currency})` : "SEC EDGAR"} for the chosen period, or enter them yourself. No sample numbers are pre-filled.</p>
+      <p className="pro-source-note">Auto-fill pulls {companyName}’s reported figures from {european ? "its own annual 20-F filings at SEC EDGAR where available, otherwise Yahoo Finance" : regional ? `Yahoo Finance fundamentals (in ${currency})` : "SEC EDGAR"} for the chosen period, or enter them yourself. No sample numbers are pre-filled.</p>
       <Button variant="outline" className="pro-autofill" disabled={loading} onClick={autofill}><RefreshCw className={loading ? "animate-spin" : ""} />{loading ? "Checking source…" : "Auto-fill verified data"}</Button>
       {source && <p role="status" className="pro-source-note">{source}</p>}
       {!regional && <Button asChild variant="link" className="pro-back"><Link to="/ask">Ask AI about {companyName}’s SEC figures<ArrowRight /></Link></Button>}
