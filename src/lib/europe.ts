@@ -7,7 +7,7 @@ export const EU_COMPANIES = [
   { symbol: "SAP.DE", name: "SAP", ticker: "XETRA: SAP", country: "Germany", initials: "SP" },
   { symbol: "NESN.SW", name: "Nestlé", ticker: "SIX: NESN", country: "Switzerland", initials: "NE" },
   { symbol: "NOVO-B.CO", name: "Novo Nordisk", ticker: "Nasdaq Copenhagen: NOVO-B", country: "Denmark", initials: "NO" },
-  { symbol: "ROG.SW", name: "Roche", ticker: "SIX: ROG", country: "Switzerland", initials: "RO" },
+  { symbol: "RO.SW", name: "Roche", ticker: "SIX: RO", country: "Switzerland", initials: "RO" },
   { symbol: "AZN.L", name: "AstraZeneca", ticker: "LSE: AZN", country: "United Kingdom", initials: "AZ" },
   { symbol: "HSBA.L", name: "HSBC Holdings", ticker: "LSE: HSBA", country: "United Kingdom", initials: "HS" },
 ] as const;
