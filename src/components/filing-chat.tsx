@@ -10,8 +10,11 @@ import { PromptInput, PromptInputFooter, PromptInputSubmit, PromptInputTextarea 
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { getAppleFilingReferences } from "@/lib/filing-threads.functions";
+import { getFilingReferences } from "@/lib/filing-threads.functions";
 import { longDate } from "@/lib/investment";
+import { COMPANIES } from "@/lib/markets";
+
+const companyName = (symbol: string) => COMPANIES.find(c => c.symbol === symbol)?.name ?? "Apple";
 
 export function FilingTutorMark({ small = false }: { small?: boolean }) {
   const s = small ? 28 : 48;
@@ -23,18 +26,19 @@ export function FilingTutorMark({ small = false }: { small?: boolean }) {
   </svg>;
 }
 
-const SUGGESTIONS = [
-  "How profitable was Apple in its latest fiscal year?",
-  "Explain Apple's free cash flow from the latest 10-K.",
-  "What was Apple's net margin and how is it calculated?",
-  "How does Apple's latest quarter compare with its annual figures?",
+const suggestions = (name: string) => [
+  `How profitable was ${name} in its latest fiscal year?`,
+  `Explain ${name}'s free cash flow from the latest 10-K.`,
+  `What was ${name}'s net margin and how is it calculated?`,
+  `How does ${name}'s latest quarter compare with its annual figures?`,
 ];
 
-export function FilingChat({ threadId, initialMessages }: { threadId: string; initialMessages: UIMessage[] }) {
+export function FilingChat({ threadId, symbol, initialMessages }: { threadId: string; symbol: string; initialMessages: UIMessage[] }) {
   const qc = useQueryClient();
   const [input, setInput] = useState("");
-  const fetchRefs = useServerFn(getAppleFilingReferences);
-  const { data: refData } = useQuery({ queryKey: ["apple-filing-refs"], queryFn: () => fetchRefs(), staleTime: 3_600_000 });
+  const name = companyName(symbol);
+  const fetchRefs = useServerFn(getFilingReferences);
+  const { data: refData } = useQuery({ queryKey: ["filing-refs", symbol], queryFn: () => fetchRefs({ data: { symbol: symbol as "AAPL" } }), staleTime: 3_600_000 });
   const transport = useMemo(() => new DefaultChatTransport({
     api: "/api/filing-chat",
     body: { threadId },
