@@ -77,13 +77,13 @@ export async function handleFilingChat(request: Request) {
   if (thread.title === "New question") await supabase.from("filing_threads").update({ title: question.slice(0, 80), updated_at: new Date().toISOString() }).eq("id", threadId);
 
   let refs: FilingReference[];
-  try { refs = await buildAppleReferences(); } catch (e) { console.error(e); return json(503, "SEC EDGAR filings are unavailable right now. Try again shortly."); }
+  try { refs = await buildReferences(symbol); } catch (e) { console.error(e); return json(503, "SEC EDGAR filings are unavailable right now. Try again shortly."); }
 
   const referenceText = refs.map(r => `[${r.id}] ${r.label} (${r.period}) = ${r.value.toLocaleString("en-US")} ${r.unit}; ${r.concept}; SEC ${r.form} filed ${r.filed}; period ${r.periodStart ? `${r.periodStart} to ` : "as of "}${r.periodEnd}${r.note ? `; ${r.note}` : ""}; ${r.url}`).join("\n");
-  const instructions = `You are the Investico Academy filings tutor. Explain Apple Inc.'s verified financial-statement figures to retail investors in plain English.
-Use ONLY the numbered SEC EDGAR references below for Apple figures. Cite every figure you use with its reference id in square brackets, e.g. [S3], and when helpful show calculations step by step using those figures. If a question needs data not in the references (forecasts, other companies, prices, sector medians), say clearly that the displayed filings don't contain it — never invent or estimate figures. Mention reporting periods and that quarterly cash-flow figures may be derived from year-to-date totals when the reference says so. Do not give buy/sell recommendations; note this is educational, not investment advice. Keep answers concise and well formatted in markdown.
+  const instructions = `You are the Investico Academy filings tutor. Explain ${company}'s verified financial-statement figures to retail investors in plain English.
+Use ONLY the numbered SEC EDGAR references below for ${company} figures. Cite every figure you use with its reference id in square brackets, e.g. [S3], and when helpful show calculations step by step using those figures. If a question needs data not in the references (forecasts, other companies, prices, sector medians), say clearly that the displayed filings don't contain it — never invent or estimate figures. Mention reporting periods and that quarterly cash-flow figures may be derived from year-to-date totals when the reference says so. Do not give buy/sell recommendations; note this is educational, not investment advice. Keep answers concise and well formatted in markdown.
 
-REFERENCES (Apple Inc., CIK 0000320193):
+REFERENCES (${company}, CIK ${SEC_CIKS[symbol]}):
 ${referenceText}`;
 
   const runIdFetch = createLovableAiGatewayRunIdFetch(getLovableAiGatewayRunId(request));
