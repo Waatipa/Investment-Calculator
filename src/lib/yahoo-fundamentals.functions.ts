@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { VerifiedFigure } from "./sec-facts.functions";
 
 export const ME_FUNDAMENTAL_SYMBOLS = ["2222.SR", "IHC.AD", "1120.SR", "TAQA.AD", "1211.SR", "ADNOCGAS.AD", "1180.SR", "7010.SR", "FAB.AD", "EMIRATESNBD.AE"] as const;
+export const AF_FUNDAMENTAL_SYMBOLS = ["NPN.JO", "FSR.JO", "SBK.JO", "CPI.JO", "GFI.JO", "ATW.CS", "MTN.JO", "DANGCEM.LG"] as const;
 
 type Obs = { asOfDate: string; currencyCode?: string; reportedValue?: { raw?: number } };
 type Fig = Omit<VerifiedFigure, "key">;
@@ -32,7 +33,7 @@ export const EU_FUNDAMENTAL_SYMBOLS = ["ASML.AS", "MC.PA", "SAP.DE", "NESN.SW", 
 export type RegionalArgs = { symbol: string; metric: string; keys: string[]; period: "annual" | "quarterly"; marketCapM?: number | null | undefined; price?: number | null | undefined; currency?: string | null | undefined };
 
 export const getRegionalFigures = createServerFn({ method: "GET" })
-  .inputValidator(d => z.object({ symbol: z.enum(ME_FUNDAMENTAL_SYMBOLS), metric: z.string().max(20), keys: z.array(z.string().max(20)).max(10), period: z.enum(["annual", "quarterly"]), marketCapM: z.number().positive().nullable().optional(), price: z.number().positive().nullable().optional(), currency: z.string().max(5).nullable().optional() }).parse(d))
+  .inputValidator(d => z.object({ symbol: z.enum([...ME_FUNDAMENTAL_SYMBOLS, ...AF_FUNDAMENTAL_SYMBOLS]), metric: z.string().max(20), keys: z.array(z.string().max(20)).max(10), period: z.enum(["annual", "quarterly"]), marketCapM: z.number().positive().nullable().optional(), price: z.number().positive().nullable().optional(), currency: z.string().max(5).nullable().optional() }).parse(d))
   .handler(({ data }) => regionalFigures(data));
 
 export async function regionalFigures(data: RegionalArgs) {
@@ -43,8 +44,9 @@ export async function regionalFigures(data: RegionalArgs) {
       const M = 1e-6;
       const pick = (t: string, skip = 0, mode: "annual" | "quarterly" = data.period, k = M, transform = (v: number) => v): Fig | null => {
         const o = s[`${mode}${t}`]?.[skip];
-        if (!o) return null;
-        return { value: transform(o.reportedValue!.raw!) * k, concept: `Yahoo Finance: ${mode}${t}`, form: "Yahoo Finance", filed: o.asOfDate, periodStart: null, periodEnd: o.asOfDate, accession: "", url, note: `${mode === "annual" ? "Fiscal year" : "Quarter"} ending ${o.asOfDate} · ${o.currencyCode ?? "local currency"}`, currency: o.currencyCode ?? null } as Fig;
+         const raw = o?.reportedValue?.raw;
+         if (!o || raw == null || !Number.isFinite(raw) || (data.currency && o.currencyCode !== data.currency)) return null;
+         return { value: transform(raw) * k, concept: `Yahoo Finance: ${mode}${t}`, form: "Yahoo Finance", filed: o.asOfDate, periodStart: null, periodEnd: o.asOfDate, accession: "", url, note: `${mode === "annual" ? "Fiscal year" : "Quarter"} ending ${o.asOfDate} · ${o.currencyCode ?? "local currency"}`, currency: o.currencyCode ?? null } as Fig;
       };
       const both = (a: Fig | null, b: Fig | null, f: (x: number, y: number) => number, concept: string, note: string): Fig | null => a && b ? { ...a, value: f(a.value, b.value), concept, note: `${note} · ${a.note}` } : null;
       const abs = (v: number) => Math.abs(v);

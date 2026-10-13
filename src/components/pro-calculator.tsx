@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CalculatorDateField } from "./calculator-date-field";
 import { getFilingFigures, type VerifiedFigure } from "@/lib/sec-facts.functions";
-import { getRegionalFigures, ME_FUNDAMENTAL_SYMBOLS } from "@/lib/yahoo-fundamentals.functions";
+import { getRegionalFigures, ME_FUNDAMENTAL_SYMBOLS, AF_FUNDAMENTAL_SYMBOLS } from "@/lib/yahoo-fundamentals.functions";
+import { africaQuotesQuery } from "@/lib/africa";
 import { middleEastQuotesQuery } from "@/lib/middle-east";
 import { europeQuotesQuery } from "@/lib/europe";
 import { getEuropeFilingFigures } from "@/lib/eu-filings.functions";
@@ -31,7 +32,8 @@ export function ProCalculatorChoices({ onChoose, hideProfit = false }: { onChoos
 
 export function FinancialMetricForm({ metric, onBack, onStageChange, symbol = "AAPL", companyName = "Apple", currency = "USD" }: { metric: FinancialMetric; onBack: () => void; onStageChange: (result: boolean) => void; symbol?: string; companyName?: string | undefined; currency?: string }) {
   const european = (EU_FUNDAMENTAL_SYMBOLS as readonly string[]).includes(symbol);
-  const regional = european || (ME_FUNDAMENTAL_SYMBOLS as readonly string[]).includes(symbol);
+  const african = (AF_FUNDAMENTAL_SYMBOLS as readonly string[]).includes(symbol);
+  const regional = european || african || (ME_FUNDAMENTAL_SYMBOLS as readonly string[]).includes(symbol);
   const usd = (n: number) => n.toLocaleString("en-US", { style: "currency", currency, minimumFractionDigits: 2, maximumFractionDigits: 2 });
   // AstraZeneca and HSBC report in USD while their London shares trade in pence.
   const reportCcy = symbol === "AZN.L" || symbol === "HSBA.L" ? "USD" : currency;
@@ -54,8 +56,10 @@ export function FinancialMetricForm({ metric, onBack, onStageChange, symbol = "A
   async function autofill() {
     setLoading(true); setError("");
     try {
-      const quotes: { symbol: string; price: number | null; marketCap: number | null; time: number | null }[] = european ? await client.fetchQuery(europeQuotesQuery()) : regional ? await client.fetchQuery(middleEastQuotesQuery()) : await client.fetchQuery(quotesQuery());
-      const apple = quotes.find(q => q.symbol === symbol);
+      const quotes: { symbol: string; price: number | null; marketCap: number | null; time: number | null }[] = european ? await client.fetchQuery(europeQuotesQuery()) : african ? await client.fetchQuery(africaQuotesQuery()) : regional ? await client.fetchQuery(middleEastQuotesQuery()) : await client.fetchQuery(quotesQuery());
+      const rawQuote = quotes.find(q => q.symbol === symbol);
+      // JSE prices are cents; market caps and statement figures are in rand.
+      const apple = rawQuote && african && symbol.endsWith(".JO") ? { ...rawQuote, price: rawQuote.price == null ? null : rawQuote.price / 100 } : rawQuote;
       const next: Record<string, string> = {};
       const tags: Record<string, VerifiedFigure | { live: string }> = {};
       const live = `Yahoo Finance quote · ${apple?.time ? new Date(apple.time).toLocaleString("en-GB", { timeZone: "America/New_York" }) + " ET" : "timestamp unavailable"}`;

@@ -7,7 +7,7 @@ import type { RegionalQuote } from "@/lib/nvda.functions";
 import { Change, sourceDate, sourceTime } from "@/components/market-calculator";
 import { formatMarketCap } from "@/lib/markets";
 
-export type RegionalCompany = { symbol: string; name: string; ticker: string; country: string; initials: string };
+export type RegionalCompany = { symbol: string; name: string; ticker: string; country: string; initials: string; currency?: string };
 export function marketCapCurrency(currency: string | null | undefined) {
   return currency === "GBp" || currency === "GBX" ? "GBP" : currency === "ZAc" ? "ZAR" : currency;
 }
@@ -16,7 +16,7 @@ export function RegionalMarketCards({ companies, quotes, region }: { companies: 
   const [metric, setMetric] = useState<FinancialMetric | null>(null);
   const company = companies.find(c => c.symbol === open);
   const quote = quotes.find(q => q.symbol === open);
-  const currency = quote?.currency === "ZAc" ? "ZAR" : quote?.currency ?? "USD";
+  const currency = quote?.currency === "ZAc" ? "ZAR" : quote?.currency ?? company?.currency ?? (region.includes("Middle East") ? "AED" : "EUR");
   return <>
     <div className="company-grid" aria-label={`${region} companies`}>{companies.map(c => {
       const q = quotes.find(x => x.symbol === c.symbol);
