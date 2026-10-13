@@ -11,7 +11,7 @@ const safeNext = (n?: string) => (n && n.startsWith("/") && !n.startsWith("//") 
 
 export const Route = createFileRoute("/auth")({
   validateSearch: z.object({ next: z.string().optional() }),
-  head: () => pageHead("Sign in | Investico Academy", "Sign in to Investico Academy to ask questions about Apple's verified SEC filings."),
+  head: () => pageHead("Sign in", "Sign in to Investico Academy to ask questions about Apple's verified SEC filings."),
   component: AuthPage,
 });
 
