@@ -63,8 +63,10 @@ export async function handleFilingChat(request: Request) {
   if (!parsed.success) return json(400, "Invalid request.");
   const { threadId } = parsed.data;
   const messages = parsed.data.messages as UIMessage[];
-  const { data: thread } = await supabase.from("filing_threads").select("id,title").eq("id", threadId).maybeSingle();
+  const { data: thread } = await supabase.from("filing_threads").select("id,title,symbol").eq("id", threadId).maybeSingle();
   if (!thread) return json(404, "Conversation not found.");
+  const symbol = (thread.symbol ?? "AAPL") as SecSymbol;
+  const company = FILING_COMPANIES[symbol] ?? FILING_COMPANIES.AAPL;
 
   const last = messages[messages.length - 1];
   if (!last || last.role !== "user") return json(400, "Ask a question first.");
