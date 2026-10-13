@@ -67,7 +67,7 @@ export function FilingChat({ threadId, symbol, initialMessages }: { threadId: st
           </ConversationEmptyState> : messages.map(m => <Message key={m.id} from={m.role}>
             <MessageContent>{m.parts.map((p, i) => p.type === "text" ? (m.role === "assistant" ? <MessageResponse key={i}>{p.text}</MessageResponse> : <span key={i}>{p.text}</span>) : null)}</MessageContent>
           </Message>)}
-          {status === "submitted" && <Message from="assistant"><MessageContent><Shimmer>Reading {name}'s filings…</Shimmer></MessageContent></Message>}
+          {status === "submitted" && <Message from="assistant"><MessageContent><Shimmer>{`Reading ${name}'s filings…`}</Shimmer></MessageContent></Message>}
           {error && !busy && <p role="alert" className="text-sm text-destructive">{error.message}</p>}
         </ConversationContent>
         <ConversationScrollButton />
