@@ -10,7 +10,7 @@ type Fig = Omit<VerifiedFigure, "key">;
 const APPLE_CIK = "0000320193";
 let cache: { at: number; data: Facts } | null = null;
 
-async function loadFacts(): Promise<Facts> {
+export async function loadFacts(): Promise<Facts> {
   if (cache && Date.now() - cache.at < 3_600_000) return cache.data;
   const res = await fetch(`https://data.sec.gov/api/xbrl/companyfacts/CIK${APPLE_CIK}.json`, { headers: { "User-Agent": "Investico Academy contact@nvestico.academy", Accept: "application/json" } });
   if (!res.ok) throw new Error(`SEC EDGAR responded ${res.status}`);
@@ -28,7 +28,7 @@ const latestByEnd = (list: Fact[]) => {
 };
 const toFig = (f: Fact, concept: string, value = f.val, note?: string): Fig => ({ value, concept, form: f.form, filed: f.filed, periodStart: f.start ?? null, periodEnd: f.end, accession: f.accn, url: url(f.accn), ...(note ? { note } : {}) });
 
-function makeResolver(data: Facts, mode: Mode) {
+export function makeResolver(data: Facts, mode: Mode) {
   const series = (concept: string, unit = "USD", tax = "us-gaap") => data.facts[tax]?.[concept]?.units[unit] ?? [];
   /** Duration figure (income / cash-flow). Quarterly cash-flow items are filed year-to-date, so the quarter is derived as YTD minus the prior YTD. */
   function flow(concept: string, unit = "USD", skip = 0, additive = true): Fig | null {
