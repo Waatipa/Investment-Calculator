@@ -163,7 +163,7 @@ function InvestmentForm({ symbol, open, setOpen }: { symbol: Symbol; open: boole
           <p className="text-xs text-muted-foreground">Portfolio value is shares × price on each date; profit is the later portfolio value minus the portfolio value at the investment date.</p>
           <p className="text-xs leading-relaxed text-muted-foreground">Yahoo Finance prices in USD, split-adjusted; shares are on the current split-adjusted basis. Investment uses the first trading day close on or after your date; valuation uses the last trading day close on or before your date. The maximum uses the highest daily traded price in that period (hypothetical sale). Excludes dividends, taxes and fees. Not financial advice.</p>
           <Button variant="outline" className="h-12 text-base" onClick={() => setResult(null)}>Edit Investment Details</Button>
-          <Button asChild className="h-12 text-base font-semibold"><Link to="/subscribe">{"Invest Now"}</Link></Button>
+          <Button asChild className="h-12 text-base font-semibold"><Link to="/subscribe">{symbol === "AAPL" ? "Invest Now" : `Invest in ${company?.name} Now`}</Link></Button>
         </>}
         </>}
       </DialogContent>
