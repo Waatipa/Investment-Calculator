@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { CalculatorDateField } from "./calculator-date-field";
 import { getRegionalInvestmentResult, getRegionalPurchasePrice } from "@/lib/regional-investment.functions";
 import { longDate } from "@/lib/investment";
+import { useDisplayCurrency } from "./display-prefs";
 
 export function RegionalProfitCalculator({ symbol, onBack, onStageChange }: { symbol: string; onBack: () => void; onStageChange: (results: boolean) => void }) {
   const [startDate, setStartDate] = useState("");
@@ -22,7 +23,9 @@ export function RegionalProfitCalculator({ symbol, onBack, onStageChange }: { sy
   const result = mutation.data;
   const p = price.data;
   const currency = result?.currency ?? p?.currency;
-  const money = (v: number) => `${currency ?? ""} ${v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const local = (v: number) => `${currency ?? ""} ${v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const fx = useDisplayCurrency(currency);
+  const money = result ? fx.money : local;
   const displayedShares = basis === "amount" && p ? String(Number(amount) / p.price) : shares;
   const displayedAmount = basis === "shares" ? p && shares ? String(Math.round(Number(shares) * p.price * 100) / 100) : "" : amount;
   const clear = () => { mutation.reset(); onStageChange(false); };
@@ -53,6 +56,7 @@ export function RegionalProfitCalculator({ symbol, onBack, onStageChange }: { sy
         {card("Profit at maximum stock price", result.maxProfit, result.maxRoi, [["Highest Stock Price", `${money(result.maxPrice)} · ${longDate(result.maxDate)}`], ["Buying Stock Price", `${money(result.purchasePrice)} · ${longDate(result.purchaseDate)}`], ["Portfolio Value (Investment Date)", money(result.invested)], ["Portfolio Value (Peak Date)", money(result.maxValue)]])}
       </div>
       <p className="text-xs text-muted-foreground"><a href={result.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline">Source: Yahoo Finance price history</a> · Valuation observation: {new Date(result.asOf).toLocaleString("en-GB", { timeZone: result.timeZone })} ({result.timeZone}). {result.usesLatestPrice ? "Today's valuation uses the latest available regular-session trade; quotes may be delayed." : "Historical valuation uses the last trading close on or before your date."}</p>
+      {fx.note && <p className="text-xs text-muted-foreground">{fx.note}</p>}
       <p className="text-xs leading-relaxed text-muted-foreground">Prices in {result.currency}, on the source's split-adjusted share basis. Purchase uses the first trading close on or after your date (latest available trade if today). Dates follow the listing's exchange time zone. Portfolio value is shares × price; profit is portfolio value minus investment cost. The maximum is the highest source daily high in the period, a hypothetical sale. Excludes dividends, currency conversion, taxes and fees. Not financial advice.</p>
       <Button variant="outline" className="h-12 text-base" onClick={clear}>Edit Investment Details</Button>
       <Button asChild className="h-12 text-base font-semibold"><Link to="/subscribe">Invest Now</Link></Button>
