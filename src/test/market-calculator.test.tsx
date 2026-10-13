@@ -32,7 +32,7 @@ describe("Linked investment calculator", () => {
     fireEvent.change(screen.getByLabelText("Weighted average shares (millions)"), { target: { value: "15000" } });
     fireEvent.change(screen.getByLabelText("Prior-period EPS (USD) (optional)"), { target: { value: "6.6" } });
     fireEvent.click(screen.getByRole("button", { name: "Calculate EPS" }));
-    expect(screen.getByText("$7.47")).toBeInTheDocument();
+    expect(screen.getAllByText("$7.47")).toHaveLength(2);
     expect(screen.getByRole("link", { name: "Invest Now" })).toHaveAttribute("href", "/subscribe");
     expect(screen.getAllByRole("dialog")).toHaveLength(1);
     fireEvent.click(screen.getByRole("button", { name: "Edit inputs" }));

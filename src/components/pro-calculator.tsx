@@ -38,8 +38,8 @@ export function FinancialMetricForm({ metric, onBack, onStageChange }: { metric:
       const quotes = await client.fetchQuery(quotesQuery());
       const apple = quotes.find(q => q.symbol === "AAPL");
       const next: Record<string, string> = {};
-      if (metric.fields.some(f => f.key === "price") && apple?.price != null) next.price = String(apple.price);
-      if (metric.fields.some(f => f.key === "cap") && apple?.marketCap != null) next.cap = String(apple.marketCap / 1e6);
+      if (metric.fields.some(f => f.key === "price") && apple?.price != null) next["price"] = String(apple.price);
+      if (metric.fields.some(f => f.key === "cap") && apple?.marketCap != null) next["cap"] = String(apple.marketCap / 1e6);
       if (!Object.keys(next).length) throw new Error("This data feed does not provide the financial statements required for this metric. Enter Apple’s reported figures.");
       setInputs(v => ({ ...v, ...next }));
       setSource(`Yahoo Finance · ${apple?.time ? new Date(apple.time).toLocaleString("en-GB", { timeZone: "America/New_York" }) + " ET" : "source timestamp unavailable"}. Financial-statement figures must be entered from Apple’s reports.`);
@@ -54,9 +54,9 @@ export function FinancialMetricForm({ metric, onBack, onStageChange }: { metric:
     } catch (e) { setError(e instanceof Error ? e.message : "Check your inputs."); }
   }
   const eps = result && metric.id === "eps" ? result.value : null;
-  const prior = result?.values.prior;
+  const prior = result?.values["prior"];
   const growth = eps != null && prior != null && prior > 0 ? (eps - prior) / prior * 100 : null;
-  const pe = eps != null && eps > 0 && result ? result.values.price / eps : null;
+  const pe = eps != null && eps > 0 && result ? (result.values["price"] ?? 0) / eps : null;
   const peg = pe != null && growth != null && growth > 0 ? pe / growth : null;
   const checks = result ? [
     { tone: result.value < 0 ? "risk" : "good", label: result.value < 0 ? "WATCH" : "CHECK", text: result.value < 0 ? "The result is negative. Review the underlying figures and business context." : "A positive result alone does not establish whether the stock is fairly valued." },
@@ -80,7 +80,7 @@ export function FinancialMetricForm({ metric, onBack, onStageChange }: { metric:
       </form>
     </> : <>
       <div className="pro-result-grid"><div className="pro-result-panel"><h3>{metric.badge} · {period}</h3><div className={`pro-big-number ${result.value < 0 ? "text-destructive" : ""}`}>{display(result.value)}</div>{growth != null && <span className={growth >= 0 ? "text-success" : "text-destructive"}>{growth > 0 ? "+" : ""}{growth.toFixed(2)}% vs prior {usd(prior ?? 0)}</span>}<p>{metric.formula}</p></div><div className="pro-result-panel pro-assessment"><h3>DECISION CONTEXT</h3><div className="pro-verdict">REVIEW</div><p>One metric cannot justify buying or selling. Verify reported figures, valuation, risk and your investment goals.</p></div></div>
-      <div className="pro-formula"><h3>WHAT THIS MEANS</h3><p>{metric.name} is {display(result.value)} for the selected period, based on your inputs.{eps != null ? ` Each Apple share earned ${usd(eps)}.${pe != null ? ` At ${usd(result.values.price)} per share, P/E is ${pe.toFixed(2)}.` : " P/E is not meaningful with non-positive earnings."}${peg != null ? ` PEG is ${peg.toFixed(2)}.` : " PEG requires positive comparable EPS growth."}` : " This is a calculation, not a prediction of future market performance."}</p></div>
+      <div className="pro-formula"><h3>WHAT THIS MEANS</h3><p>{metric.name} is {display(result.value)} for the selected period, based on your inputs.{eps != null ? ` Each Apple share earned ${usd(eps)}.${pe != null ? ` At ${usd(result.values["price"] ?? 0)} per share, P/E is ${pe.toFixed(2)}.` : " P/E is not meaningful with non-positive earnings."}${peg != null ? ` PEG is ${peg.toFixed(2)}.` : " PEG requires positive comparable EPS growth."}` : " This is a calculation, not a prediction of future market performance."}</p></div>
       <div className="pro-result-grid">{eps != null && <><div className="pro-result-panel"><h4>EPS: prior vs current</h4><div className="pro-comparison"><span>Prior period</span><strong>{prior != null ? usd(prior) : "Not supplied"}</strong></div>{prior != null && <progress max={Math.max(Math.abs(prior), Math.abs(eps), 1)} value={Math.abs(prior)} aria-label="Prior EPS magnitude" />}<div className="pro-comparison"><span>Current</span><strong>{usd(eps)}</strong></div><progress max={Math.max(Math.abs(prior ?? 0), Math.abs(eps), 1)} value={Math.abs(eps)} aria-label="Current EPS magnitude" /></div><div className="pro-result-panel"><h4>P/E ratio: {pe?.toFixed(2) ?? "Not meaningful"}</h4><p>{pe != null ? "Price paid per dollar of current earnings. Compare against verified peers and growth prospects." : "Positive earnings are required."}</p><h4>PEG ratio: {peg?.toFixed(2) ?? "Not meaningful"}</h4><p>No sector median is supplied by the current data source.</p></div></>}
       <div className="pro-result-panel"><h4>Inputs used</h4><dl>{metric.fields.map(f => <div className="pro-comparison" key={f.key}><dt>{f.label}</dt><dd>{result.values[f.key]?.toLocaleString("en-US", { maximumFractionDigits: 6 }) ?? "Not supplied"}</dd></div>)}</dl>{period === "Custom period" && <p>{start} to {end}</p>}<p>{source || "User-entered figures · not independently verified"}</p></div></div>
       <h3 className="pro-section-label">RED FLAGS AND CHECKS</h3><div className="pro-checks">{checks.map(c => <div className={`pro-check pro-check-${c.tone}`} key={c.label}><strong>{c.label}</strong><span>{c.text}</span></div>)}</div>
