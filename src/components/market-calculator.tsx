@@ -12,6 +12,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { ProCalculatorChoices, FinancialMetricForm } from "@/components/pro-calculator";
 import { CalculatorDateField } from "@/components/calculator-date-field";
 import type { FinancialMetric } from "@/lib/financial-metrics";
+import { LocationButton, LocalTimeToggle, useDisplayCurrency } from "@/components/display-prefs";
+import { usePrefs } from "@/lib/display-prefs";
 
 type Result = Awaited<ReturnType<typeof getInvestmentResult>>;
 
@@ -55,14 +57,15 @@ function LiveCompanies({ symbol, setSymbol }: { symbol: Symbol; setSymbol: (s: S
   const { data } = useSuspenseQuery(quotesQuery());
   return <><CompanyButtons symbol={symbol} setSymbol={setSymbol} quotes={data} /><p className="market-footer">Market data provided by Yahoo Finance. Data may be delayed. Prices in USD.</p></>;
 }
-export const sourceDate = (t: number | null | undefined) => t ? new Date(t).toLocaleDateString("en-US", {month:"short",day:"numeric",timeZone:"America/New_York"}) : "—";
-export const sourceTime = (t: number | null | undefined) => t ? new Date(t).toLocaleTimeString("en-US", {hour:"numeric",minute:"2-digit",timeZone:"America/New_York"}) + " ET" : "—";
+export const sourceDate = (t: number | null | undefined, local = false) => t ? new Date(t).toLocaleDateString("en-US", {month:"short",day:"numeric",...(local ? {} : {timeZone:"America/New_York"})}) : "—";
+export const sourceTime = (t: number | null | undefined, local = false) => t ? new Date(t).toLocaleTimeString("en-US", {hour:"numeric",minute:"2-digit",...(local ? {timeZoneName:"short"} : {timeZone:"America/New_York"})}) + (local ? "" : " ET") : "—";
 export function Change({ change, percent, className }: { change: number | null; percent: number | null; className?: string }) {
   const tone = change == null || change === 0 ? "text-muted-foreground" : change > 0 ? "text-success" : "text-destructive";
   return <div className={`quote-change ${tone} ${className ?? ""}`}>{change != null && percent != null ? <>{change !== 0 && <Triangle className={change < 0 ? "rotate-180" : ""} />}{change > 0 ? "+" : change < 0 ? "−" : ""}{Math.abs(change).toFixed(2)} ({percent > 0 ? "+" : percent < 0 ? "−" : ""}{Math.abs(percent).toFixed(2)}%)</> : "—"}</div>;
 }
 const initials: Record<Symbol,string> = {NVDA:"NV", AAPL:"AA", MSFT:"MS", AMZN:"AM", GOOGL:"GO", META:"ME", TSLA:"TS"};
 function CompanyButtons({ symbol, setSymbol, quotes }: { symbol: Symbol; setSymbol: (s: Symbol) => void; quotes?: MarketQuote[] }) {
+  const { localTime: lt } = usePrefs();
   return <div className="company-grid" aria-label="Companies">{COMPANIES.map(c => {
     const quote = quotes?.find(q => q.symbol === c.symbol);
     const change = quote?.price != null && quote.previousClose != null ? quote.price - quote.previousClose : null;
@@ -72,8 +75,8 @@ function CompanyButtons({ symbol, setSymbol, quotes }: { symbol: Symbol; setSymb
     const postPercent = postChange != null && quote?.price ? postChange / quote.price * 100 : null;
     return <Button key={c.symbol} variant="ghost" type="button" aria-label={`${c.name} (${c.symbol}) calculator`} aria-pressed={symbol === c.symbol} onClick={() => setSymbol(c.symbol)} className={`company-card company-panel-${c.symbol.toLowerCase()}`}>
       <div className="company-panel"><span className="company-initials">{initials[c.symbol]}</span><div><div className="company-name">{c.name}</div><div className="company-symbol">{c.symbol}</div><div className="company-market-cap">Market cap · {formatMarketCap(quote?.marketCap)}</div></div></div>
-      <div className="quote-section"><div className="quote-meta"><span>{quote?.marketOpen ? "Live" : "Close"}</span><span>{sourceDate(quote?.time)}</span></div><div className="quote-price">{quote?.price != null ? usd(quote.price) : "—"}</div><Change change={change} percent={percent} /><div className="quote-time">{sourceTime(quote?.time)}</div></div>
-      <div className="quote-section off-hours"><div className="quote-meta"><span>Off-Hours</span><span>{sourceDate(quote?.postMarketTime)}</span></div><div className="quote-price">{post != null ? usd(post) : "—"}</div><Change change={postChange} percent={postPercent} /><div className="quote-time">{sourceTime(quote?.postMarketTime)}</div></div>
+      <div className="quote-section"><div className="quote-meta"><span>{quote?.marketOpen ? "Live" : "Close"}</span><span>{sourceDate(quote?.time, lt)}</span></div><div className="quote-price">{quote?.price != null ? usd(quote.price) : "—"}</div><Change change={change} percent={percent} /><div className="quote-time">{sourceTime(quote?.time, lt)} <LocalTimeToggle /></div></div>
+      <div className="quote-section off-hours"><div className="quote-meta"><span>Off-Hours</span><span>{sourceDate(quote?.postMarketTime, lt)}</span></div><div className="quote-price">{post != null ? usd(post) : "—"}</div><Change change={postChange} percent={postPercent} /><div className="quote-time">{sourceTime(quote?.postMarketTime, lt)}</div></div>
     </Button>;
   })}</div>;
 }
@@ -147,6 +150,8 @@ function InvestmentForm({ symbol, open, setOpen }: { symbol: Symbol; open: boole
     catch (err) { if (submittedRevision === revision.current) setError(err instanceof Error ? err.message : "Prices are unavailable. Please try again."); }
     finally { setBusy(false); }
   }
+  const { money: usdFx, note: fxNote } = useDisplayCurrency("USD");
+  const usd = usdFx;
   const card = (title: string, profit: number, roi: number, rows: [string, string][]) => <div className="company-result rounded-lg border border-border p-4">
     <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{title}</div>
     <div className={`mt-1 font-display text-2xl font-semibold tabular-nums ${profit >= 0 ? "text-success" : "text-destructive"}`}>{profit >= 0 ? "+" : ""}{usd(profit)}</div>
@@ -156,6 +161,8 @@ function InvestmentForm({ symbol, open, setOpen }: { symbol: Symbol; open: boole
   return <Dialog open={open} onOpenChange={o => { setOpen(o); if (!o) setResult(null); }}>
       <DialogContent className={`company-dialog pro-dialog company-panel-${symbol.toLowerCase()} max-h-[90dvh] w-[calc(100%-1.5rem)] max-w-3xl overflow-y-auto overflow-x-hidden rounded-lg p-4 sm:p-6`}>
         <DialogHeader className="company-dialog-heading"><div className="pro-heading-row"><span className="company-initials">{initials[symbol]}</span><div><div className="mb-2 text-xs font-semibold uppercase text-muted-foreground">{company?.name} · {symbol}{true ? ` · ${metric && metric !== "profit" ? (metricResult ? "RESULT" : metric.group.toUpperCase()) : "NASDAQ"}` : ""}</div><DialogTitle className="pr-8 font-display text-xl">{metric !== "profit" ? metric?.name ?? `${company?.name} (${symbol}) pro calculator` : `${company?.name} (${symbol}) ${result ? "investment result" : "profit calculator"}`}</DialogTitle></div></div><DialogDescription>{metric == null ? "Choose a calculator." : result ? `${result.shares} ${symbol} shares · ${longDate(result.purchaseDate)} to ${longDate(result.valuationDate)}` : metric && metric !== "profit" ? `${company?.name} financial analysis` : "Enter your dates and shares or amount, then calculate."}</DialogDescription></DialogHeader>
+        {metric == null && <div className="location-row"><LocationButton homeCurrency="USD" /></div>}
+        {result && fxNote && <p className="text-xs text-muted-foreground">{fxNote}</p>}
         {metric == null ? <ProCalculatorChoices onChoose={setMetric} /> : metric && metric !== "profit" ? <FinancialMetricForm key={`${symbol}-${metric.id}`} symbol={symbol} companyName={company?.name} metric={metric} onBack={() => setMetric(null)} onStageChange={setMetricResult} /> : <>
         {<Button variant="link" className="pro-back" onClick={() => { setMetric(null); setResult(null); }}>← All calculators</Button>}
         {!result ? <form className="grid gap-4 sm:grid-cols-2" onSubmit={calculate}>

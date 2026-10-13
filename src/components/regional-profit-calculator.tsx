@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { CalculatorDateField } from "./calculator-date-field";
 import { getRegionalInvestmentResult, getRegionalPurchasePrice } from "@/lib/regional-investment.functions";
 import { longDate } from "@/lib/investment";
+import { useDisplayCurrency } from "./display-prefs";
 
 export function RegionalProfitCalculator({ symbol, onBack, onStageChange }: { symbol: string; onBack: () => void; onStageChange: (results: boolean) => void }) {
   const [startDate, setStartDate] = useState("");
@@ -22,7 +23,9 @@ export function RegionalProfitCalculator({ symbol, onBack, onStageChange }: { sy
   const result = mutation.data;
   const p = price.data;
   const currency = result?.currency ?? p?.currency;
-  const money = (v: number) => `${currency ?? ""} ${v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const local = (v: number) => `${currency ?? ""} ${v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const fx = useDisplayCurrency(currency);
+  const money = result ? fx.money : local;
   const displayedShares = basis === "amount" && p ? String(Number(amount) / p.price) : shares;
   const displayedAmount = basis === "shares" ? p && shares ? String(Math.round(Number(shares) * p.price * 100) / 100) : "" : amount;
   const clear = () => { mutation.reset(); onStageChange(false); };
