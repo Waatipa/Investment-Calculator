@@ -15,6 +15,7 @@ import { Route as AboutUsRouteImport } from './routes/about-us'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ContactUsRouteImport } from './routes/contact-us'
 import { Route as MarketsRouteImport } from './routes/markets'
+import { Route as MiddleEastRouteImport } from './routes/middle-east'
 import { Route as SubscribeRouteImport } from './routes/subscribe'
 import { Route as AuthenticatedAskRouteImport } from './routes/_authenticated/ask'
 import { Route as ApiFilingChatRouteImport } from './routes/api/filing-chat'
@@ -50,6 +51,11 @@ const MarketsRoute = MarketsRouteImport.update({
   path: '/markets',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MiddleEastRoute = MiddleEastRouteImport.update({
+  id: '/middle-east',
+  path: '/middle-east',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SubscribeRoute = SubscribeRouteImport.update({
   id: '/subscribe',
   path: '/subscribe',
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/contact-us': typeof ContactUsRoute
   '/markets': typeof MarketsRoute
+  '/middle-east': typeof MiddleEastRoute
   '/subscribe': typeof SubscribeRoute
   '/ask': typeof AuthenticatedAskRouteWithChildren
   '/api/filing-chat': typeof ApiFilingChatRoute
@@ -95,6 +102,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/contact-us': typeof ContactUsRoute
   '/markets': typeof MarketsRoute
+  '/middle-east': typeof MiddleEastRoute
   '/subscribe': typeof SubscribeRoute
   '/api/filing-chat': typeof ApiFilingChatRoute
   '/ask/$threadId': typeof AuthenticatedAskThreadIdRoute
@@ -108,6 +116,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/contact-us': typeof ContactUsRoute
   '/markets': typeof MarketsRoute
+  '/middle-east': typeof MiddleEastRoute
   '/subscribe': typeof SubscribeRoute
   '/_authenticated/ask': typeof AuthenticatedAskRouteWithChildren
   '/api/filing-chat': typeof ApiFilingChatRoute
@@ -122,6 +131,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/contact-us'
     | '/markets'
+    | '/middle-east'
     | '/subscribe'
     | '/ask'
     | '/api/filing-chat'
@@ -134,6 +144,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/contact-us'
     | '/markets'
+    | '/middle-east'
     | '/subscribe'
     | '/api/filing-chat'
     | '/ask/$threadId'
@@ -146,6 +157,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/contact-us'
     | '/markets'
+    | '/middle-east'
     | '/subscribe'
     | '/_authenticated/ask'
     | '/api/filing-chat'
@@ -160,6 +172,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ContactUsRoute: typeof ContactUsRoute
   MarketsRoute: typeof MarketsRoute
+  MiddleEastRoute: typeof MiddleEastRoute
   SubscribeRoute: typeof SubscribeRoute
   ApiFilingChatRoute: typeof ApiFilingChatRoute
 }
@@ -206,6 +219,13 @@ declare module '@tanstack/react-router' {
       path: '/markets'
       fullPath: '/markets'
       preLoaderRoute: typeof MarketsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/middle-east': {
+      id: '/middle-east'
+      path: '/middle-east'
+      fullPath: '/middle-east'
+      preLoaderRoute: typeof MiddleEastRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/subscribe': {
@@ -277,6 +297,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ContactUsRoute: ContactUsRoute,
   MarketsRoute: MarketsRoute,
+  MiddleEastRoute: MiddleEastRoute,
   SubscribeRoute: SubscribeRoute,
   ApiFilingChatRoute: ApiFilingChatRoute,
 }
