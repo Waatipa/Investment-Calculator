@@ -1,12 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { Menu, Home, UserRound, ChartCandlestick, Mail, Phone, Pencil, GraduationCap } from "lucide-react";
+import { Menu, Home, UserRound, ChartCandlestick, Mail, Phone, Pencil, GraduationCap, MessagesSquare } from "lucide-react";
 import { Sheet, SheetTrigger, SheetContent, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet";
 import { AcademyBrand } from "@/components/academy-brand";
 const menuItems = [
   { to: "/", label: "Home", icon: Home },
   { to: "/about-us", label: "About Us", icon: UserRound },
   { to: "/markets", label: "Markets", icon: ChartCandlestick },
+  { to: "/ask", label: "Ask", icon: MessagesSquare },
   { to: "/subscribe", label: "Subscribe", icon: Mail },
   { to: "/contact-us", label: "Contact Us", icon: Phone },
 ] as const;
