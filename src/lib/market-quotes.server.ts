@@ -1,10 +1,10 @@
 // Yahoo's anonymous data session stays server-only and is never returned to clients.
 let session: { cookie: string; crumb: string; expires: number } | null = null;
 let sessionPending: Promise<{ cookie: string; crumb: string; expires: number }> | null = null;
-let cached: { data: Record<string, unknown>[]; expires: number } | null = null;
-let pending: Promise<Record<string, unknown>[]> | null = null;
+const cache = new Map<string, { data: Record<string, unknown>[]; expires: number }>();
+const pendingBy = new Map<string, Promise<Record<string, unknown>[]>>();
 const headers = { "User-Agent": "Mozilla/5.0", Accept: "*/*" };
-const symbols = "NVDA,AAPL,MSFT,AMZN,GOOGL,META,TSLA";
+const US_SYMBOLS = "NVDA,AAPL,MSFT,AMZN,GOOGL,META,TSLA";
 
 async function getSession() {
   if (session && session.expires > Date.now()) return session;
@@ -24,10 +24,12 @@ async function getSession() {
   try { return await sessionPending; } finally { sessionPending = null; }
 }
 
-export async function fetchCompanyQuotes(): Promise<Record<string, unknown>[]> {
+export async function fetchCompanyQuotes(symbols: string = US_SYMBOLS): Promise<Record<string, unknown>[]> {
+  const cached = cache.get(symbols);
   if (cached && cached.expires > Date.now()) return cached.data;
-  if (pending) return pending;
-  pending = (async () => {
+  const existing = pendingBy.get(symbols);
+  if (existing) return existing;
+  const pending = (async () => {
     for (let attempt = 0; attempt < 2; attempt++) {
       const auth = await getSession();
       const response = await fetch(`https://query2.finance.yahoo.com/v7/finance/quote?symbols=${symbols}&crumb=${encodeURIComponent(auth.crumb)}`, { headers: { ...headers, Cookie: auth.cookie }, signal: AbortSignal.timeout(10000) });
@@ -36,10 +38,11 @@ export async function fetchCompanyQuotes(): Promise<Record<string, unknown>[]> {
       const body: { quoteResponse?: { result?: Record<string, unknown>[] } } = await response.json();
       const data = body.quoteResponse?.result;
       if (!Array.isArray(data)) throw new Error("Quotes unavailable");
-      cached = { data, expires: Date.now() + 1000 };
+      cache.set(symbols, { data, expires: Date.now() + 1000 });
       return data;
     }
     throw new Error("Quotes unavailable");
   })();
-  try { return await pending; } finally { pending = null; }
+  pendingBy.set(symbols, pending);
+  try { return await pending; } finally { pendingBy.delete(symbols); }
 }

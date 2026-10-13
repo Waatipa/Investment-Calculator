@@ -128,3 +128,16 @@ export const getPriceOnDate = createServerFn({ method: "GET" })
     });
     return eligible.length ? eligible[0] ?? null : null;
   });
+
+export type RegionalQuote = MarketQuote & { currency: string | null };
+const ME_SYMBOLS = ["2222.SR", "IHC.AD", "1120.SR", "TAQA.AD", "1211.SR", "ADNOCGAS.AD", "1180.SR", "7010.SR", "FAB.AD", "EMIRATESNBD.AE"] as const;
+export const getMiddleEastQuotes = createServerFn({ method: "GET" }).handler(async (): Promise<RegionalQuote[]> => {
+  const { fetchCompanyQuotes } = await import("./market-quotes.server");
+  const quotes = await fetchCompanyQuotes(ME_SYMBOLS.join(",")).catch(() => []);
+  const positive = (value: unknown) => typeof value === "number" && Number.isFinite(value) && value > 0 ? value : null;
+  return ME_SYMBOLS.map(symbol => {
+    const q = quotes.find(x => x['symbol'] === symbol);
+    const time = positive(q?.['regularMarketTime']);
+    return { symbol, currency: typeof q?.['currency'] === "string" ? q['currency'] as string : null, price: positive(q?.['regularMarketPrice']), time: time == null ? null : time * 1000, opening: positive(q?.['regularMarketOpen']), previousClose: positive(q?.['regularMarketPreviousClose']), marketOpen: q?.['marketState'] === "REGULAR", marketCap: positive(q?.['marketCap']), postMarketPrice: null, postMarketTime: null, preMarketPrice: null, preMarketTime: null };
+  });
+});
