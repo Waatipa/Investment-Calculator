@@ -29,3 +29,4 @@
 - Use a responsive SVG price plot for baseline clipping and source OHLC candles so the chart is visible on first render and both views share the calendar cursor.
 - Source each company's financial-statement figures from SEC EDGAR companyfacts by CIK, with concept aliases and a staleness cutoff (server-side, cached 1h) and tag every auto-filled input with its filing form, filed date and reporting period; unmapped or composite fields stay user-entered.
 - Apple filings Q&A: threads/messages stored per user in Lovable Cloud; /api/filing-chat verifies the bearer and thread ownership, and the model only receives server-built SEC EDGAR references [S#] so answers cite filings rather than invented figures.
+- Fill European calculators from SEC EDGAR 20-F companyfacts for SEC filers (annual only, labeled in the reporting currency), falling back to labeled Yahoo summaries for quarters and non-filers, so filed figures are never mixed up with provider summaries.
