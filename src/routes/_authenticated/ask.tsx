@@ -7,10 +7,10 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { createFilingThread, deleteFilingThread, listFilingThreads } from "@/lib/filing-threads.functions";
-import { pageHead } from "@/lib/markets";
+import { COMPANIES, pageHead } from "@/lib/markets";
 
 export const Route = createFileRoute("/_authenticated/ask")({
-  head: () => pageHead("Ask Apple's filings", "Ask questions about Apple's verified SEC financial figures and get AI explanations that cite each filing."),
+  head: () => pageHead("Ask the filings", "Ask questions about each company's verified SEC financial figures and get AI explanations that cite each filing."),
   component: AskLayout,
 });
 
@@ -25,10 +25,11 @@ function AskLayout() {
   const params = useParams({ strict: false }) as { threadId?: string };
   const { data: threads = [] } = useQuery({ queryKey: threadsKey, queryFn: () => list() });
   const [busy, setBusy] = useState(false);
+  const [symbol, setSymbol] = useState("AAPL");
 
   async function newThread() {
     setBusy(true);
-    try { const t = await create(); await qc.invalidateQueries({ queryKey: threadsKey }); navigate({ to: "/ask/$threadId", params: { threadId: t.id } }); }
+    try { const t = await create({ data: { symbol: symbol as "AAPL" } }); await qc.invalidateQueries({ queryKey: threadsKey }); navigate({ to: "/ask/$threadId", params: { threadId: t.id } }); }
     catch (e) { toast.error(e instanceof Error ? e.message : "Could not start a conversation."); }
     finally { setBusy(false); }
   }
@@ -39,11 +40,16 @@ function AskLayout() {
 
   return <main className="mx-auto grid max-w-6xl gap-4 px-4 py-6 md:grid-cols-[260px_1fr]">
     <aside className="filing-sidebar flex flex-col gap-3 rounded-xl border border-border bg-card/60 p-3 md:h-[calc(100vh-140px)]">
+      <label className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">Company
+        <select value={symbol} onChange={e => setSymbol(e.target.value)} className="h-9 rounded-md border border-border bg-background px-2 text-sm text-foreground" aria-label="Company for new question">
+          {COMPANIES.map(c => <option key={c.symbol} value={c.symbol}>{c.name} ({c.symbol})</option>)}
+        </select>
+      </label>
       <Button onClick={newThread} disabled={busy}><Plus />New question</Button>
       <nav className="flex max-h-48 flex-col gap-1 overflow-y-auto md:max-h-none md:flex-1" aria-label="Your conversations">
         {threads.length === 0 && <p className="px-2 py-3 text-xs text-muted-foreground">No conversations yet.</p>}
         {threads.map(t => <div key={t.id} className={`group flex items-center gap-1 rounded-md ${params.threadId === t.id ? "bg-accent" : "hover:bg-accent/60"}`}>
-          <Link to="/ask/$threadId" params={{ threadId: t.id }} className="flex min-w-0 flex-1 items-center gap-2 px-2 py-2 text-sm text-foreground"><FileText className="size-4 shrink-0 text-primary" /><span className="truncate">{t.title}</span></Link>
+          <Link to="/ask/$threadId" params={{ threadId: t.id }} className="flex min-w-0 flex-1 items-center gap-2 px-2 py-2 text-sm text-foreground"><FileText className="size-4 shrink-0 text-primary" /><span className="truncate">{t.title}</span><span className="ml-auto shrink-0 rounded bg-accent px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">{t.symbol}</span></Link>
           <Button variant="ghost" size="icon" aria-label={`Delete ${t.title}`} onClick={() => del(t.id)}><Trash2 className="size-4" /></Button>
         </div>)}
       </nav>

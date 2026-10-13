@@ -15,5 +15,5 @@ function ThreadPage() {
   if (isLoading) return <p className="p-6 text-sm text-muted-foreground">Loading conversation…</p>;
   if (error) return <p role="alert" className="p-6 text-sm text-destructive">{error.message}</p>;
   if (!data) return <p className="p-6 text-sm text-muted-foreground">This conversation doesn't exist.</p>;
-  return <FilingChat key={threadId} threadId={threadId} initialMessages={data.messages as never} />;
+  return <FilingChat key={threadId} threadId={threadId} symbol={data.thread.symbol ?? "AAPL"} initialMessages={data.messages as never} />;
 }
