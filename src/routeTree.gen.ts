@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AboutUsRouteImport } from './routes/about-us'
+import { Route as AfricaRouteImport } from './routes/africa'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ContactUsRouteImport } from './routes/contact-us'
 import { Route as EuropeRouteImport } from './routes/europe'
@@ -35,6 +36,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AboutUsRoute = AboutUsRouteImport.update({
   id: '/about-us',
   path: '/about-us',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AfricaRoute = AfricaRouteImport.update({
+  id: '/africa',
+  path: '/africa',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -92,6 +98,7 @@ const AuthenticatedAskThreadIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about-us': typeof AboutUsRoute
+  '/africa': typeof AfricaRoute
   '/auth': typeof AuthRoute
   '/contact-us': typeof ContactUsRoute
   '/europe': typeof EuropeRoute
@@ -106,6 +113,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about-us': typeof AboutUsRoute
+  '/africa': typeof AfricaRoute
   '/auth': typeof AuthRoute
   '/contact-us': typeof ContactUsRoute
   '/europe': typeof EuropeRoute
@@ -121,6 +129,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/about-us': typeof AboutUsRoute
+  '/africa': typeof AfricaRoute
   '/auth': typeof AuthRoute
   '/contact-us': typeof ContactUsRoute
   '/europe': typeof EuropeRoute
@@ -137,6 +146,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about-us'
+    | '/africa'
     | '/auth'
     | '/contact-us'
     | '/europe'
@@ -151,6 +161,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about-us'
+    | '/africa'
     | '/auth'
     | '/contact-us'
     | '/europe'
@@ -165,6 +176,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/about-us'
+    | '/africa'
     | '/auth'
     | '/contact-us'
     | '/europe'
@@ -181,6 +193,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AboutUsRoute: typeof AboutUsRoute
+  AfricaRoute: typeof AfricaRoute
   AuthRoute: typeof AuthRoute
   ContactUsRoute: typeof ContactUsRoute
   EuropeRoute: typeof EuropeRoute
@@ -211,6 +224,13 @@ declare module '@tanstack/react-router' {
       path: '/about-us'
       fullPath: '/about-us'
       preLoaderRoute: typeof AboutUsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/africa': {
+      id: '/africa'
+      path: '/africa'
+      fullPath: '/africa'
+      preLoaderRoute: typeof AfricaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -314,6 +334,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AboutUsRoute: AboutUsRoute,
+  AfricaRoute: AfricaRoute,
   AuthRoute: AuthRoute,
   ContactUsRoute: ContactUsRoute,
   EuropeRoute: EuropeRoute,

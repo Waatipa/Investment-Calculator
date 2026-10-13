@@ -166,6 +166,32 @@
   --brand-meta: oklch(0.55 0.2 255);
   --brand-tsla: oklch(0.55 0.22 25);
   --on-brand: oklch(1 0 0);
+  --brand-asml: oklch(0.36 0.12 265);
+  --brand-lvmh: oklch(0.28 0.06 265);
+  --brand-sap: oklch(0.55 0.16 242);
+  --brand-nestle: oklch(0.38 0.045 55);
+  --brand-novo: oklch(0.35 0.11 265);
+  --brand-roche: oklch(0.49 0.17 256);
+  --brand-azn: oklch(0.42 0.15 345);
+  --brand-hsbc: oklch(0.52 0.22 26);
+  --brand-aramco: oklch(0.52 0.13 155);
+  --brand-ihc: oklch(0.43 0.14 260);
+  --brand-rajhi: oklch(0.38 0.13 267);
+  --brand-taqa: oklch(0.45 0.14 253);
+  --brand-maaden: oklch(0.66 0.10 86);
+  --brand-adnoc: oklch(0.43 0.16 262);
+  --brand-snb: oklch(0.43 0.11 170);
+  --brand-stc: oklch(0.44 0.22 302);
+  --brand-fab: oklch(0.38 0.13 260);
+  --brand-enbd: oklch(0.36 0.12 260);
+  --brand-naspers: oklch(0.42 0.14 255);
+  --brand-firstrand: oklch(0.51 0.10 195);
+  --brand-standard: oklch(0.39 0.18 264);
+  --brand-capitec: oklch(0.55 0.22 27);
+  --brand-goldfields: oklch(0.70 0.13 86);
+  --brand-attijari: oklch(0.64 0.19 48);
+  --brand-mtn: oklch(0.85 0.17 90);
+  --brand-dangote: oklch(0.31 0.12 276);
 }
 
 .academy-seal { margin-left: 7px; font-size: 12px; color: var(--primary-deep); vertical-align: middle; }
@@ -439,3 +465,50 @@ body { background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
 @media (prefers-reduced-motion: reduce) { .company-card { transition: none; } .company-card:hover, .company-card:focus-visible, .company-card:active { transform: none; } }
 .pro-figure-source { display: block; margin-top: 4px; font-size: 11px; line-height: 1.35; color: var(--muted-foreground); font-weight: 400; }
 .pro-figure-source a { color: var(--primary); text-decoration: underline; }
+
+/* Regional identities share the same card and calculator semantics. */
+[data-company="ASML.AS"] { --company-brand: var(--brand-asml); }
+[data-company="MC.PA"] { --company-brand: var(--brand-lvmh); }
+[data-company="SAP.DE"] { --company-brand: var(--brand-sap); }
+[data-company="NESN.SW"] { --company-brand: var(--brand-nestle); }
+[data-company="NOVO-B.CO"] { --company-brand: var(--brand-novo); }
+[data-company="RO.SW"] { --company-brand: var(--brand-roche); }
+[data-company="AZN.L"] { --company-brand: var(--brand-azn); }
+[data-company="HSBA.L"] { --company-brand: var(--brand-hsbc); }
+[data-company="2222.SR"] { --company-brand: var(--brand-aramco); }
+[data-company="IHC.AD"] { --company-brand: var(--brand-ihc); }
+[data-company="1120.SR"] { --company-brand: var(--brand-rajhi); }
+[data-company="TAQA.AD"] { --company-brand: var(--brand-taqa); }
+[data-company="1211.SR"] { --company-brand: var(--brand-maaden); }
+[data-company="ADNOCGAS.AD"] { --company-brand: var(--brand-adnoc); }
+[data-company="1180.SR"] { --company-brand: var(--brand-snb); }
+[data-company="7010.SR"] { --company-brand: var(--brand-stc); }
+[data-company="FAB.AD"] { --company-brand: var(--brand-fab); }
+[data-company="EMIRATESNBD.AE"] { --company-brand: var(--brand-enbd); }
+[data-company="NPN.JO"] { --company-brand: var(--brand-naspers); }
+[data-company="FSR.JO"] { --company-brand: var(--brand-firstrand); }
+[data-company="SBK.JO"] { --company-brand: var(--brand-standard); }
+[data-company="CPI.JO"] { --company-brand: var(--brand-capitec); }
+[data-company="GFI.JO"] { --company-brand: var(--brand-goldfields); }
+[data-company="ATW.CS"] { --company-brand: var(--brand-attijari); }
+[data-company="MTN.JO"] { --company-brand: var(--brand-mtn); }
+[data-company="DANGCEM.LG"] { --company-brand: var(--brand-dangote); }
+.company-panel > div { min-width: 0; }
+.company-name, .company-symbol, .company-market-cap { overflow-wrap: anywhere; }
+.company-market-cap { font-size: 10px; line-height: 1.4; margin-top: 5px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.company-panel { min-height: 84px; }
+.regional-country { min-height: 32px; font-size: 10px; color: var(--muted-foreground); }
+.company-dialog.pro-dialog {
+  --primary: color-mix(in oklab, var(--company-brand) 65%, var(--badge-light));
+  --primary-deep: var(--primary);
+  --primary-foreground: var(--badge-dark);
+  --ring: var(--primary);
+  --pro-panel: color-mix(in oklab, var(--company-brand) 14%, var(--pro-surface));
+  --pro-info: color-mix(in oklab, var(--company-brand) 24%, var(--pro-surface));
+  border-top: 5px solid var(--company-brand);
+}
+.company-dialog.pro-dialog .pro-heading-row .company-initials { background: var(--company-brand); color: var(--on-brand); }
+.company-dialog.pro-dialog .pro-result-panel:not(.pro-assessment) { border-top: 3px solid var(--primary); }
+[data-company="1211.SR"] .company-panel { color: var(--badge-dark); }
+[data-company="GFI.JO"] .company-panel, [data-company="MTN.JO"] .company-panel, [data-company="ATW.CS"] .company-panel { color: var(--badge-dark); }
+@media (width < 768px) { .company-panel { min-height: 95px; } .company-market-cap { font-size: 9px; } }

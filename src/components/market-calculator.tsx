@@ -2,7 +2,7 @@ import { Suspense, useEffect, useRef, useState, type FormEvent } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { Triangle, Calculator, LoaderCircle } from "lucide-react";
-import { COMPANIES, quotesQuery, type Symbol } from "@/lib/markets";
+import { COMPANIES, quotesQuery, formatMarketCap, type Symbol } from "@/lib/markets";
 import { usd } from "@/lib/calc";
 import { getInvestmentResult, getPriceOnDate, type MarketQuote } from "@/lib/nvda.functions";
 import { longDate } from "@/lib/investment";
@@ -33,11 +33,12 @@ export function MarketCalculator() {
   </main>;
 }
 
-export function RegionTabs({ active }: { active: "US" | "EUROPE" | "MIDDLE EAST" }) {
+export function RegionTabs({ active }: { active: "US" | "EUROPE" | "MIDDLE EAST" | "AFRICA" }) {
   return <div className="region-tabs" aria-label="Market regions">{["US", "EUROPE", "AFRICA", "ASIA", "AUSTRALIA", "MIDDLE EAST"].map(region => {
     const cls = region === active ? "region-active" : "";
     if (region === "US") return <Button key={region} variant="outline" className={cls} asChild><Link to="/markets" aria-current={active === region ? "page" : undefined}>{region}</Link></Button>;
     if (region === "EUROPE") return <Button key={region} variant="outline" className={cls} asChild><Link to="/europe" aria-current={active === region ? "page" : undefined}>{region}</Link></Button>;
+    if (region === "AFRICA") return <Button key={region} variant="outline" className={cls} asChild><Link to="/africa" aria-current={active === region ? "page" : undefined}>{region}</Link></Button>;
     if (region === "MIDDLE EAST") return <Button key={region} variant="outline" className={cls} asChild><Link to="/middle-east" aria-current={active === region ? "page" : undefined}>{region}</Link></Button>;
     return <Button key={region} variant="outline" className={cls}>{region}</Button>;
   })}</div>;
@@ -70,7 +71,7 @@ function CompanyButtons({ symbol, setSymbol, quotes }: { symbol: Symbol; setSymb
     const postChange = post != null && quote?.price != null ? post - quote.price : null;
     const postPercent = postChange != null && quote?.price ? postChange / quote.price * 100 : null;
     return <Button key={c.symbol} variant="ghost" type="button" aria-label={`${c.name} (${c.symbol}) calculator`} aria-pressed={symbol === c.symbol} onClick={() => setSymbol(c.symbol)} className={`company-card company-panel-${c.symbol.toLowerCase()}`}>
-      <div className="company-panel"><span className="company-initials">{initials[c.symbol]}</span><div><div className="company-name">{c.name}</div><div className="company-symbol">{c.symbol}</div></div></div>
+      <div className="company-panel"><span className="company-initials">{initials[c.symbol]}</span><div><div className="company-name">{c.name}</div><div className="company-symbol">{c.symbol}</div><div className="company-market-cap">Market cap · {formatMarketCap(quote?.marketCap)}</div></div></div>
       <div className="quote-section"><div className="quote-meta"><span>{quote?.marketOpen ? "Live" : "Close"}</span><span>{sourceDate(quote?.time)}</span></div><div className="quote-price">{quote?.price != null ? usd(quote.price) : "—"}</div><Change change={change} percent={percent} /><div className="quote-time">{sourceTime(quote?.time)}</div></div>
       <div className="quote-section off-hours"><div className="quote-meta"><span>Off-Hours</span><span>{sourceDate(quote?.postMarketTime)}</span></div><div className="quote-price">{post != null ? usd(post) : "—"}</div><Change change={postChange} percent={postPercent} /><div className="quote-time">{sourceTime(quote?.postMarketTime)}</div></div>
     </Button>;
