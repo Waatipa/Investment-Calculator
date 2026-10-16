@@ -740,3 +740,15 @@ html, body { max-width: 100%; overflow-x: hidden; overscroll-behavior-x: none; }
   table { display: block; max-width: 100%; overflow-x: auto; }
   pre { white-space: pre-wrap; }
 }
+
+/* Ask Investments additions retain the existing categories, bubbles and question picker. */
+.ask-compose { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--border); }
+.ask-compose input { flex: 1; min-width: 0; border: 1px solid var(--border); border-radius: 6px; background: var(--background); color: var(--foreground); padding: 8px 10px; }
+.ask-editable { outline: none; overflow-wrap: anywhere; }
+.ask-editable:focus { box-shadow: 0 0 0 1px var(--ring); border-radius: 4px; }
+.ask-log { min-height: 90px; }
+.ask-picker { flex-shrink: 0; min-width: 0; }
+.ask-cats button { height: auto; }
+.ask-qs button { height: auto; white-space: normal; font-weight: 400; }
+.ask-bubble { flex-shrink: 0; }
+@media (prefers-reduced-motion: reduce) { .ask-typing span { animation: none; } }
