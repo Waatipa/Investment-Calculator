@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AboutUsRouteImport } from './routes/about-us'
 import { Route as AfricaRouteImport } from './routes/africa'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as CompareRouteImport } from './routes/compare'
 import { Route as ContactUsRouteImport } from './routes/contact-us'
 import { Route as EuropeRouteImport } from './routes/europe'
 import { Route as MarketsRouteImport } from './routes/markets'
@@ -46,6 +47,11 @@ const AfricaRoute = AfricaRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompareRoute = CompareRouteImport.update({
+  id: '/compare',
+  path: '/compare',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactUsRoute = ContactUsRouteImport.update({
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/about-us': typeof AboutUsRoute
   '/africa': typeof AfricaRoute
   '/auth': typeof AuthRoute
+  '/compare': typeof CompareRoute
   '/contact-us': typeof ContactUsRoute
   '/europe': typeof EuropeRoute
   '/markets': typeof MarketsRoute
@@ -115,6 +122,7 @@ export interface FileRoutesByTo {
   '/about-us': typeof AboutUsRoute
   '/africa': typeof AfricaRoute
   '/auth': typeof AuthRoute
+  '/compare': typeof CompareRoute
   '/contact-us': typeof ContactUsRoute
   '/europe': typeof EuropeRoute
   '/markets': typeof MarketsRoute
@@ -131,6 +139,7 @@ export interface FileRoutesById {
   '/about-us': typeof AboutUsRoute
   '/africa': typeof AfricaRoute
   '/auth': typeof AuthRoute
+  '/compare': typeof CompareRoute
   '/contact-us': typeof ContactUsRoute
   '/europe': typeof EuropeRoute
   '/markets': typeof MarketsRoute
@@ -148,6 +157,7 @@ export interface FileRouteTypes {
     | '/about-us'
     | '/africa'
     | '/auth'
+    | '/compare'
     | '/contact-us'
     | '/europe'
     | '/markets'
@@ -163,6 +173,7 @@ export interface FileRouteTypes {
     | '/about-us'
     | '/africa'
     | '/auth'
+    | '/compare'
     | '/contact-us'
     | '/europe'
     | '/markets'
@@ -178,6 +189,7 @@ export interface FileRouteTypes {
     | '/about-us'
     | '/africa'
     | '/auth'
+    | '/compare'
     | '/contact-us'
     | '/europe'
     | '/markets'
@@ -195,6 +207,7 @@ export interface RootRouteChildren {
   AboutUsRoute: typeof AboutUsRoute
   AfricaRoute: typeof AfricaRoute
   AuthRoute: typeof AuthRoute
+  CompareRoute: typeof CompareRoute
   ContactUsRoute: typeof ContactUsRoute
   EuropeRoute: typeof EuropeRoute
   MarketsRoute: typeof MarketsRoute
@@ -238,6 +251,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/compare': {
+      id: '/compare'
+      path: '/compare'
+      fullPath: '/compare'
+      preLoaderRoute: typeof CompareRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact-us': {
@@ -336,6 +356,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutUsRoute: AboutUsRoute,
   AfricaRoute: AfricaRoute,
   AuthRoute: AuthRoute,
+  CompareRoute: CompareRoute,
   ContactUsRoute: ContactUsRoute,
   EuropeRoute: EuropeRoute,
   MarketsRoute: MarketsRoute,
