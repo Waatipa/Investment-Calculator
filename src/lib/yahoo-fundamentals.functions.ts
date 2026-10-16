@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import type { VerifiedFigure } from "./sec-facts.functions";
 
-export const ME_FUNDAMENTAL_SYMBOLS = ["2222.SR", "IHC.AD", "1120.SR", "TAQA.AD", "1211.SR", "ADNOCGAS.AD", "1180.SR", "7010.SR", "FAB.AD", "EMIRATESNBD.AE"] as const;
+export const ME_FUNDAMENTAL_SYMBOLS = ["2222.SR", "IHC.AD", "1120.SR", "TAQA.AD", "1211.SR", "ADNOCGAS.AD", "1180.SR", "7010.SR", "FAB.AD", "EMIRATESNBD.AE", "MASQ.AE"] as const;
 export const AF_FUNDAMENTAL_SYMBOLS = ["NPN.JO", "FSR.JO", "SBK.JO", "CPI.JO", "GFI.JO", "ATW.CS", "MTN.JO", "DANGCEM.LG"] as const;
 
 type Obs = { asOfDate: string; currencyCode?: string; reportedValue?: { raw?: number } };
