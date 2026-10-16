@@ -43,8 +43,8 @@ describe("Linked investment calculator", () => {
   });
   it("matches reference labels and never invents missing off-hours prices", () => {
     const client = mount();
-    expect(screen.getAllByText("Close")).toHaveLength(7);
-    expect(screen.getAllByText("Off-Hours")).toHaveLength(7);
+    expect(screen.getAllByText("Close")).toHaveLength(8);
+    expect(screen.getAllByText("Off-Hours")).toHaveLength(8);
     expect(screen.getByRole("button", { name: /^Calculate$/ })).toBeInTheDocument();
     document.querySelectorAll(".off-hours .quote-price").forEach(price => expect(price).toHaveTextContent("—"));
     client.clear();

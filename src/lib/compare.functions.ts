@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { COMPARE_SYMBOLS, MAX_FREE_COMPARE, type UsdPoint } from "./compare";
 import { tradingDate } from "./investment";
+import { isListingObservation, requireListingDate } from "./us-listings";
 
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(v => { const d = new Date(`${v}T00:00:00Z`); return Number.isFinite(d.getTime()) && d.toISOString().slice(0, 10) === v; }, "Enter a valid date.");
 const input = z.object({
@@ -40,6 +41,8 @@ export const getComparison = createServerFn({ method: "GET" })
       return fxCache.get(cur)!;
     };
     return Promise.all(data.symbols.map(async (symbol): Promise<CompareSeries> => {
+      try { requireListingDate(symbol, data.start); }
+      catch (error) { return { symbol, currency: "USD", points: [], fx: null, latest: null, error: error instanceof Error ? error.message : "Investment date predates this listing." }; }
       const c = await chart(symbol, from, to);
       const raw = c?.meta?.currency, tz = c?.meta?.exchangeTimezoneName;
       if (!c || !raw || !tz) return { symbol, currency: raw ?? "", points: [], fx: null, latest: null, error: "Historical prices are unavailable from the data provider for this listing." };
@@ -50,7 +53,7 @@ export const getComparison = createServerFn({ method: "GET" })
       const q = c.indicators?.quote?.[0];
       let local = (c.timestamp ?? []).flatMap((t, i) => {
         const cl = q?.close?.[i];
-        if (!ok(cl)) return [];
+        if (!ok(cl) || !isListingObservation(symbol, t * 1000)) return [];
         const h = q?.high?.[i], l = q?.low?.[i];
         return [{ t: t * 1000, date: tradingDate(t * 1000, tz), c: cl / divisor, h: (ok(h) ? Math.max(h, cl) : cl) / divisor, l: (ok(l) ? Math.min(l, cl) : cl) / divisor }];
       }).filter(p => p.date >= data.start && p.date <= data.end);
