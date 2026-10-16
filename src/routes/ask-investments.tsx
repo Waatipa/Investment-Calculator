@@ -54,6 +54,19 @@ function AskInvestments() {
     setDraft("");
   }
 
+  async function shareAnswer(m: Msg, channel: "whatsapp" | "facebook" | "x" | "copy") {
+    const pageUrl = window.location.href;
+    const question = m.number ? `Question #${m.number}` : "Investico answer";
+    const text = `${question} — ${m.text}\n\nInvestico Academy: ${pageUrl}`;
+    if (channel === "whatsapp") window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener");
+    else if (channel === "facebook") window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}&quote=${encodeURIComponent(text)}`, "_blank", "noopener");
+    else if (channel === "x") window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, "_blank", "noopener");
+    else {
+      if (navigator.share) { try { await navigator.share({ title: question, text: m.text, url: pageUrl }); return; } catch { /* user cancelled */ } }
+      try { await navigator.clipboard.writeText(text); } catch { /* clipboard unavailable */ }
+    }
+  }
+
   const list = QAS.filter(x => cat === "All" || x.cat === cat);
   return <main className="ask-shell">
     <h1 className="font-[Lora,Georgia,serif] text-3xl font-bold">Ask Investments</h1>
@@ -87,6 +100,6 @@ function AskInvestments() {
         <div className="ask-qs">{list.map(x => <Button variant="ghost" key={x.q} type="button" disabled={busy} title={x.volume === null ? "Search volume unknown · provisional position" : `${x.volume.toLocaleString()} estimated Google searches/month · UAE · Semrush`} onClick={() => ask(x.q, x.a, x.cat, x.number)}>#{x.number} {x.q}</Button>)}</div>
       </div>
     </div>
-    <p className="info-fine mt-3">Educational information only, not financial advice. Examples are hypothetical. Edits are private to this open conversation, not verified source content or saved changes.</p>
+    <p className="info-fine mt-3">Educational information only, not financial advice. Examples are hypothetical.</p>
   </main>;
 }
