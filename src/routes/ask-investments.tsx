@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Send } from "lucide-react";
+import { Facebook, Link2, MessageCircle, Send, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { pageHead } from "@/lib/markets";
 import { CATEGORY_GUIDES, CATEGORIES, QAS, findQuestion, guideForQuestion, type Category } from "@/lib/ask-investments";
@@ -64,10 +64,16 @@ function AskInvestments() {
         {msgs.map((m, i) => <div key={i} className={`ask-bubble ${m.role === "user" ? "ask-user" : "ask-bot"}`}>
           {m.role === "bot" && m.category ? <>
             {m.number && <p className="mb-1 text-xs text-muted-foreground">Question #{m.number}</p>}
-            <div role="textbox" aria-label={`Editable answer ${m.number ? `for question ${m.number}` : i}`} aria-multiline="true" contentEditable suppressContentEditableWarning className="ask-editable" onBlur={e => { const value = e.currentTarget.textContent ?? ""; setMsgs(items => items.map((item, index) => index === i ? { ...item, text: value } : item)); }}>{m.text}</div>
+            <div className="ask-answer">{m.text}</div>
             <Link to={CATEGORY_GUIDES[m.category].to} className="mt-2 inline-block text-primary underline">{CATEGORY_GUIDES[m.category].label}</Link>
             <details className="mt-2 text-xs"><summary className="cursor-pointer text-muted-foreground">Steps to explore this on Investico</summary><p className="mt-2">{CATEGORY_GUIDES[m.category].steps}</p></details>
-            <Button variant="ghost" size="sm" className="mt-1" disabled={busy} onClick={e => submitManual(e.currentTarget.closest('.ask-bubble')?.querySelector('[contenteditable="true"]')?.textContent ?? m.text)}>Ask using this text</Button>
+            <div className="ask-share" aria-label="Share this answer">
+              <span className="ask-share-label">Share this answer:</span>
+              <Button variant="ghost" size="icon-sm" aria-label="Share on WhatsApp" onClick={() => shareAnswer(m, "whatsapp")}><MessageCircle /></Button>
+              <Button variant="ghost" size="icon-sm" aria-label="Share on Facebook" onClick={() => shareAnswer(m, "facebook")}><Facebook /></Button>
+              <Button variant="ghost" size="icon-sm" aria-label="Share on X" onClick={() => shareAnswer(m, "x")}><Share2 /></Button>
+              <Button variant="ghost" size="icon-sm" aria-label="Copy answer link" onClick={() => shareAnswer(m, "copy")}><Link2 /></Button>
+            </div>
           </> : m.text}
         </div>)}
         {typing !== null && <div className="ask-bubble ask-bot">{typing === "" ? <span className="ask-typing" aria-label="Typing"><span /><span /><span /></span> : typing}</div>}
