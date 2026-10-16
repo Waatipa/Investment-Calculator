@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useRef, useState, type FormEvent } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Triangle, Calculator, LoaderCircle } from "lucide-react";
+import { Triangle, Calculator, LoaderCircle, ArrowLeftRight } from "lucide-react";
 import { COMPANIES, quotesQuery, formatMarketCap, type Symbol } from "@/lib/markets";
 import { usd } from "@/lib/calc";
 import { getInvestmentResult, getPriceOnDate, type MarketQuote } from "@/lib/nvda.functions";
@@ -53,6 +53,12 @@ export function MarketArtwork() {
 function LiveCompanies({ symbol, setSymbol }: { symbol: Symbol; setSymbol: (s: Symbol) => void }) {
   const { data } = useSuspenseQuery(quotesQuery());
   return <><CompanyButtons symbol={symbol} setSymbol={setSymbol} quotes={data} /><p className="market-footer">Market data provided by Yahoo Finance. Data may be delayed. Prices in USD.</p></>;
+}
+function LiveStamp() {
+  const { data } = useSuspenseQuery(quotesQuery());
+  const t = data.find(q => q.time != null)?.time;
+  const { localTime: lt } = usePrefs();
+  return <p className="intro-side-stamp">Live prices · {sourceDate(t, lt)}, {sourceTime(t, lt)}</p>;
 }
 export const sourceDate = (t: number | null | undefined, local = false) => t ? new Date(t).toLocaleDateString("en-US", {month:"short",day:"numeric",...(local ? {} : {timeZone:"America/New_York"})}) : "—";
 export const sourceTime = (t: number | null | undefined, local = false) => t ? new Date(t).toLocaleTimeString("en-US", {hour:"numeric",minute:"2-digit",...(local ? {timeZoneName:"short"} : {timeZone:"America/New_York"})}) + (local ? "" : " ET") : "—";
