@@ -1,4 +1,5 @@
 # Website update
+- [ ] Verify SpaceX's public listing and add its US card with genuine quotes, company overview and existing calculators; exclude history belonging to the previous SPCX security.
 - [x] Expand Ask Investments to 200 retained/new questions with simple examples, evidence-based or labeled provisional numbering, editable answers and manual entry; verify category preservation and mobile/desktop flow (38 tests passed).
 - [x] Add top-positioned profit calculators to every regional company using real historical/current quotes, correct currencies and exchange dates.
 - [x] Verify regional profit, linked amount, calendars, unavailable-data handling and existing tests (31 passed); source coverage gaps block calculations honestly.
