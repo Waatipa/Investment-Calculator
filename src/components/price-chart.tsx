@@ -1,3 +1,4 @@
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useId, useRef } from "react";
 import { usd } from "@/lib/calc";
 
@@ -6,7 +7,8 @@ export type PricePoint = { t: number; c: number; o: number | null; h: number | n
 export function PriceChart({ points, previousClose, index, onSelect, candles, dateLabel, marketOpen }: { points: PricePoint[]; previousClose: number | null; index: number; onSelect: (i: number) => void; candles: boolean; dateLabel: (t: number) => string; marketOpen: boolean }) {
   const id = useId().replace(/:/g, "");
   const dragging = useRef(false);
-  const width = 1000, height = 370, left = 12, right = 890, top = 30, bottom = 325;
+  const k = useIsMobile() ? 2.3 : 1.3;
+  const width = 1000, height = k > 2 ? 640 : 400, left = 12, right = 1000 - Math.round(100 * k), top = 30, bottom = height - 45 * k;
   const prices = points.flatMap(p => candles ? [p.c, p.h ?? p.c, p.l ?? p.c] : [p.c]);
   if (previousClose != null) prices.push(previousClose);
   const low = Math.min(...prices), high = Math.max(...prices);
@@ -32,8 +34,8 @@ export function PriceChart({ points, previousClose, index, onSelect, candles, da
       <linearGradient id={`${id}-green`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--success)" stopOpacity=".3"/><stop offset="100%" stopColor="var(--success)" stopOpacity=".06"/></linearGradient>
       <linearGradient id={`${id}-red`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--destructive)" stopOpacity=".06"/><stop offset="100%" stopColor="var(--destructive)" stopOpacity=".3"/></linearGradient>
     </defs>
-    {[0,1,2,3,4].map(i => { const value = min + (max - min) * i / 4; return <g key={i}><line x1={left} x2={right} y1={y(value)} y2={y(value)} stroke="var(--border)"/><text x={right + 12} y={y(value) + 4} fill="var(--muted-foreground)" fontSize="12">{usd(value)}</text></g>; })}
-    {previousClose != null && <g><line x1={left} x2={right} y1={baseline} y2={baseline} stroke="var(--muted-foreground)" strokeDasharray="5 5"/><text x={left + 4} y={Math.max(16, baseline - 8)} fill="var(--muted-foreground)" fontSize="11">Previous close {usd(previousClose)}</text></g>}
+    {[0,1,2,3,4].map(i => { const value = min + (max - min) * i / 4; return <g key={i}><line x1={left} x2={right} y1={y(value)} y2={y(value)} stroke="var(--border)"/><text x={right + 12} y={y(value) + 4} fill="var(--muted-foreground)" fontSize={k * 12}>{usd(value)}</text></g>; })}
+    {previousClose != null && <g><line x1={left} x2={right} y1={baseline} y2={baseline} stroke="var(--muted-foreground)" strokeDasharray="5 5"/><text x={left + 4} y={Math.max(16, baseline - 8)} fill="var(--muted-foreground)" fontSize={k * 11}>Previous close {usd(previousClose)}</text></g>}
     {candles ? <g data-chart="candles">{points.map((p,i) => {
       if (p.o == null || p.h == null || p.l == null) return null;
       const color = p.c >= p.o ? "var(--success)" : "var(--destructive)";
@@ -41,6 +43,6 @@ export function PriceChart({ points, previousClose, index, onSelect, candles, da
     })}</g> : <g data-chart="line"><path d={area} fill={`url(#${id}-green)`} clipPath={`url(#${id}-up)`}/><path d={area} fill={`url(#${id}-red)`} clipPath={`url(#${id}-down)`}/><path d={line} fill="none" stroke="var(--success)" strokeWidth="2" clipPath={`url(#${id}-up)`}/><path d={line} fill="none" stroke="var(--destructive)" strokeWidth="2" clipPath={`url(#${id}-down)`}/></g>}
     {last && <g><line x1={x(points.length-1)} x2={right} y1={y(last.c)} y2={y(last.c)} stroke={previousClose != null && last.c < previousClose ? "var(--destructive)" : "var(--success)"} strokeDasharray="4 4"/><circle cx={x(points.length-1)} cy={y(last.c)} r="4" fill="var(--success)" className={marketOpen ? "market-endpoint" : ""}/></g>}
     {selected && <g><line x1={x(index)} x2={x(index)} y1={top} y2={bottom} stroke="var(--primary-deep)" strokeWidth="2" strokeDasharray="3 4"/><circle cx={x(index)} cy={y(selected.c)} r="5" fill="var(--primary-deep)" stroke="var(--background)" strokeWidth="2"/></g>}
-    {[0,.25,.5,.75,1].map((v,i) => { const p=points[Math.round(v*(points.length-1))]; return p ? <text key={i} x={x(Math.round(v*(points.length-1)))} y={bottom+28} textAnchor={i===0 ? "start" : i===4 ? "end" : "middle"} fontSize="11" fill="var(--muted-foreground)">{dateLabel(p.t)}</text> : null; })}
+    {[0,.25,.5,.75,1].map((v,i) => { const p=points[Math.round(v*(points.length-1))]; return p ? <text key={i} x={x(Math.round(v*(points.length-1)))} y={bottom+28*k} textAnchor={i===0 ? "start" : i===4 ? "end" : "middle"} fontSize={k * 11} fill="var(--muted-foreground)">{dateLabel(p.t)}</text> : null; })}
   </svg>;
 }

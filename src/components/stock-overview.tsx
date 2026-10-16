@@ -1,3 +1,4 @@
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useRef, useState } from "react";
 import { ChartSettingsMenu, ChartTypeSwitch } from "@/components/chart-settings";
 import { chartColors, useChartSettings } from "@/lib/chart-settings";
@@ -92,7 +93,8 @@ function OverviewChartView({ c, cur }: { c: OverviewChart; cur: string | null })
   const st = useChartSettings(), col = chartColors(st);
   const [hover, setHover] = useState<number | null>(null);
   const drag = useRef(false);
-  const pts = c.points, W = 1000, H = 440, L = 10, R = st.priceLabels ? 880 : 990, T = 30, B = st.volume ? 330 : 400, VB = 420;
+  const k = useIsMobile() ? 2.3 : 1.3;
+  const pts = c.points, W = 1000, H = Math.round(k > 2 ? 820 : 500), L = 10, R = st.priceLabels ? W - Math.round(115 * k) : 990, T = 30 * k, B = H - (st.volume ? 110 : 40) * k, VB = H - 20 * k;
   const ohlc = st.type === "candle" || st.type === "bar";
   const vals = pts.flatMap(p => ohlc ? [p.h ?? p.c, p.l ?? p.c] : [p.c]); if (c.previousClose) vals.push(c.previousClose);
   const lo = Math.min(...vals), hi = Math.max(...vals), pad = (hi - lo) * .08 || hi * .01;
@@ -124,21 +126,21 @@ function OverviewChartView({ c, cur }: { c: OverviewChart; cur: string | null })
       onPointerDown={e => { if (!st.crosshair) return; drag.current = true; e.currentTarget.setPointerCapture(e.pointerId); pick(e); }}
       onPointerMove={e => { if (st.crosshair && (drag.current || e.pointerType === "mouse")) pick(e); }}
       onPointerUp={() => { drag.current = false; }} onPointerLeave={() => { if (!drag.current) setHover(null); }}>
-      {ticks.map((v, i) => <g key={i}>{st.gridH && <line x1={L} x2={R} y1={y(v)} y2={y(v)} stroke={col.grid} />}{st.priceLabels && <text x={R + 10} y={y(v) + 4} fontSize="13" fill={col.muted}>{v.toFixed(v < 10 ? 2 : 0)}</text>}</g>)}
+      {ticks.map((v, i) => <g key={i}>{st.gridH && <line x1={L} x2={R} y1={y(v)} y2={y(v)} stroke={col.grid} />}{st.priceLabels && <text x={R + 10} y={y(v) + 4 * k} fontSize={13 * k} fill={col.muted}>{v.toFixed(v < 10 ? 2 : 0)}</text>}</g>)}
       {st.gridV && xTicks.map((t, i) => <line key={i} x1={xt(t)} x2={xt(t)} y1={T} y2={VB} stroke={col.grid} />)}
-      {c.previousClose != null && <g><line x1={L} x2={R} y1={y(c.previousClose)} y2={y(c.previousClose)} stroke={col.muted} strokeDasharray="5 5" /><text x={L + 4} y={y(c.previousClose) - 6} fontSize="12" fill={col.muted}>{c.intraday ? "Prev close" : "Start"} {c.previousClose.toFixed(2)}</text></g>}
-      {st.volume && pts.map((p, i) => p.v ? <rect key={`v${i}`} x={x(i) - bw / 2} width={bw} y={VB - p.v / vmax * 70} height={p.v / vmax * 70} fill={st.trend} opacity=".35" /> : null)}
+      {c.previousClose != null && <g><line x1={L} x2={R} y1={y(c.previousClose)} y2={y(c.previousClose)} stroke={col.muted} strokeDasharray="5 5" /><text x={L + 4} y={y(c.previousClose) - 6} fontSize={12 * k} fill={col.muted}>{c.intraday ? "Prev close" : "Start"} {c.previousClose.toFixed(2)}</text></g>}
+      {st.volume && pts.map((p, i) => p.v ? <rect key={`v${i}`} x={x(i) - bw / 2} width={bw} y={VB - p.v / vmax * 70 * k} height={p.v / vmax * 70 * k} fill={st.trend} opacity=".35" /> : null)}
       {st.type === "candle" ? pts.map((p, i) => { if (p.o == null || p.h == null || p.l == null) return null; const up = p.c >= p.o; return <g key={i}><line x1={x(i)} x2={x(i)} y1={y(p.h)} y2={y(p.l)} stroke={up ? st.bullWick : st.bearWick} strokeWidth="1" /><rect x={x(i) - bw / 2} width={bw} y={y(Math.max(p.o, p.c))} height={Math.max(1, Math.abs(y(p.o) - y(p.c)))} fill={up ? st.bullBody : st.bearBody} stroke={up ? st.bullBorder : st.bearBorder} strokeWidth=".8" /></g>; })
         : st.type === "bar" ? pts.map((p, i) => { if (p.o == null || p.h == null || p.l == null) return null; const up = p.c >= p.o, k = up ? st.bullBorder : st.bearBorder, w = Math.max(1.5, bw); return <g key={i} stroke={k} strokeWidth="1.2"><line x1={x(i)} x2={x(i)} y1={y(p.h)} y2={y(p.l)} /><line x1={x(i) - w} x2={x(i)} y1={y(p.o)} y2={y(p.o)} /><line x1={x(i)} x2={x(i) + w} y1={y(p.c)} y2={y(p.c)} /></g>; })
         : <>{st.type === "area" && <path d={`${line} L${x(pts.length - 1)},${B} L${x(0)},${B} Z`} fill={st.trend} opacity=".18" />}<path d={line} fill="none" stroke={st.trend} strokeWidth="2" /></>}
-      <text x={x(hiI)} y={y(pts[hiI]!.h ?? pts[hiI]!.c) - 8} fontSize="13" fill={col.fg} textAnchor={x(hiI) > R * .8 ? "end" : "start"}>High {(pts[hiI]!.h ?? pts[hiI]!.c).toFixed(2)}</text>
-      <text x={x(loI)} y={y(pts[loI]!.l ?? pts[loI]!.c) + 18} fontSize="13" fill={col.fg} textAnchor={x(loI) > R * .8 ? "end" : "start"}>Low {(pts[loI]!.l ?? pts[loI]!.c).toFixed(2)}</text>
+      <text x={x(hiI)} y={y(pts[hiI]!.h ?? pts[hiI]!.c) - 8} fontSize={13 * k} fill={col.fg} textAnchor={x(hiI) > R * .8 ? "end" : "start"}>High {(pts[hiI]!.h ?? pts[hiI]!.c).toFixed(2)}</text>
+      <text x={x(loI)} y={y(pts[loI]!.l ?? pts[loI]!.c) + 18} fontSize={13 * k} fill={col.fg} textAnchor={x(loI) > R * .8 ? "end" : "start"}>Low {(pts[loI]!.l ?? pts[loI]!.c).toFixed(2)}</text>
       <line x1={x(pts.length - 1)} x2={R} y1={y(last.c)} y2={y(last.c)} stroke={st.trend} strokeDasharray="3 3" />
       {ses && <circle cx={x(pts.length - 1)} cy={y(last.c)} r="4" fill={st.trend} className="market-endpoint" />}
-      {st.priceLabels && <><rect x={R + 2} y={y(last.c) - 11} width="96" height="22" rx="4" fill={st.trend} /><text x={R + 50} y={y(last.c) + 5} fontSize="13" fontWeight="700" textAnchor="middle" fill="#ffffff">{last.c.toFixed(2)}</text></>}
+      {st.priceLabels && <><rect x={R + 2} y={y(last.c) - 11 * k} width={96 * k} height={22 * k} rx="4" fill={st.trend} /><text x={R + 2 + 48 * k} y={y(last.c) + 5 * k} fontSize={13 * k} fontWeight="700" textAnchor="middle" fill="#ffffff">{last.c.toFixed(2)}</text></>}
       {hover != null && <g><line x1={x(hover)} x2={x(hover)} y1={T} y2={VB} stroke={col.fg} strokeDasharray="2 3" opacity=".7" /><line x1={L} x2={R} y1={y(sel.c)} y2={y(sel.c)} stroke={col.fg} strokeDasharray="2 3" opacity=".5" /><circle cx={x(hover)} cy={y(sel.c)} r="4" fill={st.trend} stroke={col.bg} strokeWidth="1.5" />
-        {st.priceLabels && <><rect x={R + 2} y={y(sel.c) - 11} width="96" height="22" rx="4" fill={col.fg} /><text x={R + 50} y={y(sel.c) + 5} fontSize="13" fontWeight="700" textAnchor="middle" fill={col.bg}>{sel.c.toFixed(2)}</text></>}</g>}
-      {xTicks.map((t, i) => <text key={i} x={xt(t)} y={H - 2} fontSize="12" fill={col.muted} textAnchor={i === 0 ? "start" : i === 4 ? "end" : "middle"}>{fmt(t)}</text>)}
+        {st.priceLabels && <><rect x={R + 2} y={y(sel.c) - 11 * k} width={96 * k} height={22 * k} rx="4" fill={col.fg} /><text x={R + 2 + 48 * k} y={y(sel.c) + 5 * k} fontSize={13 * k} fontWeight="700" textAnchor="middle" fill={col.bg}>{sel.c.toFixed(2)}</text></>}</g>}
+      {xTicks.map((t, i) => <text key={i} x={xt(t)} y={H - 4} fontSize={12 * k} fill={col.muted} textAnchor={i === 0 ? "start" : i === 4 ? "end" : "middle"}>{fmt(t)}</text>)}
     </svg>
     <span className="sr-only">{money(last.c, cur)}</span>
   </div>;
