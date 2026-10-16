@@ -26,8 +26,8 @@ export function MarketCalculator() {
   return <main className="market-page">
     <section className="reference-intro">
       <div className="reference-copy"><h1>How? When? How Much?<br />Should I Start Investing?</h1>
-      <p>Get a free course at Investico Academy to sharpen your skill in choosing the best companies to invest in. Use our <Button variant="link" className="inline-link" onClick={() => setOpen(true)}>investment calculator</Button> to work out your target profit based on the historical returns of the stock you have chosen.</p>
-      <p>Need help? <Button variant="link" className="inline-link" asChild><Link to="/contact-us">Email us</Link></Button> and we will guide you step by step to build a portfolio and make your first investment.</p>
+      <p>Access free educational courses at Investico Academy to sharpen your skills in market research. Use our <Button variant="link" className="inline-link" onClick={() => setOpen(true)}>historical investment calculator</Button> to analyze past stock trends and see how different assets performed over time.</p>
+      <p>Need help? <Button variant="link" className="inline-link" asChild><Link to="/contact-us">Email us</Link></Button> and our team will guide you step by step to navigate our platform and tools.</p>
       <div className="intro-actions"><Button>Start Free Course</Button><Button onClick={() => setOpen(true)}>Calculate</Button><Button className="btn-gold">Invest Now</Button></div>
       <Button className="compare-stocks" asChild><Link to="/compare"><ArrowLeftRight />Compare Stocks</Link></Button>
       </div><div className="intro-side"><RegionTabs active="US" /><Suspense fallback={null}><LiveStamp /></Suspense><p className="intro-side-note">Choose a region to browse companies, then press Compare Stocks to see how they performed over your chosen dates.</p></div>
