@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { ChartSettingsMenu, ChartTypeSwitch } from "@/components/chart-settings";
+import { chartColors, useChartSettings } from "@/lib/chart-settings";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,7 +29,6 @@ export function StockOverviewDialog({ symbol, initials, open, onOpenChange, onPr
 
 function Overview({ symbol, initials, onProceed, onBack }: { symbol: string; initials?: string | undefined; onProceed: () => void; onBack: () => void }) {
   const [range, setRange] = useState<OverviewRange>("1d");
-  const [candles, setCandles] = useState(true);
   const info = useQuery({ queryKey: ["overview", symbol], queryFn: () => getStockOverview({ data: { symbol } }), refetchInterval: 5000 });
   const chart = useQuery({ queryKey: ["overview-chart", symbol, range], queryFn: () => getOverviewChart({ data: { symbol, range } }), refetchInterval: ["30m", "1h", "1d"].includes(range) ? 15000 : false, placeholderData: keepPreviousData, retry: 1 });
   const d = info.data, cur = d?.currency ?? null, s = d?.stats;
@@ -49,13 +50,13 @@ function Overview({ symbol, initials, onProceed, onBack }: { symbol: string; ini
     </div>}
     <div className="grid gap-4 lg:grid-cols-[1.6fr_1fr]">
       <section className="overview-panel">
-        <div className="grid grid-cols-8 gap-1 rounded-lg border border-border p-1">{OVERVIEW_RANGES.map(r => <button key={r} type="button" onClick={() => setRange(r)} aria-pressed={range === r} className={`rounded-md py-1.5 text-xs font-semibold ${range === r ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>{r.toUpperCase()}</button>)}</div>
+        <div className="grid grid-cols-5 gap-1 sm:grid-cols-10 rounded-lg border border-border p-1">{OVERVIEW_RANGES.map(r => <button key={r} type="button" onClick={() => setRange(r)} aria-pressed={range === r} className={`rounded-md py-1.5 text-xs font-semibold ${range === r ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>{r.toUpperCase()}</button>)}</div>
         <div className="mt-3 flex items-center justify-between gap-2">
-          <div className="inline-flex rounded-lg border border-border p-1">{[["Line", false], ["Candles", true]].map(([l, v]) => <button key={String(l)} type="button" aria-pressed={candles === v} onClick={() => setCandles(v as boolean)} className={`rounded-md px-3 py-1 text-xs font-semibold ${candles === v ? "bg-primary/20 text-primary" : "text-muted-foreground"}`}>{l}</button>)}</div>
+          <div className="flex flex-wrap items-center gap-2"><ChartTypeSwitch /><ChartSettingsMenu /></div>
           {chart.data && <RangeChange c={chart.data} range={range} />}
         </div>
-        {chart.isError ? <p role="alert" className="py-16 text-center text-sm text-destructive">{chart.error instanceof Error ? chart.error.message : "Price history unavailable."}</p> : !chart.data ? <p className="flex justify-center py-24 text-muted-foreground"><LoaderCircle className="h-5 w-5 animate-spin" /></p> : <OverviewChartView c={chart.data} candles={candles} cur={cur} />}
-        <p className="mt-2 text-xs text-muted-foreground">{candles ? "Filled candle = closed higher. Hollow = closed lower." : "Line shows closing price."} Bars below show volume. Source: Yahoo Finance.</p>
+        {chart.isError ? <p role="alert" className="py-16 text-center text-sm text-destructive">{chart.error instanceof Error ? chart.error.message : "Price history unavailable."}</p> : !chart.data ? <p className="flex justify-center py-24 text-muted-foreground"><LoaderCircle className="h-5 w-5 animate-spin" /></p> : <OverviewChartView c={chart.data} cur={cur} />}
+        <p className="mt-2 text-xs text-muted-foreground">Drag across the chart to read the exact date, time and price. Only trading that has already happened is drawn. Source: Yahoo Finance.</p>
       </section>
       <div className="grid content-start gap-4">
         <section className="overview-panel"><h3 className="font-display text-lg font-semibold">Key statistics</h3>
@@ -87,31 +88,57 @@ function RangeChange({ c, range }: { c: OverviewChart; range: OverviewRange }) {
   return <span className="text-xs text-muted-foreground">{range.toUpperCase()} change <b className={tone(p)}>{pct(p)}</b></span>;
 }
 
-function OverviewChartView({ c, candles, cur }: { c: OverviewChart; candles: boolean; cur: string | null }) {
+function OverviewChartView({ c, cur }: { c: OverviewChart; cur: string | null }) {
+  const st = useChartSettings(), col = chartColors(st);
   const [hover, setHover] = useState<number | null>(null);
-  const pts = c.points, W = 1000, H = 440, L = 10, R = 880, T = 30, B = 330, VB = 420;
-  const vals = pts.flatMap(p => candles ? [p.h ?? p.c, p.l ?? p.c] : [p.c]); if (c.previousClose) vals.push(c.previousClose);
-  const lo = Math.min(...vals), hi = Math.max(...vals), pad = (hi - lo) * .08 || hi * .01, min = lo - pad, max = hi + pad;
-  const x = (i: number) => L + (i + .5) / pts.length * (R - L), y = (v: number) => B - (v - min) / (max - min) * (B - T);
-  const vmax = Math.max(1, ...pts.map(p => p.v ?? 0)), bw = Math.max(1, (R - L) / pts.length * .6);
+  const drag = useRef(false);
+  const pts = c.points, W = 1000, H = 440, L = 10, R = st.priceLabels ? 880 : 990, T = 30, B = st.volume ? 330 : 400, VB = 420;
+  const ohlc = st.type === "candle" || st.type === "bar";
+  const vals = pts.flatMap(p => ohlc ? [p.h ?? p.c, p.l ?? p.c] : [p.c]); if (c.previousClose) vals.push(c.previousClose);
+  const lo = Math.min(...vals), hi = Math.max(...vals), pad = (hi - lo) * .08 || hi * .01;
+  const min = Math.max(st.log ? lo * .5 : -Infinity, lo - pad), max = hi + pad;
+  const f = (v: number) => st.log ? Math.log(Math.max(v, 1e-9)) : v;
+  const y = (v: number) => B - (f(v) - f(min)) / (f(max) - f(min)) * (B - T);
+  // Today's unfinished session: position by time across the whole session, so the future stays empty.
+  const ses = c.session;
+  const x = ses ? (i: number) => L + (pts[i]!.t - ses.start) / (ses.end - ses.start) * (R - L) : (i: number) => L + (i + .5) / pts.length * (R - L);
+  const slots = ses ? Math.max(pts.length, (ses.end - ses.start) / 300_000) : pts.length;
+  const slot = (R - L) / slots, bw = Math.max(.6, Math.min(st.thickness, slot * (1 - st.spacing)));
+  const vmax = Math.max(1, ...pts.map(p => p.v ?? 0));
   let hiI = 0, loI = 0; pts.forEach((p, i) => { if ((p.h ?? p.c) > (pts[hiI]!.h ?? pts[hiI]!.c)) hiI = i; if ((p.l ?? p.c) < (pts[loI]!.l ?? pts[loI]!.c)) loI = i; });
   const last = pts[pts.length - 1]!, sel: Candle = pts[hover ?? pts.length - 1]!;
   const fmt = (t: number) => new Date(t).toLocaleString("en-US", c.intraday ? (pts[pts.length - 1]!.t - pts[0]!.t > 86400_000 ? { month: "short", day: "numeric", timeZone: c.timeZone } : { hour: "numeric", minute: "2-digit", hour12: false, timeZone: c.timeZone }) : { month: "short", year: "2-digit", timeZone: c.timeZone });
-  const line = pts.map((p, i) => `${i ? "L" : "M"}${x(i)},${y(p.c)}`).join(" ");
-  return <div>
-    <p className="mt-2 flex flex-wrap gap-3 text-xs tabular-nums"><span>O <b>{sel.o?.toFixed(2) ?? "—"}</b></span><span>H <b>{sel.h?.toFixed(2) ?? "—"}</b></span><span>L <b>{sel.l?.toFixed(2) ?? "—"}</b></span><span>C <b>{sel.c.toFixed(2)}</b></span><span>Vol <b>{big(sel.v)}</b></span><span className="text-muted-foreground">{new Date(sel.t).toLocaleString("en-US", { month: "short", day: "numeric", hour: c.intraday ? "numeric" : undefined, minute: c.intraday ? "2-digit" : undefined, timeZone: c.timeZone })}</span></p>
-    <svg viewBox={`0 0 ${W} ${H}`} className="mt-1 w-full touch-pan-y" role="img" aria-label={candles ? "Candlestick price chart with volume" : "Line price chart with volume"} onPointerLeave={() => setHover(null)} onPointerMove={e => { const r = e.currentTarget.getBoundingClientRect(); const px = (e.clientX - r.left) / r.width * W; setHover(Math.max(0, Math.min(pts.length - 1, Math.floor((px - L) / (R - L) * pts.length)))); }}>
-      {[0, 1, 2, 3, 4].map(i => { const v = min + (max - min) * i / 4; return <g key={i}><line x1={L} x2={R} y1={y(v)} y2={y(v)} stroke="var(--border)" /><text x={R + 10} y={y(v) + 4} fontSize="13" fill="var(--muted-foreground)">{v.toFixed(v < 10 ? 2 : 0)}</text></g>; })}
-      {c.previousClose != null && <g><line x1={L} x2={R} y1={y(c.previousClose)} y2={y(c.previousClose)} stroke="var(--muted-foreground)" strokeDasharray="5 5" /><text x={L + 4} y={y(c.previousClose) - 6} fontSize="12" fill="var(--muted-foreground)">{c.intraday ? "Prev close" : "Start"} {c.previousClose.toFixed(2)}</text></g>}
-      {pts.map((p, i) => p.v ? <rect key={`v${i}`} x={x(i) - bw / 2} width={bw} y={VB - p.v / vmax * 70} height={p.v / vmax * 70} fill="var(--primary)" opacity=".35" /> : null)}
-      {candles ? pts.map((p, i) => { if (p.o == null || p.h == null || p.l == null) return null; const up = p.c >= p.o; return <g key={i}><line x1={x(i)} x2={x(i)} y1={y(p.h)} y2={y(p.l)} stroke="var(--primary)" /><rect x={x(i) - bw / 2} width={bw} y={y(Math.max(p.o, p.c))} height={Math.max(1, Math.abs(y(p.o) - y(p.c)))} fill={up ? "var(--primary)" : "var(--background)"} stroke="var(--primary)" /></g>; })
-        : <><path d={`${line} L${x(pts.length - 1)},${B} L${x(0)},${B} Z`} fill="var(--primary)" opacity=".12" /><path d={line} fill="none" stroke="var(--primary)" strokeWidth="2.5" /></>}
-      <text x={x(hiI)} y={y(pts[hiI]!.h ?? pts[hiI]!.c) - 8} fontSize="13" fill="var(--foreground)" textAnchor={hiI > pts.length * .8 ? "end" : "start"}>High {(pts[hiI]!.h ?? pts[hiI]!.c).toFixed(2)}</text>
-      <text x={x(loI)} y={y(pts[loI]!.l ?? pts[loI]!.c) + 18} fontSize="13" fill="var(--foreground)" textAnchor={loI > pts.length * .8 ? "end" : "start"}>Low {(pts[loI]!.l ?? pts[loI]!.c).toFixed(2)}</text>
-      <line x1={x(pts.length - 1)} x2={R} y1={y(last.c)} y2={y(last.c)} stroke="var(--primary)" strokeDasharray="3 3" />
-      <rect x={R + 2} y={y(last.c) - 11} width="96" height="22" rx="4" fill="var(--primary)" /><text x={R + 50} y={y(last.c) + 5} fontSize="13" fontWeight="700" textAnchor="middle" fill="var(--primary-foreground)">{last.c.toFixed(2)}</text>
-      {hover != null && <line x1={x(hover)} x2={x(hover)} y1={T} y2={VB} stroke="var(--muted-foreground)" strokeDasharray="2 3" />}
-      {[0, .25, .5, .75, 1].map((f, i) => { const k = Math.round(f * (pts.length - 1)); return <text key={i} x={x(k)} y={H - 2} fontSize="12" fill="var(--muted-foreground)" textAnchor={i === 0 ? "start" : i === 4 ? "end" : "middle"}>{fmt(pts[k]!.t)}</text>; })}
+  const full = (t: number) => new Date(t).toLocaleString("en-US", { day: "numeric", month: "short", year: "numeric", hour: c.intraday ? "numeric" : undefined, minute: c.intraday ? "2-digit" : undefined, timeZone: c.timeZone });
+  const line = pts.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p.c).toFixed(1)}`).join(" ");
+  const pick = (e: React.PointerEvent<SVGSVGElement>) => {
+    const r = e.currentTarget.getBoundingClientRect(); const px = (e.clientX - r.left) / r.width * W;
+    let best = 0; for (let i = 1; i < pts.length; i++) if (Math.abs(x(i) - px) < Math.abs(x(best) - px)) best = i;
+    setHover(best);
+  };
+  const ticks = [0, 1, 2, 3, 4].map(i => st.log ? Math.exp(f(min) + (f(max) - f(min)) * i / 4) : min + (max - min) * i / 4);
+  const xTicks = ses ? [0, .25, .5, .75, 1].map(q => ses.start + q * (ses.end - ses.start)) : [0, .25, .5, .75, 1].map(q => pts[Math.round(q * (pts.length - 1))]!.t);
+  const xt = (t: number) => ses ? L + (t - ses.start) / (ses.end - ses.start) * (R - L) : x(Math.round(pts.findIndex(p => p.t === t)));
+  return <div className="chart-surface" style={{ background: col.bg, color: col.fg }}>
+    <p className="flex flex-wrap gap-3 text-xs tabular-nums"><span>O <b>{sel.o?.toFixed(2) ?? "—"}</b></span><span>H <b>{sel.h?.toFixed(2) ?? "—"}</b></span><span>L <b>{sel.l?.toFixed(2) ?? "—"}</b></span><span>C <b>{sel.c.toFixed(2)}</b></span><span>Vol <b>{big(sel.v)}</b></span><span style={{ color: col.muted }}>{full(sel.t)}</span></p>
+    <svg viewBox={`0 0 ${W} ${H}`} className="mt-1 w-full touch-pan-y select-none" role="img" aria-label={`${st.type} price chart`}
+      onPointerDown={e => { if (!st.crosshair) return; drag.current = true; e.currentTarget.setPointerCapture(e.pointerId); pick(e); }}
+      onPointerMove={e => { if (st.crosshair && (drag.current || e.pointerType === "mouse")) pick(e); }}
+      onPointerUp={() => { drag.current = false; }} onPointerLeave={() => { if (!drag.current) setHover(null); }}>
+      {ticks.map((v, i) => <g key={i}>{st.gridH && <line x1={L} x2={R} y1={y(v)} y2={y(v)} stroke={col.grid} />}{st.priceLabels && <text x={R + 10} y={y(v) + 4} fontSize="13" fill={col.muted}>{v.toFixed(v < 10 ? 2 : 0)}</text>}</g>)}
+      {st.gridV && xTicks.map((t, i) => <line key={i} x1={xt(t)} x2={xt(t)} y1={T} y2={VB} stroke={col.grid} />)}
+      {c.previousClose != null && <g><line x1={L} x2={R} y1={y(c.previousClose)} y2={y(c.previousClose)} stroke={col.muted} strokeDasharray="5 5" /><text x={L + 4} y={y(c.previousClose) - 6} fontSize="12" fill={col.muted}>{c.intraday ? "Prev close" : "Start"} {c.previousClose.toFixed(2)}</text></g>}
+      {st.volume && pts.map((p, i) => p.v ? <rect key={`v${i}`} x={x(i) - bw / 2} width={bw} y={VB - p.v / vmax * 70} height={p.v / vmax * 70} fill={st.trend} opacity=".35" /> : null)}
+      {st.type === "candle" ? pts.map((p, i) => { if (p.o == null || p.h == null || p.l == null) return null; const up = p.c >= p.o; return <g key={i}><line x1={x(i)} x2={x(i)} y1={y(p.h)} y2={y(p.l)} stroke={up ? st.bullWick : st.bearWick} strokeWidth="1" /><rect x={x(i) - bw / 2} width={bw} y={y(Math.max(p.o, p.c))} height={Math.max(1, Math.abs(y(p.o) - y(p.c)))} fill={up ? st.bullBody : st.bearBody} stroke={up ? st.bullBorder : st.bearBorder} strokeWidth=".8" /></g>; })
+        : st.type === "bar" ? pts.map((p, i) => { if (p.o == null || p.h == null || p.l == null) return null; const up = p.c >= p.o, k = up ? st.bullBorder : st.bearBorder, w = Math.max(1.5, bw); return <g key={i} stroke={k} strokeWidth="1.2"><line x1={x(i)} x2={x(i)} y1={y(p.h)} y2={y(p.l)} /><line x1={x(i) - w} x2={x(i)} y1={y(p.o)} y2={y(p.o)} /><line x1={x(i)} x2={x(i) + w} y1={y(p.c)} y2={y(p.c)} /></g>; })
+        : <>{st.type === "area" && <path d={`${line} L${x(pts.length - 1)},${B} L${x(0)},${B} Z`} fill={st.trend} opacity=".18" />}<path d={line} fill="none" stroke={st.trend} strokeWidth="2" /></>}
+      <text x={x(hiI)} y={y(pts[hiI]!.h ?? pts[hiI]!.c) - 8} fontSize="13" fill={col.fg} textAnchor={x(hiI) > R * .8 ? "end" : "start"}>High {(pts[hiI]!.h ?? pts[hiI]!.c).toFixed(2)}</text>
+      <text x={x(loI)} y={y(pts[loI]!.l ?? pts[loI]!.c) + 18} fontSize="13" fill={col.fg} textAnchor={x(loI) > R * .8 ? "end" : "start"}>Low {(pts[loI]!.l ?? pts[loI]!.c).toFixed(2)}</text>
+      <line x1={x(pts.length - 1)} x2={R} y1={y(last.c)} y2={y(last.c)} stroke={st.trend} strokeDasharray="3 3" />
+      {ses && <circle cx={x(pts.length - 1)} cy={y(last.c)} r="4" fill={st.trend} className="market-endpoint" />}
+      {st.priceLabels && <><rect x={R + 2} y={y(last.c) - 11} width="96" height="22" rx="4" fill={st.trend} /><text x={R + 50} y={y(last.c) + 5} fontSize="13" fontWeight="700" textAnchor="middle" fill="#ffffff">{last.c.toFixed(2)}</text></>}
+      {hover != null && <g><line x1={x(hover)} x2={x(hover)} y1={T} y2={VB} stroke={col.fg} strokeDasharray="2 3" opacity=".7" /><line x1={L} x2={R} y1={y(sel.c)} y2={y(sel.c)} stroke={col.fg} strokeDasharray="2 3" opacity=".5" /><circle cx={x(hover)} cy={y(sel.c)} r="4" fill={st.trend} stroke={col.bg} strokeWidth="1.5" />
+        {st.priceLabels && <><rect x={R + 2} y={y(sel.c) - 11} width="96" height="22" rx="4" fill={col.fg} /><text x={R + 50} y={y(sel.c) + 5} fontSize="13" fontWeight="700" textAnchor="middle" fill={col.bg}>{sel.c.toFixed(2)}</text></>}</g>}
+      {xTicks.map((t, i) => <text key={i} x={xt(t)} y={H - 2} fontSize="12" fill={col.muted} textAnchor={i === 0 ? "start" : i === 4 ? "end" : "middle"}>{fmt(t)}</text>)}
     </svg>
     <span className="sr-only">{money(last.c, cur)}</span>
   </div>;
