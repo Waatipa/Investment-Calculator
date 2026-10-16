@@ -24,7 +24,7 @@ export function RegionalMarketCards({ companies, quotes, region }: { companies: 
   const [profitResult, setProfitResult] = useState(false);
   const capCurrencies = [...new Set(quotes.map(q => marketCapCurrency(q.currency)).filter((c): c is string => !!c && c !== "USD" && FX_CURRENCIES.includes(c)))];
   const fx = useQueries({ queries: capCurrencies.map(c => ({ queryKey: ["fx", c, "USD"], queryFn: () => getFxRate({ data: { from: c, to: "USD" } }), staleTime: 60_000, retry: false })) });
-  const usdRate = (c: string | null | undefined) => { const k = marketCapCurrency(c); if (k === "USD") return 1; const i = capCurrencies.indexOf(k ?? ""); return i >= 0 ? fx[i].data?.rate ?? null : null; };
+  const usdRate = (c: string | null | undefined) => { const k = marketCapCurrency(c); if (k === "USD") return 1; const i = capCurrencies.indexOf(k ?? ""); return i >= 0 ? fx[i]?.data?.rate ?? null : null; };
   const capUsd = (s: string) => { const q = quotes.find(x => x.symbol === s); const r = usdRate(q?.currency); return q?.marketCap != null && r != null ? q.marketCap * r : -1; };
   const sorted = [...companies].sort((a, b) => capUsd(b.symbol) - capUsd(a.symbol));
   const company = companies.find(c => c.symbol === open);
