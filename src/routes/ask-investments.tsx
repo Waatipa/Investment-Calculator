@@ -11,7 +11,7 @@ export const Route = createFileRoute("/ask-investments")({
   component: AskInvestments,
 });
 
-type Msg = { role: "user" | "bot"; text: string; category?: Category; number?: number };
+type Msg = { role: "user" | "bot"; text: string; category?: Category; number?: number | undefined };
 const WELCOME = "Hi! I'm the Investico guide. Tap any question below and I'll explain it in simple words, with an example.";
 
 function AskInvestments() {
@@ -67,7 +67,7 @@ function AskInvestments() {
             <div role="textbox" aria-label={`Editable answer ${m.number ? `for question ${m.number}` : i}`} aria-multiline="true" contentEditable suppressContentEditableWarning className="ask-editable" onBlur={e => { const value = e.currentTarget.textContent ?? ""; setMsgs(items => items.map((item, index) => index === i ? { ...item, text: value } : item)); }}>{m.text}</div>
             <Link to={CATEGORY_GUIDES[m.category].to} className="mt-2 inline-block text-primary underline">{CATEGORY_GUIDES[m.category].label}</Link>
             <details className="mt-2 text-xs"><summary className="cursor-pointer text-muted-foreground">Steps to explore this on Investico</summary><p className="mt-2">{CATEGORY_GUIDES[m.category].steps}</p></details>
-            <Button variant="ghost" size="sm" className="mt-1" disabled={busy} onClick={() => submitManual(log.current?.querySelectorAll('[contenteditable="true"]')[msgs.slice(0, i + 1).filter(x => x.role === "bot" && x.category).length - 1]?.textContent ?? m.text)}>Ask using this text</Button>
+            <Button variant="ghost" size="sm" className="mt-1" disabled={busy} onClick={e => submitManual(e.currentTarget.closest('.ask-bubble')?.querySelector('[contenteditable="true"]')?.textContent ?? m.text)}>Ask using this text</Button>
           </> : m.text}
         </div>)}
         {typing !== null && <div className="ask-bubble ask-bot">{typing === "" ? <span className="ask-typing" aria-label="Typing"><span /><span /><span /></span> : typing}</div>}
