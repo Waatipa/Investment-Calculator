@@ -59,7 +59,7 @@ export function RegionalProfitCalculator({ symbol, onBack, onStageChange }: { sy
       {fx.note && <p className="text-xs text-muted-foreground">{fx.note}</p>}
       <p className="text-xs leading-relaxed text-muted-foreground">Prices in {result.currency}, on the source's split-adjusted share basis. Purchase uses the first trading close on or after your date (latest available trade if today). Dates follow the listing's exchange time zone. Portfolio value is shares × price; profit is portfolio value minus investment cost. The maximum is the highest source daily high in the period, a hypothetical sale. Excludes dividends, currency conversion, taxes and fees. Not financial advice.</p>
       <Button variant="outline" className="h-12 text-base" onClick={clear}>Edit Investment Details</Button>
-      <Button asChild className="h-12 text-base font-semibold"><Link to="/subscribe">Invest Now</Link></Button>
+      <Button asChild className="btn-gold h-12 text-base font-semibold"><Link to="/subscribe">Invest Now</Link></Button>
     </>}
   </>;
 }
