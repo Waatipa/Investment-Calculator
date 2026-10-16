@@ -12,6 +12,7 @@ export const ME_COMPANIES = [
   { symbol: "7010.SR", name: "stc Group", ticker: "Tadawul: 7010", country: "Saudi Arabia", initials: "ST" },
   { symbol: "FAB.AD", name: "First Abu Dhabi Bank", ticker: "ADX: FAB", country: "UAE", initials: "FA" },
   { symbol: "EMIRATESNBD.AE", name: "Emirates NBD", ticker: "DFM: EMIRATESNBD", country: "UAE", initials: "EN" },
+  { symbol: "MASQ.AE", name: "Mashreq Bank", ticker: "DFM: MASQ", country: "UAE", initials: "MB" },
 ] as const;
 
 export const middleEastQuotesQuery = () => queryOptions({
