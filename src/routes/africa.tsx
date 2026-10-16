@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { pageHead } from "@/lib/markets";
-import { AF_COMPANIES, africaQuotesQuery } from "@/lib/africa";
+import { AF_COMPANIES, DANGOTE_REFINERY, africaQuotesQuery } from "@/lib/africa";
 import { RegionTabs, MarketArtwork } from "@/components/market-calculator";
 import { RegionalMarketCards } from "@/components/regional-market-cards";
 
 export const Route = createFileRoute("/africa")({
-  head: () => pageHead("Africa Markets", "Explore eight leading African publicly traded companies, source-reported prices, market capitalization and company-specific financial calculators."),
+  head: () => pageHead("Africa Markets", "Explore eight leading African publicly traded companies with source-reported prices, market capitalization and company-specific financial calculators, plus Dangote Refinery's pre-listing public offer."),
   loader: async ({ context }) => { await context.queryClient.ensureQueryData(africaQuotesQuery()); },
   errorComponent: ({ error }) => <p role="alert" className="p-6">Market prices are unavailable: {error instanceof Error ? error.message : "Please try again."}</p>,
   component: AfricaPage,
@@ -14,9 +14,9 @@ export const Route = createFileRoute("/africa")({
 function AfricaPage() {
   const { data } = useSuspenseQuery(africaQuotesQuery());
   return <main className="market-page">
-    <section className="reference-intro"><div className="reference-copy"><h1>Africa Markets</h1><p>Eight leading African listed companies across technology, banking, mining and telecommunications. A large-cap selection, not a live continent-wide ranking.</p></div><MarketArtwork /></section>
+    <section className="reference-intro"><div className="reference-copy"><h1>Africa Markets</h1><p>Eight leading African listed companies across technology, banking, mining and telecommunications. A large-cap selection, not a live continent-wide ranking. Dangote Refinery is shown with its public offer details while its shares are not yet trading.</p></div><MarketArtwork /></section>
     <RegionTabs active="AFRICA" />
-    <RegionalMarketCards companies={AF_COMPANIES} quotes={data} region="African" />
-    <p className="market-footer">Market data provided by Yahoo Finance; may be delayed. JSE share prices in South African cents (ZAc), market caps in rand (ZAR). Calculators use labeled provider summaries in the reporting currency. Attijariwafa Bank and Dangote Cement are not covered by this feed: prices and market caps are unavailable; their calculators accept user-entered figures. Quote timestamps shown in ET.</p>
+    <RegionalMarketCards companies={[...AF_COMPANIES, DANGOTE_REFINERY]} quotes={data} region="African" />
+    <p className="market-footer">Market data provided by Yahoo Finance; may be delayed. JSE share prices in South African cents (ZAc), market caps in rand (ZAR). Calculators use labeled provider summaries in the reporting currency. Attijariwafa Bank and Dangote Cement are not covered by this feed: prices and market caps are unavailable; their calculators accept user-entered figures. Dangote Refinery's public offer is open until 27 October and its shares are not trading yet, so no market prices are shown. Quote timestamps shown in ET.</p>
   </main>;
 }

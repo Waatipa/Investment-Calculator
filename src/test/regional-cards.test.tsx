@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { RegionalMarketCards, marketCapCurrency } from "@/components/regional-market-cards";
-import { AF_COMPANIES } from "@/lib/africa";
+import { AF_COMPANIES, DANGOTE_REFINERY } from "@/lib/africa";
 vi.mock("@/components/stock-overview", () => ({ StockOverviewDialog: ({ open, onProceed }: { open: boolean; onProceed: () => void }) => { React.useLayoutEffect(() => { if (open) onProceed(); }, [open]); return null; } }));
 vi.mock("@tanstack/react-router", () => ({ Link: ({ to, children, ...props }: { to: string; children: React.ReactNode }) => <a href={to} {...props}>{children}</a> }));
 afterEach(cleanup);
@@ -33,6 +33,14 @@ describe("Regional cards", () => {
     fireEvent.click(screen.getByRole("button", { name: "Calculate ROE" }));
     expect(screen.getAllByText("10.00%").length).toBeGreaterThan(0);
     expect(screen.getByRole("link", { name: "Invest Now" })).toBeInTheDocument();
+    client.clear();
+  });
+  it("shows Dangote Refinery's pre-listing offer with no prices and no calculator", () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(<QueryClientProvider client={client}><RegionalMarketCards companies={[...AF_COMPANIES, DANGOTE_REFINERY]} quotes={[]} region="African" /></QueryClientProvider>);
+    expect(screen.getByText("Public offer open until 27 October")).toBeInTheDocument();
+    expect(screen.getByText("Shares are not trading yet")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Dangote Refinery calculator" })).not.toBeInTheDocument();
     client.clear();
   });
 });

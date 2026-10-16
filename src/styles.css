@@ -521,6 +521,10 @@ body { background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
 [data-company="ATW.CS"] { --company-brand: var(--brand-attijari); }
 [data-company="MTN.JO"] { --company-brand: var(--brand-mtn); }
 [data-company="DANGCEM.LG"] { --company-brand: var(--brand-dangote); }
+[data-company="DANGOTEREF"] { --company-brand: var(--brand-dangote); }
+.ipo-notice { display: flex; flex-direction: column; justify-content: center; gap: 3px; }
+.ipo-notice span:first-child { font-size: 12.5px; font-weight: 600; color: var(--foreground); }
+.ipo-notice span:last-child { font-size: 11px; color: var(--muted-foreground); }
 .company-panel > div { min-width: 0; }
 .company-name, .company-symbol, .company-market-cap { overflow-wrap: anywhere; }
 .company-market-cap { font-size: 11px; line-height: 1.4; margin-top: 5px; font-weight: 500; font-variant-numeric: tabular-nums; }
