@@ -184,6 +184,7 @@
   --brand-stc: oklch(0.44 0.22 302);
   --brand-fab: oklch(0.38 0.13 260);
   --brand-enbd: oklch(0.36 0.12 260);
+  --brand-masq: oklch(0.55 0.2 27);
   --brand-naspers: oklch(0.42 0.14 255);
   --brand-firstrand: oklch(0.51 0.10 195);
   --brand-standard: oklch(0.39 0.18 264);
@@ -485,6 +486,7 @@ body { background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
 [data-company="7010.SR"] { --company-brand: var(--brand-stc); }
 [data-company="FAB.AD"] { --company-brand: var(--brand-fab); }
 [data-company="EMIRATESNBD.AE"] { --company-brand: var(--brand-enbd); }
+[data-company="MASQ.AE"] { --company-brand: var(--brand-masq); }
 [data-company="NPN.JO"] { --company-brand: var(--brand-naspers); }
 [data-company="FSR.JO"] { --company-brand: var(--brand-firstrand); }
 [data-company="SBK.JO"] { --company-brand: var(--brand-standard); }
