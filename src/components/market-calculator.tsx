@@ -14,13 +14,15 @@ import { CalculatorDateField } from "@/components/calculator-date-field";
 import type { FinancialMetric } from "@/lib/financial-metrics";
 import { LocationButton, LocalTimeToggle, useDisplayCurrency } from "@/components/display-prefs";
 import { usePrefs } from "@/lib/display-prefs";
+import { StockOverviewDialog } from "@/components/stock-overview";
 
 type Result = Awaited<ReturnType<typeof getInvestmentResult>>;
 
 export function MarketCalculator() {
   const [symbol, setSymbolState] = useState<Symbol>("NVDA");
   const [open, setOpen] = useState(false);
-  const setSymbol = (s: Symbol) => { setSymbolState(s); setOpen(true); };
+  const [overview, setOverview] = useState(false);
+  const setSymbol = (s: Symbol) => { setSymbolState(s); setOverview(true); };
   return <main className="market-page">
     <section className="reference-intro">
       <div className="reference-copy"><h1>How? When? How Much?<br />Should I Start Investing?</h1>
@@ -31,6 +33,7 @@ export function MarketCalculator() {
       </div><div className="intro-side"><RegionTabs active="US" /><Suspense fallback={null}><LiveStamp /></Suspense><p className="intro-side-note">Choose a region to browse companies, then press Compare Stocks to see how they performed over your chosen dates.</p></div>
     </section>
     <Suspense fallback={<CompanyButtons symbol={symbol} setSymbol={setSymbol} />}><LiveCompanies symbol={symbol} setSymbol={setSymbol} /></Suspense>
+    <StockOverviewDialog symbol={symbol} initials={initials[symbol]} open={overview} onOpenChange={setOverview} onProceed={() => { setOverview(false); setOpen(true); }} />
     <InvestmentForm symbol={symbol} open={open} setOpen={setOpen} />
   </main>;
 }

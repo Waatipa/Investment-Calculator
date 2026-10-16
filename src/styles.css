@@ -603,3 +603,5 @@ body { background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
   .compare-rank { grid-template-columns: repeat(4, minmax(0, 1fr)); } .compare-rank > div { grid-template-columns: 1fr; text-align: center; padding: 8px 4px; font-size: 13px; }
   .compare-table { font-size: 11.5px; }
 }
+
+.overview-panel { border: 1px solid var(--border); border-radius: 0.75rem; padding: 1rem; background: color-mix(in oklab, var(--card) 92%, var(--primary) 8%); min-width: 0; }
