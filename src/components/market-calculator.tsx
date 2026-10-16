@@ -69,7 +69,7 @@ export function Change({ change, percent, className }: { change: number | null; 
 const initials: Record<Symbol,string> = {NVDA:"NV", AAPL:"AA", MSFT:"MS", AMZN:"AM", GOOGL:"GO", META:"ME", TSLA:"TS"};
 function CompanyButtons({ symbol, setSymbol, quotes }: { symbol: Symbol; setSymbol: (s: Symbol) => void; quotes?: MarketQuote[] }) {
   const { localTime: lt } = usePrefs();
-  return <div className="company-grid" aria-label="Companies">{COMPANIES.map(c => {
+  return <div className="company-grid" aria-label="Companies">{[...COMPANIES].sort((a, b) => (quotes?.find(q => q.symbol === b.symbol)?.marketCap ?? -1) - (quotes?.find(q => q.symbol === a.symbol)?.marketCap ?? -1)).map(c => {
     const quote = quotes?.find(q => q.symbol === c.symbol);
     const change = quote?.price != null && quote.previousClose != null ? quote.price - quote.previousClose : null;
     const percent = change != null && quote?.previousClose ? change / quote.previousClose * 100 : null;
