@@ -33,3 +33,4 @@
 - Share RegionalMarketCards across Africa, Europe and Middle East, using data-company identity tokens for cards and all dialog stages so each region retains identical calculator behavior.
 - Regional profit calculators reuse date/share return formulas with exchange-local dates, allowlisted Yahoo history, normalized pence/cents and source-timestamped latest trades for today's valuation; missing source data must block results rather than be estimated.
 - Keep African quotes and fundamentals allowlisted; normalize JSE cents to rand only in calculators, and distinguish share-price subunits from market-cap currencies to avoid 100-fold valuation errors.
+- Compare Stocks (/compare) uses daily split-adjusted Yahoo closes converted to USD at each day's historical FX close, computed by the pure compare.ts module; only an end date of today uses the timestamped latest trade, so past-date results never drift with live prices.

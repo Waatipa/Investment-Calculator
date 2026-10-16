@@ -131,7 +131,7 @@ function ValueChart({ rows, amount }: { rows: { i: number; s: CompareSeries; m: 
   const fmt = (v: number) => v >= 1000 ? `$${(v / 1000).toFixed(1)}k` : `$${v.toFixed(0)}`;
   return <svg viewBox={`0 0 ${W} ${H}`} className="compare-svg" role="img" aria-label="Investment value over time">
     {ticks.map(v => <g key={v}><line x1={L} x2={W - 8} y1={y(v)} y2={y(v)} className="grid" /><text x={L - 6} y={y(v) + 3} textAnchor="end">{fmt(v)}</text></g>)}
-    {years.map(t => <text key={t} x={x(t)} y={H - 6} textAnchor="middle">{new Date(t).toLocaleDateString("en-GB", { month: "short", year: "2-digit" })}</text>)}
+    {years.map((t, k) => <text key={t} x={x(t)} y={H - 6} textAnchor={k === 0 ? "start" : k === 4 ? "end" : "middle"}>{new Date(t).toLocaleDateString("en-GB", { month: "short", year: "2-digit" })}</text>)}
     {rows.map(r => { const pts = r.s.points; const step = Math.max(1, Math.floor(pts.length / 300)); const d = pts.filter((_, k) => k % step === 0 || k === pts.length - 1).map((p, k) => `${k ? "L" : "M"}${x(p.t).toFixed(1)},${y(r.m.shares * p.c).toFixed(1)}`).join(""); const last = pts[pts.length - 1]!;
       return <g key={r.s.symbol} style={{ color: LINES[r.i] }}><path d={d} fill="none" stroke="currentColor" strokeWidth="2" /><circle cx={x(r.m.peakT)} cy={y(r.m.peakValue)} r="6" fill="none" stroke="currentColor" strokeWidth="1.5" /><circle cx={x(last.t)} cy={y(r.m.value)} r="3.5" fill="currentColor" /></g>; })}
   </svg>;
