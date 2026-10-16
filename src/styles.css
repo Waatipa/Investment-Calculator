@@ -360,7 +360,7 @@ body { background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
 .footer-link { font-size: 13px; font-weight: 600; color: var(--foreground); }
 .footer-link:hover { color: var(--primary); }
 .footer-disclaimer { font-size: 10px; line-height: 1.5; color: var(--muted-foreground); margin: 0; max-width: 720px; }
-.footer-copyright { font-size: 12px; font-weight: 600; color: var(--foreground); margin: 0; letter-spacing: 0.2px; }
+.footer-copyright { text-align: center; justify-self: center; font-size: 12px; font-weight: 600; color: var(--foreground); margin: 0; letter-spacing: 0.2px; }
 .btn-gold { background: var(--gold); color: var(--gold-foreground); border-color: var(--gold); box-shadow: 0 6px 18px -10px color-mix(in oklab, var(--gold) 70%, transparent); }
 .btn-gold:hover, .btn-gold:focus-visible { background: color-mix(in oklab, var(--gold) 88%, white); color: var(--gold-foreground); border-color: color-mix(in oklab, var(--gold) 88%, white); }
 .reference-menu { background: var(--card); top: 20px; bottom: auto; right: 14px; height: auto; max-height: calc(100dvh - 40px); width: 270px; border: 1px solid var(--border); border-radius: 20px; padding: 24px 18px 16px; overflow-y: auto; }
@@ -521,7 +521,7 @@ body { background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
 [data-company="DANGCEM.LG"] { --company-brand: var(--brand-dangote); }
 .company-panel > div { min-width: 0; }
 .company-name, .company-symbol, .company-market-cap { overflow-wrap: anywhere; }
-.company-market-cap { font-size: 10px; line-height: 1.4; margin-top: 5px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.company-market-cap { font-size: 11px; line-height: 1.4; margin-top: 5px; font-weight: 500; font-variant-numeric: tabular-nums; }
 .company-panel { min-height: 84px; }
 .regional-country { min-height: 32px; font-size: 10px; color: var(--muted-foreground); }
 .company-dialog.pro-dialog {

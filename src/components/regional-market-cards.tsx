@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { useQueries } from "@tanstack/react-query";
+import { getFxRate } from "@/lib/fx.functions";
+import { FX_CURRENCIES } from "@/lib/display-prefs";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ProCalculatorChoices, FinancialMetricForm } from "@/components/pro-calculator";
@@ -19,11 +22,16 @@ export function RegionalMarketCards({ companies, quotes, region }: { companies: 
   const [open, setOpen] = useState<string | null>(null);
   const [metric, setMetric] = useState<FinancialMetric | "profit" | null>(null);
   const [profitResult, setProfitResult] = useState(false);
+  const capCurrencies = [...new Set(quotes.map(q => marketCapCurrency(q.currency)).filter((c): c is string => !!c && c !== "USD" && FX_CURRENCIES.includes(c)))];
+  const fx = useQueries({ queries: capCurrencies.map(c => ({ queryKey: ["fx", c, "USD"], queryFn: () => getFxRate({ data: { from: c, to: "USD" } }), staleTime: 60_000, retry: false })) });
+  const usdRate = (c: string | null | undefined) => { const k = marketCapCurrency(c); if (k === "USD") return 1; const i = capCurrencies.indexOf(k ?? ""); return i >= 0 ? fx[i].data?.rate ?? null : null; };
+  const capUsd = (s: string) => { const q = quotes.find(x => x.symbol === s); const r = usdRate(q?.currency); return q?.marketCap != null && r != null ? q.marketCap * r : -1; };
+  const sorted = [...companies].sort((a, b) => capUsd(b.symbol) - capUsd(a.symbol));
   const company = companies.find(c => c.symbol === open);
   const quote = quotes.find(q => q.symbol === open);
   const currency = quote?.currency === "ZAc" ? "ZAR" : quote?.currency ?? company?.currency ?? (region.includes("Middle East") ? "AED" : "EUR");
   return <>
-    <div className="company-grid" aria-label={`${region} companies`}>{companies.map(c => {
+    <div className="company-grid" aria-label={`${region} companies`}>{sorted.map(c => {
       const q = quotes.find(x => x.symbol === c.symbol);
       const change = q?.price != null && q.previousClose != null ? q.price - q.previousClose : null;
       const percent = change != null && q?.previousClose ? change / q.previousClose * 100 : null;
