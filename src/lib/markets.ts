@@ -9,6 +9,7 @@ export const COMPANIES = [
   { symbol: "GOOGL", name: "Alphabet", brand: "var(--brand-googl)" },
   { symbol: "META", name: "Meta", brand: "var(--brand-meta)" },
   { symbol: "TSLA", name: "Tesla", brand: "var(--brand-tsla)" },
+  { symbol: "SPCX", name: "SpaceX", brand: "var(--brand-spcx)" },
 ] as const;
 export type Symbol = typeof COMPANIES[number]["symbol"];
 export function formatMarketCap(value: number | null | undefined) {

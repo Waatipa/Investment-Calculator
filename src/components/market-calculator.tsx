@@ -15,6 +15,7 @@ import type { FinancialMetric } from "@/lib/financial-metrics";
 import { LocationButton, LocalTimeToggle, useDisplayCurrency } from "@/components/display-prefs";
 import { usePrefs } from "@/lib/display-prefs";
 import { StockOverviewDialog } from "@/components/stock-overview";
+import { listingDate } from "@/lib/us-listings";
 
 type Result = Awaited<ReturnType<typeof getInvestmentResult>>;
 
@@ -69,7 +70,7 @@ export function Change({ change, percent, className }: { change: number | null; 
   const tone = change == null || change === 0 ? "text-muted-foreground" : change > 0 ? "text-success" : "text-destructive";
   return <div className={`quote-change ${tone} ${className ?? ""}`}>{change != null && percent != null ? <>{change !== 0 && <Triangle className={change < 0 ? "rotate-180" : ""} />}{change > 0 ? "+" : change < 0 ? "−" : ""}{Math.abs(change).toFixed(2)} ({percent > 0 ? "+" : percent < 0 ? "−" : ""}{Math.abs(percent).toFixed(2)}%)</> : "—"}</div>;
 }
-const initials: Record<Symbol,string> = {NVDA:"NV", AAPL:"AA", MSFT:"MS", AMZN:"AM", GOOGL:"GO", META:"ME", TSLA:"TS"};
+const initials: Record<Symbol,string> = {NVDA:"NV", AAPL:"AA", MSFT:"MS", AMZN:"AM", GOOGL:"GO", META:"ME", TSLA:"TS", SPCX:"SX"};
 function CompanyButtons({ symbol, setSymbol, quotes }: { symbol: Symbol; setSymbol: (s: Symbol) => void; quotes?: MarketQuote[] }) {
   const { localTime: lt } = usePrefs();
   return <div className="company-grid" aria-label="Companies">{[...COMPANIES].sort((a, b) => (quotes?.find(q => q.symbol === b.symbol)?.marketCap ?? -1) - (quotes?.find(q => q.symbol === a.symbol)?.marketCap ?? -1)).map(c => {
@@ -127,7 +128,7 @@ function InvestmentForm({ symbol, open, setOpen }: { symbol: Symbol; open: boole
           }
         }
       })
-      .catch(() => { if (!cancelled) { setPurchasePrice(null); setError("Purchase price unavailable. Please try another date."); } })
+      .catch((err) => { if (!cancelled) { setPurchasePrice(null); setError(err instanceof Error ? err.message : "Purchase price unavailable. Please try another date."); } })
       .finally(() => { if (!cancelled) setPriceLoading(false); });
     return () => { cancelled = true; };
   }, [symbol, startDate]);
@@ -172,7 +173,7 @@ function InvestmentForm({ symbol, open, setOpen }: { symbol: Symbol; open: boole
         {metric == null ? <ProCalculatorChoices onChoose={setMetric} /> : metric && metric !== "profit" ? <FinancialMetricForm key={`${symbol}-${metric.id}`} symbol={symbol} companyName={company?.name} metric={metric} onBack={() => setMetric(null)} onStageChange={setMetricResult} /> : <>
         {<Button variant="link" className="pro-back" onClick={() => { setMetric(null); setResult(null); }}>← All calculators</Button>}
         {!result ? <form className="grid gap-4 sm:grid-cols-2" onSubmit={calculate}>
-          <CalculatorDateField id="investment-date" label="Investment date" value={startDate} disabled={busy} onChange={v => { revision.current += 1; setStartDate(v); setResult(null); }} />
+          <CalculatorDateField id="investment-date" label="Investment date" value={startDate} min={listingDate(symbol)} disabled={busy} onChange={v => { revision.current += 1; setStartDate(v); setResult(null); }} />
           <CalculatorDateField id="valuation-date" label="Valuation date" value={endDate} min={startDate || undefined} disabled={busy} onChange={v => { revision.current += 1; setEndDate(v); setResult(null); }} />
           <label className="grid gap-2 text-xs font-medium" htmlFor="investment-shares">Number of shares<Input id="investment-shares" type="number" min="0.000001" step="any" required value={shares} disabled={busy} onChange={e => updateShares(e.target.value)} className="h-12 text-base" /></label>
           <label className="grid gap-2 text-xs font-medium" htmlFor="investment-amount">Investment amount (USD)<Input id="investment-amount" type="number" min="0.01" step="any" value={amount} disabled={busy || priceLoading || purchasePrice == null} placeholder={priceLoading ? "Loading purchase price…" : "Pick a date first"} onChange={e => updateAmount(e.target.value)} className="h-12 text-base" /></label>

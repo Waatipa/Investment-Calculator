@@ -4,7 +4,7 @@ let sessionPending: Promise<{ cookie: string; crumb: string; expires: number }> 
 const cache = new Map<string, { data: Record<string, unknown>[]; expires: number }>();
 const pendingBy = new Map<string, Promise<Record<string, unknown>[]>>();
 const headers = { "User-Agent": "Mozilla/5.0", Accept: "*/*" };
-const US_SYMBOLS = "NVDA,AAPL,MSFT,AMZN,GOOGL,META,TSLA";
+import { US_SYMBOLS } from "./us-listings";
 
 async function getSession() {
   if (session && session.expires > Date.now()) return session;
@@ -24,7 +24,7 @@ async function getSession() {
   try { return await sessionPending; } finally { sessionPending = null; }
 }
 
-export async function fetchCompanyQuotes(symbols: string = US_SYMBOLS): Promise<Record<string, unknown>[]> {
+export async function fetchCompanyQuotes(symbols: string = US_SYMBOLS.join(",")): Promise<Record<string, unknown>[]> {
   const cached = cache.get(symbols);
   if (cached && cached.expires > Date.now()) return cached.data;
   const existing = pendingBy.get(symbols);
