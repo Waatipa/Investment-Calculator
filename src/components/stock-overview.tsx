@@ -17,7 +17,7 @@ const signed = (v: number | null) => v == null ? "—" : `${v >= 0 ? "+" : ""}${
 const day = (t: number | null) => t ? new Date(t).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—";
 const tone = (v: number | null) => v == null || v === 0 ? "text-muted-foreground" : v > 0 ? "text-success" : "text-destructive";
 
-export function StockOverviewDialog({ symbol, initials, open, onOpenChange, onProceed }: { symbol: string | null; initials?: string; open: boolean; onOpenChange: (o: boolean) => void; onProceed: () => void }) {
+export function StockOverviewDialog({ symbol, initials, open, onOpenChange, onProceed }: { symbol: string | null; initials?: string | undefined; open: boolean; onOpenChange: (o: boolean) => void; onProceed: () => void }) {
   return <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent data-company={symbol ?? undefined} className={`company-dialog stock-overview company-panel-${(symbol ?? "").toLowerCase()} max-h-[92dvh] w-[calc(100%-1rem)] max-w-6xl overflow-y-auto overflow-x-hidden rounded-lg p-3 sm:p-6`}>
       {symbol && <Overview key={symbol} symbol={symbol} initials={initials} onProceed={onProceed} onBack={() => onOpenChange(false)} />}
@@ -25,7 +25,7 @@ export function StockOverviewDialog({ symbol, initials, open, onOpenChange, onPr
   </Dialog>;
 }
 
-function Overview({ symbol, initials, onProceed, onBack }: { symbol: string; initials?: string; onProceed: () => void; onBack: () => void }) {
+function Overview({ symbol, initials, onProceed, onBack }: { symbol: string; initials?: string | undefined; onProceed: () => void; onBack: () => void }) {
   const [range, setRange] = useState<OverviewRange>("1d");
   const [candles, setCandles] = useState(true);
   const info = useQuery({ queryKey: ["overview", symbol], queryFn: () => getStockOverview({ data: { symbol } }), refetchInterval: 5000 });
