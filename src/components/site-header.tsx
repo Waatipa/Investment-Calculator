@@ -56,7 +56,7 @@ function DesktopNav() {
       </div>
       {regions ? <>
         <div className="mega-col"><h4>Regions</h4>{REGIONS.map((r, idx) => <Link key={r.label} to={r.to} onClick={close} onMouseEnter={() => setRegion(idx)} className={`mega-link ${region === idx ? "mega-on" : ""}`}><span>{r.label}{region === idx ? " ›" : ""}</span></Link>)}</div>
-        <div className="mega-col"><h4>{REGIONS[region].label}</h4>{REGIONS[region].companies.map(c => <Link key={c} to={REGIONS[region].to} onClick={close} className="mega-link"><span>{c}</span></Link>)}</div>
+        {(() => { const r = REGIONS[region] ?? REGIONS[0]!; return <div className="mega-col"><h4>{r.label}</h4>{r.companies.map(c => <Link key={c} to={r.to} onClick={close} className="mega-link"><span>{c}</span></Link>)}</div>; })()}
       </> : <>
         <div className="mega-col"><h4>Calculators</h4>{CALCULATORS.map(i => <MegaLink key={i.label} item={i} onClick={close} />)}</div>
         <div className="mega-col"><h4>Analysis &amp; News</h4>{NEWS.map(i => <MegaLink key={i.label} item={i} onClick={close} />)}</div>
@@ -80,8 +80,8 @@ function MLink({ item, level = 0 }: { item: Item; level?: number }) {
 }
 
 function MobileNav() {
-  const [o, setO] = useState<Record<string, boolean>>({});
-  const t = (k: string) => () => setO(s => ({ ...s, [k]: !s[k] }));
+  const [o, setO] = useState<Partial<Record<"m"|"s"|"c"|"n"|"si"|"co"|`r${string}`, boolean>>>({});
+  const t = (k: "m"|"s"|"c"|"n"|"si"|"co"|`r${string}`) => () => setO(s => ({ ...s, [k]: !s[k] }));
   return <nav aria-label="Mobile menu" className="m-nav">
     {TOP.map(i => <MLink key={i.label} item={i} />)}
     <Row label="Markets" open={!!o.m} onToggle={t("m")} />
