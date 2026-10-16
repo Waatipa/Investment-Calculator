@@ -130,9 +130,9 @@ export const getPriceOnDate = createServerFn({ method: "GET" })
   });
 
 export type RegionalQuote = MarketQuote & { currency: string | null };
-const ME_SYMBOLS = ["2222.SR", "IHC.AD", "1120.SR", "TAQA.AD", "1211.SR", "ADNOCGAS.AD", "1180.SR", "7010.SR", "FAB.AD", "EMIRATESNBD.AE", "MASQ.AE"] as const;
-const EU_SYMBOLS = ["ASML.AS", "MC.PA", "SAP.DE", "NESN.SW", "NOVO-B.CO", "RO.SW", "AZN.L", "HSBA.L"] as const;
-const AF_SYMBOLS = ["NPN.JO", "FSR.JO", "SBK.JO", "CPI.JO", "GFI.JO", "ATW.CS", "MTN.JO", "DANGCEM.LG"] as const;
+export const ME_SYMBOLS = ["2222.SR", "IHC.AD", "1120.SR", "TAQA.AD", "1211.SR", "ADNOCGAS.AD", "1180.SR", "7010.SR", "FAB.AD", "EMIRATESNBD.AE", "MASQ.AE"] as const;
+export const EU_SYMBOLS = ["ASML.AS", "MC.PA", "SAP.DE", "NESN.SW", "NOVO-B.CO", "RO.SW", "AZN.L", "HSBA.L"] as const;
+export const AF_SYMBOLS = ["NPN.JO", "FSR.JO", "SBK.JO", "CPI.JO", "GFI.JO", "ATW.CS", "MTN.JO", "DANGCEM.LG"] as const;
 const regionalQuotes = async (symbols: readonly string[]): Promise<RegionalQuote[]> => {
   const { fetchCompanyQuotes } = await import("./market-quotes.server");
   const quotes = await fetchCompanyQuotes(symbols.join(",")).catch(() => []);
