@@ -12,6 +12,9 @@ export const AF_COMPANIES = [
   { symbol: "DANGCEM.LG", name: "Dangote Cement", ticker: "NGX: DANGCEM", country: "Nigeria", initials: "DC", currency: "NGN" },
 ] as const;
 
+// Dangote Petroleum Refinery: pre-listing public offer, shares not trading yet, no market prices.
+export const DANGOTE_REFINERY = { symbol: "DANGOTEREF", name: "Dangote Refinery", ticker: "NGX: DANGOTEREF", country: "Nigeria", initials: "DR", currency: "NGN", notTrading: true } as const;
+
 export const africaQuotesQuery = () => queryOptions({
   queryKey: ["africa-quotes"], queryFn: () => getAfricaQuotes(),
   staleTime: 0, refetchOnMount: false, refetchInterval: 5_000,

@@ -14,7 +14,7 @@ import { LocationButton, LocalTimeToggle } from "./display-prefs";
 import { usePrefs } from "@/lib/display-prefs";
 import { StockOverviewDialog } from "./stock-overview";
 
-export type RegionalCompany = { symbol: string; name: string; ticker: string; country: string; initials: string; currency?: string };
+export type RegionalCompany = { symbol: string; name: string; ticker: string; country: string; initials: string; currency?: string; notTrading?: boolean };
 export function marketCapCurrency(currency: string | null | undefined) {
   return currency === "GBp" || currency === "GBX" ? "GBP" : currency === "ZAc" ? "ZAR" : currency;
 }
@@ -34,6 +34,11 @@ export function RegionalMarketCards({ companies, quotes, region }: { companies: 
   const currency = quote?.currency === "ZAc" ? "ZAR" : quote?.currency ?? company?.currency ?? (region.includes("Middle East") ? "AED" : "EUR");
   return <>
     <div className="company-grid" aria-label={`${region} companies`}>{sorted.map(c => {
+      if (c.notTrading) return <div key={c.symbol} data-company={c.symbol} className="company-card regional-company">
+        <div className="company-panel"><span className="company-initials">{c.initials}</span><div><div className="company-name">{c.name}</div><div className="company-symbol">{c.ticker}</div></div></div>
+        <div className="quote-section ipo-notice"><span>Public offer open until 27 October</span><span>Shares are not trading yet</span></div>
+        <div className="quote-section off-hours regional-country"><span>{c.country}</span></div>
+      </div>;
       const q = quotes.find(x => x.symbol === c.symbol);
       const change = q?.price != null && q.previousClose != null ? q.price - q.previousClose : null;
       const percent = change != null && q?.previousClose ? change / q.previousClose * 100 : null;
