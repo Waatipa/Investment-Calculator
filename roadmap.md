@@ -8,7 +8,7 @@
 - [x] Add Apple-only metric selection, input and result stages matching the three uploaded screens.
 - [x] Keep historical profit calculations, add financial metric calculations with honest input/source handling and calendar controls.
 - [x] Add Invest Now, subtle company-card interaction and verify calculator flows.
-- [ ] Auto-fill verified financial-statement figures: blocked on a financial-statement data source; existing feed provides quotes and market capitalization only.
+- [x] Auto-fill verified financial-statement figures from SEC EDGAR filings for US companies and European SEC filers; other companies use labeled Yahoo Finance summaries, gaps stay empty.
 - [x] Match the latest desktop/mobile reference design, copy, navigation and branding while keeping all seven companies.
 - [x] Show sourced closing/off-hours prices and verify calculator, menus and screen layouts.
 - [x] Shorten cards with four desktop columns; brand calculator forms and results.
