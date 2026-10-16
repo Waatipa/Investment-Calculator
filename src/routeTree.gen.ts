@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AboutUsRouteImport } from './routes/about-us'
 import { Route as AfricaRouteImport } from './routes/africa'
+import { Route as AskInvestmentsRouteImport } from './routes/ask-investments'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CompareRouteImport } from './routes/compare'
 import { Route as ContactUsRouteImport } from './routes/contact-us'
@@ -42,6 +43,11 @@ const AboutUsRoute = AboutUsRouteImport.update({
 const AfricaRoute = AfricaRouteImport.update({
   id: '/africa',
   path: '/africa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AskInvestmentsRoute = AskInvestmentsRouteImport.update({
+  id: '/ask-investments',
+  path: '/ask-investments',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -105,6 +111,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about-us': typeof AboutUsRoute
   '/africa': typeof AfricaRoute
+  '/ask-investments': typeof AskInvestmentsRoute
   '/auth': typeof AuthRoute
   '/compare': typeof CompareRoute
   '/contact-us': typeof ContactUsRoute
@@ -121,6 +128,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about-us': typeof AboutUsRoute
   '/africa': typeof AfricaRoute
+  '/ask-investments': typeof AskInvestmentsRoute
   '/auth': typeof AuthRoute
   '/compare': typeof CompareRoute
   '/contact-us': typeof ContactUsRoute
@@ -138,6 +146,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/about-us': typeof AboutUsRoute
   '/africa': typeof AfricaRoute
+  '/ask-investments': typeof AskInvestmentsRoute
   '/auth': typeof AuthRoute
   '/compare': typeof CompareRoute
   '/contact-us': typeof ContactUsRoute
@@ -156,6 +165,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about-us'
     | '/africa'
+    | '/ask-investments'
     | '/auth'
     | '/compare'
     | '/contact-us'
@@ -172,6 +182,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about-us'
     | '/africa'
+    | '/ask-investments'
     | '/auth'
     | '/compare'
     | '/contact-us'
@@ -188,6 +199,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/about-us'
     | '/africa'
+    | '/ask-investments'
     | '/auth'
     | '/compare'
     | '/contact-us'
@@ -206,6 +218,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AboutUsRoute: typeof AboutUsRoute
   AfricaRoute: typeof AfricaRoute
+  AskInvestmentsRoute: typeof AskInvestmentsRoute
   AuthRoute: typeof AuthRoute
   CompareRoute: typeof CompareRoute
   ContactUsRoute: typeof ContactUsRoute
@@ -244,6 +257,13 @@ declare module '@tanstack/react-router' {
       path: '/africa'
       fullPath: '/africa'
       preLoaderRoute: typeof AfricaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ask-investments': {
+      id: '/ask-investments'
+      path: '/ask-investments'
+      fullPath: '/ask-investments'
+      preLoaderRoute: typeof AskInvestmentsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -355,6 +375,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AboutUsRoute: AboutUsRoute,
   AfricaRoute: AfricaRoute,
+  AskInvestmentsRoute: AskInvestmentsRoute,
   AuthRoute: AuthRoute,
   CompareRoute: CompareRoute,
   ContactUsRoute: ContactUsRoute,
