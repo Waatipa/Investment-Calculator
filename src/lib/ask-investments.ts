@@ -1,11 +1,13 @@
-// Prewritten educational Q&A for the Ask Investments chat. Add more entries to the list below.
+import { EXTRA_QUESTIONS } from "./ask-investments-extra";
+import { SEARCH_VOLUMES, searchKey } from "./ask-investments-volumes";
+
 export type QA = { cat: Category; q: string; a: string };
 export const CATEGORIES = ["Beginners", "Calculators", "Comparing stocks", "Companies", "Ratios & research", "Risk & strategy"] as const;
 export type Category = typeof CATEGORIES[number];
 
 const B: Category = "Beginners", C: Category = "Calculators", K: Category = "Comparing stocks", Co: Category = "Companies", R: Category = "Ratios & research", S: Category = "Risk & strategy";
 
-export const QAS: QA[] = [
+export const ORIGINAL_QUESTIONS: QA[] = [
   // Beginners (20)
   { cat: B, q: "What is a stock?", a: "A stock is a small piece of ownership in a company.\n\nExample: if a bakery is split into 100 equal pieces and you buy 1, you own 1% of the bakery — and 1% of its future profits." },
   { cat: B, q: "Why do stock prices go up and down?", a: "Prices move because buyers and sellers keep changing their minds about what a company is worth.\n\nExample: if a company reports bigger profits than expected, more people want to buy, so the price rises." },
@@ -118,3 +120,51 @@ export const QAS: QA[] = [
   { cat: S, q: "Is it better to buy one share of many companies or many shares of one?", a: "Usually many companies, because it lowers the damage of one company doing badly.\n\nExample: 10 companies × $100 is safer than $1,000 in one company." },
   { cat: S, q: "Does Investico give buy or sell advice?", a: "No. Investico is educational. Our tools show numbers so you can decide for yourself.\n\nExample: the calculator shows a past profit; it doesn't tell you to buy." },
 ];
+
+export type GuideDestination = "/markets" | "/compare" | "/ask";
+export const CATEGORY_GUIDES: Record<Category, { to: GuideDestination; label: string; steps: string }> = {
+  Beginners: { to: "/markets", label: "Markets", steps: "1. Open Markets. 2. Select a company. 3. Read its chart and statistics. 4. Choose Proceed to calculators to explore the figures." },
+  Calculators: { to: "/markets", label: "Investment Calculator", steps: "1. Open Markets. 2. Select a company. 3. Choose Proceed to calculators. 4. For historical profit, enter both dates and shares or amount, then calculate. For financial ratios, select the matching tool and check its source labels. Tools without a dedicated calculator require a manual calculation; blank fields are not estimates." },
+  "Comparing stocks": { to: "/compare", label: "Compare Stocks", steps: "1. Open Compare Stocks. 2. Select supported companies. 3. Choose Next: investment details. 4. Enter the same amount and dates. 5. Calculate results and move the timeline pointer. This shows price returns, not dividends or unsupported assets." },
+  Companies: { to: "/markets", label: "Company charts and calculators", steps: "1. Open Markets. 2. Choose the company's region. 3. Select its card. 4. Read About and statistics, then Proceed to calculators. Check the reporting period and source; missing information stays unavailable." },
+  "Ratios & research": { to: "/markets", label: "Financial calculators", steps: "1. Open Markets and select a company. 2. Choose Proceed to calculators. 3. Select the matching financial metric. 4. Check units, reporting period and source before calculating. If no matching tool exists, use verified report values and the stated formula manually." },
+  "Risk & strategy": { to: "/compare", label: "Historical comparisons", steps: "1. Open Compare Stocks. 2. Select supported companies and matching dates. 3. Calculate and move the timeline to examine past gains and losses. This cannot predict future risk, provide trade signals or calculate personal taxes." },
+};
+
+const EXPANSIONS: Record<Category, string> = {
+  Beginners: "Treat this as a starting explanation, not a promise of profit. A company's share price and its business results are different things. Open Markets, select a company and review its chart and statistics to connect the idea with actual source-backed information.",
+  Calculators: "To explore this, open Markets, select a company and choose Proceed to calculators. Check the dates, units and source labels before entering values. Read the result's exclusions; historical price gains do not include dividends, taxes or fees, and missing figures must not be guessed.",
+  "Comparing stocks": "Open Compare Stocks, select supported companies, enter matching dates and an equal amount, then calculate. Move the shared timeline to inspect past results. Price returns exclude dividends, taxes and fees. Separate company reports are needed for business ratios or information the comparison does not display.",
+  Companies: "For current information, open Markets, choose the region and select the company's card. Read its About section and statistics, then choose Proceed to calculators. Check the reporting date beside sourced figures. This description explains the business; it is not a recommendation or a live financial statement.",
+  "Ratios & research": "Open Markets, select a company and choose Proceed to calculators to find related financial tools. Use matching periods and units, and read each source label. A single ratio cannot prove a business is healthy or cheap; compare it with other report figures and relevant business risks.",
+  "Risk & strategy": "Use Compare Stocks to examine supported companies over matching historical dates, then move the timeline to inspect gains and losses. This is educational history, not a forecast or personal strategy. Your own costs, financial needs and ability to handle losses are not captured by the chart.",
+};
+
+function expandedAnswer(qa: QA): string {
+  // Keep the original explanation and example; add relevant context to short entries.
+  const words = qa.a.split(/\s+/).length;
+  return words >= 60 ? qa.a : `${qa.a}\n\n${EXPANSIONS[qa.cat]}`;
+}
+
+export type NumberedQA = QA & { number: number; volume: number | null };
+export const QAS: NumberedQA[] = CATEGORIES.flatMap(cat => {
+  const entries: QA[] = [...ORIGINAL_QUESTIONS, ...EXTRA_QUESTIONS.filter(q => q.cat === cat).map(q => ({ ...q, cat }))];
+  return entries.filter(q => q.cat === cat).map(qa => ({ ...qa, a: expandedAnswer(qa), volume: SEARCH_VOLUMES[searchKey(qa.q)] ?? null }))
+    .sort((a, b) => a.volume === null ? b.volume === null ? 0 : 1 : b.volume === null ? -1 : b.volume - a.volume);
+}).map((qa, index) => ({ ...qa, number: index + 1 }));
+
+// Frozen evidence snapshot: refresh ordering only with an explicit content update, not on page load.
+export function findQuestion(input: string): NumberedQA | undefined {
+  const text = input.trim();
+  const number = /^(?:#|q\s*|question\s*)?(\d+)$/i.exec(text)?.[1];
+  if (number) return QAS.find(q => q.number === Number(number));
+  return QAS.find(q => searchKey(q.q) === searchKey(text));
+}
+
+export function guideForQuestion(input: string): Category {
+  if (/compare|versus|\bvs\b|outperform/i.test(input)) return "Comparing stocks";
+  if (/ratio|earnings|revenue|cash flow|balance sheet|filing/i.test(input)) return "Ratios & research";
+  if (/risk|safe|tax|buy|sell|strategy/i.test(input)) return "Risk & strategy";
+  if (/profit|return|worth|calculate|invested|shares|amount/i.test(input)) return "Calculators";
+  return "Companies";
+}
