@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useRef, useState, type FormEvent } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Triangle, Calculator, LoaderCircle } from "lucide-react";
+import { Triangle, Calculator, LoaderCircle, ArrowLeftRight } from "lucide-react";
 import { COMPANIES, quotesQuery, formatMarketCap, type Symbol } from "@/lib/markets";
 import { usd } from "@/lib/calc";
 import { getInvestmentResult, getPriceOnDate, type MarketQuote } from "@/lib/nvda.functions";
@@ -27,22 +27,19 @@ export function MarketCalculator() {
       <p>Get a free course at Investico Academy to sharpen your skill in choosing the best companies to invest in. Use our <Button variant="link" className="inline-link" onClick={() => setOpen(true)}>investment calculator</Button> to work out your target profit based on the historical returns of the stock you have chosen.</p>
       <p>Need help? <Button variant="link" className="inline-link" asChild><Link to="/contact-us">Email us</Link></Button> and we will guide you step by step to build a portfolio and make your first investment.</p>
       <div className="intro-actions"><Button>Start Free Course</Button><Button onClick={() => setOpen(true)}>Calculate</Button><Button>Invest Now</Button></div>
-      </div><MarketArtwork />
+      <Button className="compare-stocks" onClick={() => setOpen(true)}><ArrowLeftRight />Compare Stocks</Button>
+      </div><div className="intro-side"><RegionTabs active="US" /><Suspense fallback={null}><LiveStamp /></Suspense><p className="intro-side-note">Choose a region to browse companies, then press Compare Stocks to see how they performed over your chosen dates.</p></div>
     </section>
-    <RegionTabs active="US" />
     <Suspense fallback={<CompanyButtons symbol={symbol} setSymbol={setSymbol} />}><LiveCompanies symbol={symbol} setSymbol={setSymbol} /></Suspense>
     <InvestmentForm symbol={symbol} open={open} setOpen={setOpen} />
   </main>;
 }
 
 export function RegionTabs({ active }: { active: "US" | "EUROPE" | "MIDDLE EAST" | "AFRICA" }) {
-  return <div className="region-tabs" aria-label="Market regions">{["US", "EUROPE", "AFRICA", "ASIA", "AUSTRALIA", "MIDDLE EAST"].map(region => {
+  return <div className="region-tabs" aria-label="Market regions">{(["US", "EUROPE", "AFRICA", "MIDDLE EAST"] as const).map(region => {
     const cls = region === active ? "region-active" : "";
-    if (region === "US") return <Button key={region} variant="outline" className={cls} asChild><Link to="/markets" aria-current={active === region ? "page" : undefined}>{region}</Link></Button>;
-    if (region === "EUROPE") return <Button key={region} variant="outline" className={cls} asChild><Link to="/europe" aria-current={active === region ? "page" : undefined}>{region}</Link></Button>;
-    if (region === "AFRICA") return <Button key={region} variant="outline" className={cls} asChild><Link to="/africa" aria-current={active === region ? "page" : undefined}>{region}</Link></Button>;
-    if (region === "MIDDLE EAST") return <Button key={region} variant="outline" className={cls} asChild><Link to="/middle-east" aria-current={active === region ? "page" : undefined}>{region}</Link></Button>;
-    return <Button key={region} variant="outline" className={cls}>{region}</Button>;
+    const to = region === "US" ? "/markets" : region === "EUROPE" ? "/europe" : region === "AFRICA" ? "/africa" : "/middle-east";
+    return <Button key={region} variant="outline" className={cls} asChild><Link to={to} aria-current={active === region ? "page" : undefined}>{region}</Link></Button>;
   })}</div>;
 }
 export function MarketArtwork() {
@@ -56,6 +53,12 @@ export function MarketArtwork() {
 function LiveCompanies({ symbol, setSymbol }: { symbol: Symbol; setSymbol: (s: Symbol) => void }) {
   const { data } = useSuspenseQuery(quotesQuery());
   return <><CompanyButtons symbol={symbol} setSymbol={setSymbol} quotes={data} /><p className="market-footer">Market data provided by Yahoo Finance. Data may be delayed. Prices in USD.</p></>;
+}
+function LiveStamp() {
+  const { data } = useSuspenseQuery(quotesQuery());
+  const t = data.find(q => q.time != null)?.time;
+  const { localTime: lt } = usePrefs();
+  return <p className="intro-side-stamp">Live prices · {sourceDate(t, lt)}, {sourceTime(t, lt)}</p>;
 }
 export const sourceDate = (t: number | null | undefined, local = false) => t ? new Date(t).toLocaleDateString("en-US", {month:"short",day:"numeric",...(local ? {} : {timeZone:"America/New_York"})}) : "—";
 export const sourceTime = (t: number | null | undefined, local = false) => t ? new Date(t).toLocaleTimeString("en-US", {hour:"numeric",minute:"2-digit",...(local ? {timeZoneName:"short"} : {timeZone:"America/New_York"})}) + (local ? "" : " ET") : "—";
