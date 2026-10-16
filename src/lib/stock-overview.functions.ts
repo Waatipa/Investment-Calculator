@@ -3,7 +3,7 @@ import { z } from "zod";
 import { AF_SYMBOLS, EU_SYMBOLS, ME_SYMBOLS } from "./nvda.functions";
 
 const SYMBOLS = ["NVDA", "AAPL", "MSFT", "AMZN", "GOOGL", "META", "TSLA", ...ME_SYMBOLS, ...EU_SYMBOLS, ...AF_SYMBOLS] as string[];
-export const OVERVIEW_RANGES = ["30m", "1h", "1d", "5d", "1mo", "6mo", "1y", "5y"] as const;
+export const OVERVIEW_RANGES = ["30m", "1h", "1d", "5d", "1mo", "3mo", "6mo", "1y", "5y", "max"] as const;
 export type OverviewRange = typeof OVERVIEW_RANGES[number];
 const sym = z.string().refine(s => SYMBOLS.includes(s), "Unsupported company.");
 
@@ -68,12 +68,12 @@ export const getStockOverview = createServerFn({ method: "GET" })
   });
 
 export type Candle = { t: number; o: number | null; h: number | null; l: number | null; c: number; v: number | null };
-export type OverviewChart = { points: Candle[]; previousClose: number | null; timeZone: string; intraday: boolean };
+export type OverviewChart = { points: Candle[]; previousClose: number | null; timeZone: string; intraday: boolean; session?: { start: number; end: number } | null };
 
 const RANGE: Record<OverviewRange, { range: string; interval: string; minutes?: number }> = {
   "30m": { range: "1d", interval: "1m", minutes: 30 }, "1h": { range: "1d", interval: "1m", minutes: 60 },
   "1d": { range: "1d", interval: "5m" }, "5d": { range: "5d", interval: "15m" }, "1mo": { range: "1mo", interval: "1d" },
-  "6mo": { range: "6mo", interval: "1d" }, "1y": { range: "1y", interval: "1d" }, "5y": { range: "5y", interval: "1wk" },
+  "3mo": { range: "3mo", interval: "1d" }, "6mo": { range: "6mo", interval: "1d" }, "1y": { range: "1y", interval: "1d" }, "5y": { range: "5y", interval: "1wk" }, "max": { range: "max", interval: "1mo" },
 };
 
 export const getOverviewChart = createServerFn({ method: "GET" })
@@ -94,5 +94,9 @@ export const getOverviewChart = createServerFn({ method: "GET" })
     const meta = res?.meta ?? {};
     const intraday = ["30m", "1h", "1d", "5d"].includes(data.range);
     const previousClose = intraday && data.range !== "5d" ? pos(meta["chartPreviousClose"]) ?? pos(meta["previousClose"]) : points[0]!.c;
-    return { points, previousClose, timeZone: str(meta["exchangeTimezoneName"]) ?? "America/New_York", intraday };
+    // Regular session bounds let the chart leave the unfinished part of today's session empty.
+    const reg = (meta["currentTradingPeriod"] as { regular?: { start?: number; end?: number } } | undefined)?.regular;
+    const last = points[points.length - 1]!.t;
+    const session = data.range === "1d" && reg?.start && reg?.end && last >= reg.start * 1000 && last <= reg.end * 1000 ? { start: reg.start * 1000, end: reg.end * 1000 } : null;
+    return { points, previousClose, timeZone: str(meta["exchangeTimezoneName"]) ?? "America/New_York", intraday, session };
   });
