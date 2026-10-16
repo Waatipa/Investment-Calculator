@@ -62,6 +62,8 @@
   --color-primary-deep: var(--primary-deep);
   --color-success: var(--success);
   --color-on-brand: var(--on-brand);
+  --color-gold: var(--gold);
+  --color-gold-foreground: var(--gold-foreground);
   --font-display: "Space Grotesk", sans-serif;
   --font-sans: "DM Sans", sans-serif;
   --shadow-soft: 0 1px 2px oklch(0.2 0.03 220 / 6%), 0 8px 24px -12px oklch(0.6 0.1 210 / 25%);
@@ -291,6 +293,8 @@
   --header-surface: oklch(0.17 0.03 255 / 94%);
   --grid-line: oklch(0.65 0.12 230 / 5%);
   --scene-glow: oklch(0.39 0.08 245 / 65%);
+  --gold: oklch(0.81 0.15 85);
+  --gold-foreground: oklch(0.22 0.06 85);
 }
 body { background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px), radial-gradient(ellipse at 86% 22%, var(--scene-glow), transparent 62%); background-size: 36px 36px,36px 36px,100% 100%; min-height: 100vh; }
 .site-header { border-bottom: 1px solid var(--border); background: var(--header-surface); }
@@ -326,6 +330,7 @@ body { background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
 .region-tabs > * { background: var(--muted); height: 33px; padding: 0 8px; font-size: 11px; color: var(--muted-foreground); font-weight: 700; }
 .region-tabs .region-active { background: var(--accent); border-color: var(--primary); color: var(--primary); }
 .company-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 16px; margin-top: 0; }
+.reference-intro + .company-grid { margin-top: 52px; }
 .company-card { display: block; min-width: 0; width: 100%; height: auto; padding: 0; overflow: hidden; white-space: normal; text-align: left; font-weight: 400; border: 1px solid color-mix(in oklab,var(--company-brand) 60%,var(--border)); border-radius: 14px; background: var(--card); color: var(--foreground); box-shadow: none; }
 .company-card:hover { background: var(--card); color: var(--foreground); }
 .company-card { transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease; }
@@ -355,6 +360,9 @@ body { background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
 .footer-link { font-size: 13px; font-weight: 600; color: var(--foreground); }
 .footer-link:hover { color: var(--primary); }
 .footer-disclaimer { font-size: 10px; line-height: 1.5; color: var(--muted-foreground); margin: 0; max-width: 720px; }
+.footer-copyright { font-size: 12px; font-weight: 600; color: var(--foreground); margin: 0; letter-spacing: 0.2px; }
+.btn-gold { background: var(--gold); color: var(--gold-foreground); border-color: var(--gold); box-shadow: 0 6px 18px -10px color-mix(in oklab, var(--gold) 70%, transparent); }
+.btn-gold:hover, .btn-gold:focus-visible { background: color-mix(in oklab, var(--gold) 88%, white); color: var(--gold-foreground); border-color: color-mix(in oklab, var(--gold) 88%, white); }
 .reference-menu { background: var(--card); top: 20px; bottom: auto; right: 14px; height: auto; max-height: calc(100dvh - 40px); width: 270px; border: 1px solid var(--border); border-radius: 20px; padding: 24px 18px 16px; overflow-y: auto; }
 .reference-menu > button:first-child { top: 8px; right: 8px; width: 24px; height: 24px; background: transparent; color: var(--muted-foreground); }
 .reference-menu .academy-wordmark { font-size: 20px; }
@@ -388,6 +396,7 @@ body { background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
   .region-tabs { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px; margin: 12px 0; max-width: none; }
   .region-tabs > * { height: 30px; font-size: 10px; }
   .company-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+  .reference-intro + .company-grid { margin-top: 30px; }
   .company-panel { padding: 8px; min-height: 48px; gap: 7px; }
   .company-initials { width: 27px; height: 27px; font-size: 10px; border-radius: 7px; }
   .company-name { font-size: 12px; }

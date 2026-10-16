@@ -26,7 +26,7 @@ export function MarketCalculator() {
       <div className="reference-copy"><h1>How? When? How Much?<br />Should I Start Investing?</h1>
       <p>Get a free course at Investico Academy to sharpen your skill in choosing the best companies to invest in. Use our <Button variant="link" className="inline-link" onClick={() => setOpen(true)}>investment calculator</Button> to work out your target profit based on the historical returns of the stock you have chosen.</p>
       <p>Need help? <Button variant="link" className="inline-link" asChild><Link to="/contact-us">Email us</Link></Button> and we will guide you step by step to build a portfolio and make your first investment.</p>
-      <div className="intro-actions"><Button>Start Free Course</Button><Button onClick={() => setOpen(true)}>Calculate</Button><Button>Invest Now</Button></div>
+      <div className="intro-actions"><Button>Start Free Course</Button><Button onClick={() => setOpen(true)}>Calculate</Button><Button className="btn-gold">Invest Now</Button></div>
       <Button className="compare-stocks" onClick={() => setOpen(true)}><ArrowLeftRight />Compare Stocks</Button>
       </div><div className="intro-side"><RegionTabs active="US" /><Suspense fallback={null}><LiveStamp /></Suspense><p className="intro-side-note">Choose a region to browse companies, then press Compare Stocks to see how they performed over your chosen dates.</p></div>
     </section>
@@ -183,7 +183,7 @@ function InvestmentForm({ symbol, open, setOpen }: { symbol: Symbol; open: boole
           <p className="text-xs text-muted-foreground">Portfolio value is shares × price on each date; profit is the later portfolio value minus the portfolio value at the investment date.</p>
           <p className="text-xs leading-relaxed text-muted-foreground">Yahoo Finance prices in USD, split-adjusted; shares are on the current split-adjusted basis. Investment uses the first trading day close on or after your date; valuation uses the last trading day close on or before your date. The maximum uses the highest daily traded price in that period (hypothetical sale). Excludes dividends, taxes and fees. Not financial advice.</p>
           <Button variant="outline" className="h-12 text-base" onClick={() => setResult(null)}>Edit Investment Details</Button>
-          <Button asChild className="h-12 text-base font-semibold"><Link to="/subscribe">{symbol === "AAPL" ? "Invest Now" : `Invest in ${company?.name} Now`}</Link></Button>
+          <Button asChild className="btn-gold h-12 text-base font-semibold"><Link to="/subscribe">{symbol === "AAPL" ? "Invest Now" : `Invest in ${company?.name} Now`}</Link></Button>
         </>}
         </>}
       </DialogContent>

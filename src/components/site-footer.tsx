@@ -1,5 +1,4 @@
 import { Link } from "@tanstack/react-router";
-import { AcademyBrand } from "@/components/academy-brand";
 
 const footerItems = [
   { to: "/", label: "Home" },
@@ -12,7 +11,7 @@ const footerItems = [
 
 export function SiteFooter() {
   return <footer className="site-footer"><div className="footer-inner">
-    <Link to="/" aria-label="Investico Academy home"><AcademyBrand /></Link>
+    <p className="footer-copyright">Copyright © 2026 Investico Academy</p>
     <nav aria-label="Footer menu" className="footer-nav">
       {footerItems.map(({ to, label }) => <Link key={to} to={to} className="footer-link">{label}</Link>)}
     </nav>
