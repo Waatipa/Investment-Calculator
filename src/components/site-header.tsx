@@ -88,8 +88,8 @@ function MobileNav() {
     {o.m && <>
       <Row label="Stocks" level={1} open={!!o.s} onToggle={t("s")} />
       {o.s && REGIONS.map(r => <div key={r.label}>
-        <Row label={r.label} level={2} open={!!o["r" + r.label]} onToggle={t("r" + r.label)} />
-        {o["r" + r.label] && <SheetClose asChild><Link to={r.to} className="m-companies">{r.companies.join(" · ")}</Link></SheetClose>}
+        <Row label={r.label} level={2} open={!!o[`r${r.label}` as const]} onToggle={t(`r${r.label}` as const)} />
+        {o[`r${r.label}` as const] && <SheetClose asChild><Link to={r.to} className="m-companies">{r.companies.join(" · ")}</Link></SheetClose>}
       </div>)}
       {o.s && STOCKS.map(i => <MLink key={i.label} item={i} level={2} />)}
       <Row label="Calculators" level={1} open={!!o.c} onToggle={t("c")} />
