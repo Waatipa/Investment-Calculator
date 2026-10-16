@@ -5,6 +5,7 @@ import { MarketCalculator } from "@/components/market-calculator";
 import { formatMarketCap } from "@/lib/markets";
 
 const api = vi.hoisted(() => ({ price: vi.fn(), result: vi.fn(), quotes: vi.fn() }));
+vi.mock("@/components/stock-overview", () => ({ StockOverviewDialog: ({ open, onProceed }: { open: boolean; onProceed: () => void }) => { if (open) queueMicrotask(onProceed); return null; } }));
 vi.mock("@/lib/nvda.functions", () => ({ getPriceOnDate: api.price, getInvestmentResult: api.result, getMarketQuotes: api.quotes, getMarketHistory: vi.fn() }));
 vi.mock("@tanstack/react-router", () => ({ Link: ({ to, children, ...props }: { to: string; children: React.ReactNode }) => <a href={to} {...props}>{children}</a> }));
 

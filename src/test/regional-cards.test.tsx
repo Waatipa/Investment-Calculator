@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { RegionalMarketCards, marketCapCurrency } from "@/components/regional-market-cards";
 import { AF_COMPANIES } from "@/lib/africa";
+vi.mock("@/components/stock-overview", () => ({ StockOverviewDialog: ({ open, onProceed }: { open: boolean; onProceed: () => void }) => { if (open) queueMicrotask(onProceed); return null; } }));
 vi.mock("@tanstack/react-router", () => ({ Link: ({ to, children, ...props }: { to: string; children: React.ReactNode }) => <a href={to} {...props}>{children}</a> }));
 afterEach(cleanup);
 describe("Regional cards", () => {
