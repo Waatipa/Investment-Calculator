@@ -1,4 +1,5 @@
 # Website update
+- [ ] Expand Ask Investments to 200 retained/new questions with simple examples, evidence-based or labeled provisional numbering, editable answers and manual entry; verify category preservation and mobile/desktop flow.
 - [x] Add top-positioned profit calculators to every regional company using real historical/current quotes, correct currencies and exchange dates.
 - [x] Verify regional profit, linked amount, calendars, unavailable-data handling and existing tests (31 passed); source coverage gaps block calculations honestly.
 - [x] Add Africa page with eight major African public companies and staged calculators; unavailable provider data clearly labeled.
