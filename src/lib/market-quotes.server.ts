@@ -46,3 +46,20 @@ export async function fetchCompanyQuotes(symbols: string = US_SYMBOLS): Promise<
   pendingBy.set(symbols, pending);
   try { return await pending; } finally { pendingBy.delete(symbols); }
 }
+// Authenticated Yahoo JSON request (adds the server-only crumb/cookie); cached per URL for `ttl` ms.
+const jsonCache = new Map<string, { data: unknown; expires: number }>();
+export async function fetchYahooJson(url: string, ttl = 60_000): Promise<unknown> {
+  const hit = jsonCache.get(url);
+  if (hit && hit.expires > Date.now()) return hit.data;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const auth = await getSession();
+    const sep = url.includes("?") ? "&" : "?";
+    const r = await fetch(`${url}${sep}crumb=${encodeURIComponent(auth.crumb)}`, { headers: { ...headers, Cookie: auth.cookie }, signal: AbortSignal.timeout(12000) });
+    if (r.status === 401 || r.status === 403) { await r.arrayBuffer(); session = null; continue; }
+    if (!r.ok) { await r.arrayBuffer(); throw new Error("Data unavailable"); }
+    const data = await r.json();
+    jsonCache.set(url, { data, expires: Date.now() + ttl });
+    return data;
+  }
+  throw new Error("Data unavailable");
+}
