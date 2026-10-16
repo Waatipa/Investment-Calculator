@@ -587,7 +587,7 @@ body { background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
 .compare-tabs button { height: 38px; border-radius: 7px; font-weight: 600; font-size: 14px; color: var(--muted-foreground); }
 .compare-tabs .active { background: var(--primary); color: var(--primary-foreground); }
 .compare-chart-box { border: 1px solid var(--border); border-radius: 12px; background: var(--card); padding: 14px; } .compare-chart-box > p:first-child { font-size: 13px; color: var(--muted-foreground); }
-.compare-svg { width: 100%; height: auto; } .compare-svg text { font-size: 10px; } .compare-svg .grid { stroke: var(--border); stroke-width: 1; }
+.compare-svg { width: 100%; height: auto; } .compare-svg text { font-size: inherit; } .compare-svg .grid { stroke: var(--border); stroke-width: 1; }
 .compare-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; margin-top: 6px; } .compare-legend i { display: inline-block; width: 9px; height: 9px; border-radius: 99px; margin-right: 6px; }
 .compare-rank { display: grid; gap: 8px; } .compare-rank > div { display: grid; grid-template-columns: 36px 1fr auto; align-items: center; padding: 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); font-size: 14px; }
 .compare-rank small { color: var(--muted-foreground); }

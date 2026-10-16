@@ -1,3 +1,4 @@
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useMemo, useRef, useState } from "react";
 import { ChartSettingsMenu, ChartTypeSwitch } from "@/components/chart-settings";
 import { chartColors, useChartSettings } from "@/lib/chart-settings";
@@ -138,7 +139,8 @@ function ChartView({ ok, amount, tabs, disclosure, actions }: { ok: Row[]; amoun
 function ValueChart({ rows, amount, times, idx, onPick }: { rows: Row[]; amount: number; times: number[]; idx: number; onPick: (k: number) => void }) {
   const st = useChartSettings(), col = chartColors(st);
   const drag = useRef(false);
-  const W = 600, H = 270, L = st.priceLabels ? 46 : 8, B = 34;
+  const k = useIsMobile() ? 2 : 1.3;
+  const W = 600, H = k > 1.5 ? 420 : 300, L = st.priceLabels ? 46 * k : 8, B = 34 * k;
   const all = rows.flatMap(r => r.s.points.map(p => ({ t: p.t, v: r.m.shares * p.c, h: r.m.shares * p.h })));
   if (!all.length) return <p className="compare-note">No chart data available.</p>;
   const t0 = times[0]!, t1 = times[times.length - 1]!;
@@ -151,11 +153,11 @@ function ValueChart({ rows, amount, times, idx, onPick }: { rows: Row[]; amount:
   const fmt = (v: number) => v >= 1000 ? `$${(v / 1000).toFixed(1)}k` : `$${v.toFixed(0)}`;
   const t = times[idx]!;
   const pick = (e: React.PointerEvent<SVGSVGElement>) => { const r = e.currentTarget.getBoundingClientRect(); const tt = t0 + ((e.clientX - r.left) / r.width * W - L) / (W - L - 8) * (t1 - t0); let b = 0; for (let j = 1; j < times.length; j++) if (Math.abs(times[j]! - tt) < Math.abs(times[b]! - tt)) b = j; onPick(b); };
-  return <svg viewBox={`0 0 ${W} ${H}`} className="compare-svg touch-pan-y select-none" style={{ background: col.bg, borderRadius: 8 }} role="img" aria-label="Investment value over time"
+  return <svg viewBox={`0 0 ${W} ${H}`} className="compare-svg touch-pan-y select-none" style={{ background: col.bg, borderRadius: 8, fontSize: 10 * k }} role="img" aria-label="Investment value over time"
     onPointerDown={e => { if (!st.crosshair) return; drag.current = true; e.currentTarget.setPointerCapture(e.pointerId); pick(e); }} onPointerMove={e => { if (st.crosshair && drag.current) pick(e); }} onPointerUp={() => { drag.current = false; }}>
-    {ticks.map(v => <g key={v}>{st.gridH && <line x1={L} x2={W - 8} y1={y(v)} y2={y(v)} stroke={col.grid} />}{st.priceLabels && <text x={L - 6} y={y(v) + 3} textAnchor="end" style={{ fill: col.muted }}>{fmt(v)}</text>}</g>)}
+    {ticks.map(v => <g key={v}>{st.gridH && <line x1={L} x2={W - 8} y1={y(v)} y2={y(v)} stroke={col.grid} />}{st.priceLabels && <text x={L - 6} y={y(v) + 4 * k} textAnchor="end" style={{ fill: col.muted }}>{fmt(v)}</text>}</g>)}
     {st.gridV && years.map(tt => <line key={tt} x1={x(tt)} x2={x(tt)} y1={8} y2={H - B} stroke={col.grid} />)}
-    {years.slice(1).map((tt, k) => <text key={tt} x={x(tt)} y={H - B + 14} textAnchor={k === 3 ? "end" : "middle"} style={{ fill: col.muted }}>{new Date(tt).toLocaleDateString("en-GB", { month: "short", year: "2-digit" })}</text>)}
+    {years.slice(1).map((tt, k) => <text key={tt} x={x(tt)} y={H - B + 14 * k} textAnchor={k === 3 ? "end" : "middle"} style={{ fill: col.muted }}>{new Date(tt).toLocaleDateString("en-GB", { month: "short", year: "2-digit" })}</text>)}
     <text x={L} y={H - 4} textAnchor="start" style={{ fill: col.fg, fontWeight: 600 }}>Invested {new Date(t0).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" })}</text>
     {rows.map(r => { const pts = r.s.points; const step = Math.max(1, Math.floor(pts.length / 300)); const d = pts.filter((_, k) => k % step === 0 || k === pts.length - 1).map((p, k) => `${k ? "L" : "M"}${x(p.t).toFixed(1)},${y(r.m.shares * p.c).toFixed(1)}`).join(""); const last = pts[pts.length - 1]!; const color = rows.length === 1 ? st.trend : LINES[r.i];
       return <g key={r.s.symbol} style={{ color }}>{st.type === "area" && <path d={`${d}L${x(last.t).toFixed(1)},${H - B}L${x(pts[0]!.t).toFixed(1)},${H - B}Z`} fill="currentColor" opacity=".12" />}<path d={d} fill="none" stroke="currentColor" strokeWidth="2" /><circle cx={x(r.m.peakT)} cy={y(r.m.peakValue)} r="6" fill="none" stroke="currentColor" strokeWidth="1.5" /><circle cx={x(last.t)} cy={y(r.m.value)} r="3.5" fill="currentColor" /><circle cx={x(t)} cy={y(r.m.shares * at(r, t).c)} r="4.5" fill="currentColor" stroke={col.bg} strokeWidth="1.5" /></g>; })}
