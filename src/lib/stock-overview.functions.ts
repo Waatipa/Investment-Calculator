@@ -1,8 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { AF_SYMBOLS, EU_SYMBOLS, ME_SYMBOLS } from "./nvda.functions";
+import { US_SYMBOLS, isListingObservation } from "./us-listings";
 
-const SYMBOLS = ["NVDA", "AAPL", "MSFT", "AMZN", "GOOGL", "META", "TSLA", ...ME_SYMBOLS, ...EU_SYMBOLS, ...AF_SYMBOLS] as string[];
+const SYMBOLS = [...US_SYMBOLS, ...ME_SYMBOLS, ...EU_SYMBOLS, ...AF_SYMBOLS] as string[];
 export const OVERVIEW_RANGES = ["30m", "1h", "1d", "5d", "1mo", "3mo", "6mo", "1y", "5y", "max"] as const;
 export type OverviewRange = typeof OVERVIEW_RANGES[number];
 const sym = z.string().refine(s => SYMBOLS.includes(s), "Unsupported company.");
@@ -86,7 +87,7 @@ export const getOverviewChart = createServerFn({ method: "GET" })
     const res = body.chart?.result?.[0];
     const qq = res?.indicators?.quote?.[0];
     let points: Candle[] = (res?.timestamp ?? []).flatMap((t, i) => {
-      const c = pos(qq?.close?.[i]); if (c == null) return [];
+      const c = pos(qq?.close?.[i]); if (c == null || !isListingObservation(data.symbol, t * 1000)) return [];
       return [{ t: t * 1000, c, o: pos(qq?.open?.[i]), h: pos(qq?.high?.[i]), l: pos(qq?.low?.[i]), v: num(qq?.volume?.[i]) }];
     });
     if (cfg.minutes && points.length) { const end = points[points.length - 1]!.t; points = points.filter(p => p.t > end - cfg.minutes! * 60_000); }

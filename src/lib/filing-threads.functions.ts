@@ -13,7 +13,7 @@ export const listFilingThreads = createServerFn({ method: "GET" })
 
 export const createFilingThread = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(d => z.object({ symbol: z.enum(["AAPL", "NVDA", "MSFT", "AMZN", "GOOGL", "META", "TSLA"]).default("AAPL") }).parse(d ?? {}))
+  .inputValidator(d => z.object({ symbol: z.enum(["AAPL", "NVDA", "MSFT", "AMZN", "GOOGL", "META", "TSLA", "SPCX"]).default("AAPL") }).parse(d ?? {}))
   .handler(async ({ context, data: input }) => {
     const { data, error } = await context.supabase.from("filing_threads").insert({ user_id: context.userId, symbol: input.symbol }).select("id,symbol").single();
     if (error) throw new Error("Could not start a new conversation.");
@@ -42,7 +42,7 @@ export const getFilingThread = createServerFn({ method: "GET" })
   });
 
 export const getFilingReferences = createServerFn({ method: "GET" })
-  .inputValidator(d => z.object({ symbol: z.enum(["AAPL", "NVDA", "MSFT", "AMZN", "GOOGL", "META", "TSLA"]).default("AAPL") }).parse(d ?? {}))
+  .inputValidator(d => z.object({ symbol: z.enum(["AAPL", "NVDA", "MSFT", "AMZN", "GOOGL", "META", "TSLA", "SPCX"]).default("AAPL") }).parse(d ?? {}))
   .handler(async ({ data }) => {
     const { buildReferences } = await import("./filing-chat.server");
     try { return { refs: await buildReferences(data.symbol), error: null as string | null }; }

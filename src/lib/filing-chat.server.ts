@@ -28,6 +28,7 @@ const FIGURES: { label: string; concept: string; kind: "flow" | "instant"; unit?
 export const FILING_COMPANIES: Record<SecSymbol, string> = {
   AAPL: "Apple Inc.", NVDA: "NVIDIA Corporation", MSFT: "Microsoft Corporation",
   AMZN: "Amazon.com, Inc.", GOOGL: "Alphabet Inc.", META: "Meta Platforms, Inc.", TSLA: "Tesla, Inc.",
+  SPCX: "Space Exploration Technologies Corp.",
 };
 
 export async function buildReferences(symbol: SecSymbol = "AAPL"): Promise<FilingReference[]> {

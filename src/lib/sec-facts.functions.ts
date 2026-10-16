@@ -7,7 +7,7 @@ export type VerifiedFigure = { key: string; value: number; concept: string; form
 type Mode = "annual" | "quarterly";
 type Fig = Omit<VerifiedFigure, "key">;
 
-export const SEC_CIKS = { AAPL: "0000320193", NVDA: "0001045810", MSFT: "0000789019", AMZN: "0001018724", GOOGL: "0001652044", META: "0001326801", TSLA: "0001318605" } as const;
+export const SEC_CIKS = { AAPL: "0000320193", NVDA: "0001045810", MSFT: "0000789019", AMZN: "0001018724", GOOGL: "0001652044", META: "0001326801", TSLA: "0001318605", SPCX: "0001181412" } as const;
 export type SecSymbol = keyof typeof SEC_CIKS;
 const caches = new Map<string, { at: number; data: Facts }>();
 
@@ -90,7 +90,7 @@ const combine = (parts: (Fig | null)[], value: (v: number[]) => number, concept:
 const scale = (f: Fig | null, k: number): Fig | null => (f ? { ...f, value: f.value * k } : null);
 
 export const getFilingFigures = createServerFn({ method: "GET" })
-  .inputValidator(d => z.object({ symbol: z.enum(["AAPL", "NVDA", "MSFT", "AMZN", "GOOGL", "META", "TSLA"]).default("AAPL"), metric: z.string().max(20), keys: z.array(z.string().max(20)).max(10), period: z.enum(["annual", "quarterly"]), marketCapM: z.number().positive().nullable().optional(), price: z.number().positive().nullable().optional() }).parse(d))
+  .inputValidator(d => z.object({ symbol: z.enum(["AAPL", "NVDA", "MSFT", "AMZN", "GOOGL", "META", "TSLA", "SPCX"]).default("AAPL"), metric: z.string().max(20), keys: z.array(z.string().max(20)).max(10), period: z.enum(["annual", "quarterly"]), marketCapM: z.number().positive().nullable().optional(), price: z.number().positive().nullable().optional() }).parse(d))
   .handler(async ({ data }) => {
     try {
       const facts = await loadFacts(data.symbol);
@@ -104,7 +104,7 @@ export const getFilingFigures = createServerFn({ method: "GET" })
       const eps = () => flow("EarningsPerShareDiluted", "USD/shares", 0, false);
       const priorEps = () => flow("EarningsPerShareDiluted", "USD/shares", data.period === "annual" ? 1 : 4, false);
       const average = (concept: string) => combine([instant(concept), instant(concept, "USD", "us-gaap", data.period === "annual" ? 1 : 1)], ([a, b]) => (a! + b!) / 2 * M, `us-gaap:${concept}`, "Average of the latest two filed balances");
-      const noPreferred = (): Fig | null => { const n = flow("NetIncomeLoss"); return n ? { ...n, value: 0, concept: "No preferred stock reported", note: "Apple's filings report no preferred stock or preferred dividends" } : null; };
+      const noPreferred = (): Fig | null => { if (data.symbol !== "AAPL") return scale(flow("PreferredStockDividendsAndOtherAdjustments"), M); const n = flow("NetIncomeLoss"); return n ? { ...n, value: 0, concept: "No preferred stock reported", note: "Apple's filings report no preferred stock or preferred dividends" } : null; };
       const sharesOut = () => scale(instant("EntityCommonStockSharesOutstanding", "shares", "dei"), M);
 
       const common: Record<string, () => Fig | null> = {

@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { calculateShares, tradingDate } from "./investment";
+import { US_SYMBOLS, isListingObservation, requireListingDate } from "./us-listings";
 
 export type NvdaData = {
   points: { t: number; p: number; c: number; o: number | null; h: number | null; l: number | null }[];
@@ -14,7 +15,7 @@ export type NvdaData = {
 
 export const getMarketHistory = createServerFn({ method: "GET" })
  .inputValidator((input) => z.object({
-   symbol: z.enum(["NVDA", "AAPL", "MSFT", "AMZN", "GOOGL", "META", "TSLA"]),
+   symbol: z.enum(US_SYMBOLS),
    range: z.enum(["1d", "5d", "1mo", "6mo", "1y", "5y"]),
  }).parse(input))
  .handler(async ({ data }): Promise<NvdaData> => fetchHistory(data));
@@ -37,7 +38,7 @@ async function fetchHistory(data: { symbol: string; range: string }): Promise<Nv
     const p = interval === "1d" ? adj[i] : close[i];
     const c = close[i];
     const t = ts[i];
-    if (t == null || p == null || c == null || !isFinite(p) || p <= 0) continue;
+    if (t == null || p == null || c == null || !isFinite(p) || p <= 0 || !isListingObservation(data.symbol, t * 1000)) continue;
     const quote = r.indicators?.quote?.[0];
     const valid = (v: unknown): number | null => typeof v === "number" && Number.isFinite(v) && v > 0 ? v : null;
     points.push({ t: t * 1000, p, c, o: valid(quote?.open?.[i]), h: valid(quote?.high?.[i]), l: valid(quote?.low?.[i]) });
@@ -70,7 +71,7 @@ export type MarketQuote = {
 };
 
 export const getMarketQuotes = createServerFn({ method: "GET" }).handler(async (): Promise<MarketQuote[]> => {
-  const symbols = ["NVDA", "AAPL", "MSFT", "AMZN", "GOOGL", "META", "TSLA"] as const;
+  const symbols = US_SYMBOLS;
   const { fetchCompanyQuotes } = await import("./market-quotes.server");
   const quotes = await fetchCompanyQuotes().catch(() => []);
   const positive = (value: unknown) => typeof value === "number" && Number.isFinite(value) && value > 0 ? value : null;
@@ -90,8 +91,9 @@ const dateInput = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(value => {
 }, "Enter a valid date.");
 
 export const getInvestmentResult = createServerFn({ method: "GET" })
-  .inputValidator(input => z.object({ symbol: z.enum(["NVDA", "AAPL", "MSFT", "AMZN", "GOOGL", "META", "TSLA"]), startDate: dateInput, endDate: dateInput, shares: z.number().finite().positive() }).parse(input))
+  .inputValidator(input => z.object({ symbol: z.enum(US_SYMBOLS), startDate: dateInput, endDate: dateInput, shares: z.number().finite().positive() }).parse(input))
   .handler(async ({ data }) => {
+    requireListingDate(data.symbol, data.startDate);
     if (data.startDate > data.endDate) throw new Error("The valuation date must be on or after the investment date.");
     if (data.endDate > tradingDate(Date.now())) throw new Error("Choose a valuation date no later than today.");
     if (data.startDate < "1970-01-01") throw new Error("Choose an investment date from 1970 onwards.");
@@ -106,14 +108,15 @@ export const getInvestmentResult = createServerFn({ method: "GET" })
     const highs: (number | null)[] = r?.indicators?.quote?.[0]?.high ?? [];
     const points = timestamps.flatMap((t, i) => {
       const c = closes[i];
-      return c != null && Number.isFinite(c) && c > 0 ? [{ t: t * 1000, c, h: highs[i] ?? null }] : [];
+      return c != null && Number.isFinite(c) && c > 0 && isListingObservation(data.symbol, t * 1000) ? [{ t: t * 1000, c, h: highs[i] ?? null }] : [];
     });
     return calculateShares(points, data.startDate, data.endDate, data.shares);
   });
 
 export const getPriceOnDate = createServerFn({ method: "GET" })
-  .inputValidator(input => z.object({ symbol: z.enum(["NVDA", "AAPL", "MSFT", "AMZN", "GOOGL", "META", "TSLA"]), date: dateInput }).parse(input))
+  .inputValidator(input => z.object({ symbol: z.enum(US_SYMBOLS), date: dateInput }).parse(input))
   .handler(async ({ data }): Promise<number | null> => {
+    requireListingDate(data.symbol, data.date);
     const period1 = Math.floor(Date.parse(data.date + "T00:00:00Z") / 1000);
     const period2 = period1 + 86400 * 10;
     const response = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${data.symbol}?period1=${period1}&period2=${period2}&interval=1d`, { headers: { "User-Agent": "Mozilla/5.0", Accept: "application/json" }, signal: AbortSignal.timeout(15000) });
@@ -124,7 +127,7 @@ export const getPriceOnDate = createServerFn({ method: "GET" })
     const closes: (number | null)[] = r?.indicators?.quote?.[0]?.close ?? [];
     const eligible = timestamps.flatMap((t, i) => {
       const c = closes[i];
-      return c != null && Number.isFinite(c) && c > 0 && tradingDate(t * 1000) >= data.date ? [c] : [];
+      return c != null && Number.isFinite(c) && c > 0 && isListingObservation(data.symbol, t * 1000) && tradingDate(t * 1000) >= data.date ? [c] : [];
     });
     return eligible.length ? eligible[0] ?? null : null;
   });
