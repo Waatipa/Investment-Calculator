@@ -648,7 +648,9 @@ body { background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
 .mega-link small { font-size: 10.5px; color: var(--muted-foreground); }
 .mega-link:hover, .mega-link.mega-on { color: var(--primary); }
 .m-nav { display: grid; margin-top: 16px; }
-.reference-menu .m-nav > * { height: auto; border: 0; padding: 0; }
+.reference-menu .m-nav > * { height: auto; }
+.reference-menu .m-nav > div { border: 0; padding: 0; }
+.desktop-nav > .nav-drop { padding: 0; }
 .m-row { display: flex; width: 100%; align-items: center; justify-content: space-between; min-height: 52px; padding: 0 2px; border-bottom: 1px solid var(--border); font-size: 15px; color: var(--foreground); background: none; text-align: left; }
 .m-row svg { width: 14px; height: 14px; color: var(--muted-foreground) !important; }
 .m-row.m-l1 { min-height: 44px; padding-left: 14px; font-size: 13px; color: var(--muted-foreground); }
