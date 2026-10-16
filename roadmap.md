@@ -1,4 +1,5 @@
 # Website update
+- [ ] Verify Dangote Refinery's public listing and add its Africa stock card only with a verified traded identity.
 - [x] Verify SpaceX's SPCX listing and add its US card, sourced quotes, overview and calculators; exclude pre-listing ticker history. Desktop/mobile profit flow verified; unavailable annual filing fields stay empty. All 41 tests passed.
 - [x] Expand Ask Investments to 200 retained/new questions with simple examples, evidence-based or labeled provisional numbering, editable answers and manual entry; verify category preservation and mobile/desktop flow (38 tests passed).
 - [x] Add top-positioned profit calculators to every regional company using real historical/current quotes, correct currencies and exchange dates.
