@@ -303,6 +303,17 @@
   --ask-border: color-mix(in oklab, var(--ask-answer) 32%, var(--primary));
 }
 body { background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px), radial-gradient(ellipse at 86% 22%, var(--scene-glow), transparent 62%); background-size: 36px 36px,36px 36px,100% 100%; min-height: 100vh; }
+/* Homepage-only decoration: no layout changes or interaction interception. */
+body:has(.homepage-space-background) {
+  isolation: isolate;
+  background-image: none;
+  --space-blue: oklch(0.33 0.075 245);
+  --space-cyan: var(--primary);
+  --space-star: oklch(0.91 0.035 215);
+}
+.homepage-space-background { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+.homepage-space-background canvas { display: block; width: 100%; height: 100%; }
+@media (width < 768px) { .homepage-space-background { opacity: 0.65; } }
 .site-header { border-bottom: 1px solid var(--border); background: var(--header-surface); }
 .header-inner { max-width: 1440px; margin: auto; padding: 12px 4.5%; display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 20px; }
 .academy-brand { display: inline-flex; align-items: center; gap: 10px; }
