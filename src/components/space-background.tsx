@@ -130,8 +130,8 @@ export function SpaceBackground() {
       function resize() {
         width=window.innerWidth;height=window.innerHeight;renderer.setSize(width,height);camera.right=width;camera.top=height;camera.updateProjectionMatrix();
         const intro=document.querySelector(".reference-intro")?.getBoundingClientRect();
-        radius=mobile.matches?76:Math.min(110,width*.09);
-        baseY=(intro?.top??240)+window.scrollY+(mobile.matches?190:185);planet.scale.setScalar(radius);
+        radius=path === "/" || path === "/markets" ? (mobile.matches?76:Math.min(110,width*.09)) : (mobile.matches?58:53);
+        baseY=(intro?.top??240)+window.scrollY+(path === "/" || path === "/markets" ? (mobile.matches?190:185) : (mobile.matches?105:75));planet.scale.setScalar(radius);
         for(let j=0;j<coords.length;j+=3){coords[j]=((j*.618033)%1)*width;coords[j+1]=((j*.414214)%1)*height;coords[j+2]=-350;}
         const attr=starGeometry.getAttribute("position");if(attr)attr.needsUpdate=true;draw();
       }
@@ -151,6 +151,6 @@ export function SpaceBackground() {
       };
     });
     return ()=>{disposed=true;cleanup?.();};
-  },[selected]);
+  },[selected,path]);
   return selected ? <div ref={host} className="homepage-space-background" data-region={selected.name} data-companies={selected.companies.join(",")} aria-hidden="true" /> : null;
 }
