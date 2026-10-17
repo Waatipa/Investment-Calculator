@@ -68,7 +68,7 @@ export const ORIGINAL_QUESTIONS: QA[] = [
   { cat: K, q: "What does 'normalized' performance mean on a chart?", a: "All stocks start from the same point so you see growth, not price size.\n\nExample: a $20 and a $400 stock both start at 100% and you see who grew more." },
   { cat: K, q: "Why might two similar companies perform differently?", a: "Different products, profits, debts and news change how investors value them.\n\nExample: one chipmaker winning a big customer can rise while a rival falls." },
 
-  // Companies (18)
+  // Companies (17)
   { cat: Co, q: "What does NVIDIA do?", a: "NVIDIA designs graphics chips (GPUs) used in gaming, data centres and artificial intelligence.\n\nExample: many AI systems are trained on NVIDIA chips." },
   { cat: Co, q: "What does Apple make money from?", a: "Mostly from selling iPhones, plus Macs, iPads, wearables and services like the App Store and iCloud.\n\nExample: every paid app download earns Apple a share." },
   { cat: Co, q: "How does Microsoft earn its money?", a: "From cloud services (Azure), Office/Microsoft 365, Windows, gaming and LinkedIn.\n\nExample: a company paying monthly for Microsoft 365 is recurring revenue." },
@@ -76,7 +76,6 @@ export const ORIGINAL_QUESTIONS: QA[] = [
   { cat: Co, q: "What does Alphabet own?", a: "Alphabet is Google's parent: Search, YouTube, Android, Google Cloud and other projects.\n\nExample: ads shown next to search results are its biggest earner." },
   { cat: Co, q: "How does Meta make money?", a: "Mostly from advertising on Facebook, Instagram and WhatsApp.\n\nExample: a shop paying to show its ad in your Instagram feed." },
   { cat: Co, q: "What does Tesla do?", a: "Tesla makes electric cars, batteries and solar energy products.\n\nExample: selling a car brings revenue; energy storage is a growing second business." },
-  { cat: Co, q: "Who are the 'Magnificent Seven'?", a: "Seven large US tech companies: Apple, Microsoft, NVIDIA, Amazon, Alphabet, Meta and Tesla.\n\nExample: together they make up a large part of the S&P 500's value." },
   { cat: Co, q: "What is ASML known for?", a: "ASML builds the advanced machines used to print computer chips.\n\nExample: top chipmakers rely on ASML machines to make the newest chips." },
   { cat: Co, q: "What does Novo Nordisk do?", a: "It's a Danish healthcare company known for diabetes and weight-loss medicines.\n\nExample: insulin products are among its core medicines." },
   { cat: Co, q: "What is LVMH?", a: "A French luxury group owning brands in fashion, jewellery, wine and perfume.\n\nExample: Louis Vuitton and Moët are part of LVMH." },

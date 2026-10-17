@@ -4,10 +4,10 @@ import { EXTRA_QUESTIONS } from "@/lib/ask-investments-extra";
 import { SEARCH_VOLUME_SOURCE } from "@/lib/ask-investments-volumes";
 
 describe("Ask Investments", () => {
-  it("retains 100 original questions and adds exactly 100", () => {
-    expect(ORIGINAL_QUESTIONS).toHaveLength(100);
+  it("retains 99 original questions and adds exactly 100", () => {
+    expect(ORIGINAL_QUESTIONS).toHaveLength(99);
     expect(EXTRA_QUESTIONS).toHaveLength(100);
-    expect(QAS).toHaveLength(200);
+    expect(QAS).toHaveLength(199);
     for (const original of ORIGINAL_QUESTIONS) expect(QAS.find(q => q.q === original.q)?.cat).toBe(original.cat);
   });
   it("has unique questions", () => { expect(new Set(QAS.map(q => q.q)).size).toBe(QAS.length); });
@@ -27,10 +27,10 @@ describe("Ask Investments", () => {
     }
   });
   it("assigns unique stable global references that can be retrieved by number", () => {
-    expect(QAS.map(q => q.number)).toEqual(Array.from({ length: 200 }, (_, i) => i + 1));
+    expect(QAS.map(q => q.number)).toEqual(Array.from({ length: 199 }, (_, i) => i + 1));
     expect(findQuestion("#1")?.q).toBe("What is compounding?");
-    expect(findQuestion("question 200")?.number).toBe(200);
-    expect(findQuestion("#201")).toBeUndefined();
+    expect(findQuestion("question 199")?.number).toBe(199);
+    expect(findQuestion("#200")).toBeUndefined();
   });
   it("answers only explicit matches and sends unsupported questions to relevant tools", () => {
     expect(findQuestion("what is a stock")?.q).toBe("What is a stock?");
