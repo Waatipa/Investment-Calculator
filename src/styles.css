@@ -918,3 +918,7 @@ html, body { max-width: 100%; overflow-x: hidden; overscroll-behavior-x: none; }
   .navigation-crumbs li { font-size: 11px; }
   .navigation-trail-dialog { top: -16px; padding: 5px 26px 8px 0; }
 }
+/* Keep the pop-up close (X) above and clear of the sticky breadcrumb */
+.company-dialog > button[class*="absolute"] { z-index: 20; }
+.navigation-trail-dialog { padding-right: 44px; }
+@media (max-width: 640px) { .navigation-trail-dialog { padding-right: 40px; } }
