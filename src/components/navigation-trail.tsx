@@ -19,6 +19,7 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
   const href = useRouterState({ select: s => s.location.href });
   const [visits, setVisits] = useState<PageVisit[]>([{ href, label: pageLabel(href.split("?")[0] ?? href), source: null, scroll: 0 }]);
   const [steps, setSteps] = useState<LocalStep[]>([]);
+  const visitsRef = useRef(visits);
   const stepsRef = useRef<LocalStep[]>([]);
   const lastClick = useRef<string | null>(null);
   const lastHref = useRef(href);
@@ -45,7 +46,8 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
       const el = e.target instanceof Element ? e.target.closest("a,button,[role=button]") : null;
       if (el && !el.closest("[data-navigation-trail]")) {
         lastClick.current = controlKey(el);
-        setVisits(old => old.map((v, i) => i === old.length - 1 ? { ...v, source: lastClick.current, scroll: window.scrollY } : v));
+        const next = visitsRef.current.map((v, i, all) => i === all.length - 1 ? { ...v, source: lastClick.current, scroll: window.scrollY } : v);
+        visitsRef.current = next; setVisits(next);
       }
     };
     document.addEventListener("click", capture, true);
@@ -56,20 +58,25 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
     if (lastHref.current === href) return;
     lastHref.current = href;
     stepsRef.current = []; setSteps([]);
-    setVisits(old => {
-      const i = returning.current ? previousVisit(old, href) : -1;
-      returning.current = false;
-      if (i >= 0) { const dest = old[i]; if (dest) highlight(dest.source, dest.scroll); return old.slice(0, i + 1); }
-      const prior = old.map((v, n) => n === old.length - 1 ? { ...v, source: lastClick.current, scroll: window.scrollY } : v);
-      return [...prior, { href, label: pageLabel(href.split("?")[0] ?? href), source: null, scroll: 0 }];
-    });
+    const old = visitsRef.current;
+    const i = returning.current ? previousVisit(old, href) : -1;
+    returning.current = false;
+    const next = i >= 0 ? old.slice(0, i + 1) : [...old, { href, label: pageLabel(href.split("?")[0] ?? href), source: null, scroll: 0 }];
+    visitsRef.current = next; setVisits(next);
+    if (i >= 0) { const dest = old[i]; if (dest) highlight(dest.source, dest.scroll); }
   }, [href, highlight]);
   const register = useCallback((labels: string[], back: () => void) => {
     const old = stepsRef.current;
     const next = labels.map((label, i) => ({ label, back, source: old[i]?.label === label ? old[i]?.source ?? null : lastClick.current }));
     stepsRef.current = next; setSteps(next);
   }, []);
-  const clear = useCallback(() => { const first = stepsRef.current[0]; stepsRef.current = []; setSteps([]); if (first) highlight(first.source); }, [highlight]);
+  const clear = useCallback(() => {
+    const old = stepsRef.current;
+    highlightTimers.current.push(setTimeout(() => {
+      if (stepsRef.current !== old) return;
+      const first = old[0]; stepsRef.current = []; setSteps([]); if (first) highlight(first.source);
+    }, 0));
+  }, [highlight]);
   const back = () => {
     const step = stepsRef.current.at(-1);
     if (step) { step.back(); highlight(step.source); return; }
