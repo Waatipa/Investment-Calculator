@@ -27,7 +27,7 @@ export function MarketCalculator() {
   return <main className="market-page">
     <section className="reference-intro">
       <div className="reference-copy"><h1>How? When? How Much?<br />Should I Start Investing?</h1>
-      <p>Access free educational courses at Investico Academy to sharpen your skills in market research. Use our educational Stock Investment and Comparison Calculators to analyze past stock trends and see how different assets performed over time.</p>
+      <p>Our educational Stock Investment and Comparison Calculators help you to understand past stock price trends. This enables you to see how different assets performed over time so that you can make informed decisions.</p>
       <div className="intro-actions"><Button>Start Free Course</Button><Button onClick={() => setOpen(true)}>Investment Calculator</Button><Button className="btn-gold">Invest Now</Button></div>
       <Button className="compare-stocks" asChild><Link to="/compare"><ArrowLeftRight />Compare Stocks</Link></Button>
       </div><div className="intro-side"><RegionTabs active="US" /><Suspense fallback={null}><LiveStamp /></Suspense><p className="intro-side-note">Choose a region to browse companies, then press Compare Stocks to see how they performed over your chosen dates.</p></div>
