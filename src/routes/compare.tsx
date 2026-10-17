@@ -45,7 +45,7 @@ function ComparePage() {
   const amt = Number(amount);
   const toggle = (s: string) => setSelected(v => v.includes(s) ? v.filter(x => x !== s) : v.length >= MAX_FREE_COMPARE ? v : [...v, s]);
   const list = COMPARE_COMPANIES.filter(c => (region === "All" || c.region === region) && `${c.name} ${c.short}`.toLowerCase().includes(search.toLowerCase()));
-  useNavigationStep(step > 1 ? ["Select companies", "Investment details", ...(step >= 3 ? ["Results"] : []), ...(step === 4 ? ["Detailed table"] : [])] : [], () => setStep(step === 4 ? 3 : step - 1));
+  useNavigationStep(step > 1 ? ["Select companies", "Investment details", ...(step >= 3 ? ["Results"] : []), ...(step === 4 ? ["Detailed table"] : [])] : [], () => { if (step === 4) setView("chart"); setStep(step === 4 ? 3 : step - 1); });
   const edit = () => { mutation.reset(); };
   const sub = step === 1 ? "Pick companies from any region." : step === 2 ? "One amount and one set of dates for every stock." : step === 3 ? `${money(amt, 0)} each · ${shortDate(start)} to ${shortDate(end)}` : `Detailed comparison · ${money(amt, 0)} each`;
 
