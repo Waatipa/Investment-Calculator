@@ -9,7 +9,7 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-- Root layout shares navigation; named sections have leaf routes. NavigationProvider tracks visited pages and registered card-step Back callbacks; ComingSoonButton handles destinationless options without blocking real actions.
+- Shared root navigation uses leaf routes; NavigationProvider tracks visits/card Back callbacks; ComingSoonButton handles unlinked options.
 - Render the educational disclaimer once in the shared root layout, so all pages use identical copy without duplication.
 - Aggregate comparison holdings through the browser-safe portfolioTotals helper and shared CompareTotals view, so chart-cursor and end-period table totals use the same formulas.
 - Company identity: letter-monogram badges only (no logo artwork); the site's own identity is the shared AcademyBrand pillar-and-growth wordmark and pillar favicon.
@@ -34,4 +34,5 @@
 - Compare Stocks (/compare) uses daily split-adjusted Yahoo closes converted to USD at each day's historical FX close via the pure compare.ts module; only an end date of today uses the timestamped latest trade, so past-date results never drift with live prices.
 - Compare result charts and portfolio ranking share a calendar-date cursor through compare-timeline.ts; market-cap estimates use source current shares held constant and must explicitly disclose that they are not reported historical capitalization.
 - Ask Investments content and routing/matching stay browser-safe with a frozen exact-query country-specific volume snapshot; missing volumes remain unknown and numbering never changes on refresh.
-- PWA: vite-plugin-pwa (generateSW, /sw.js, NetworkFirst navigations, /~oauth excluded) in vite.config.ts; registration only via the guarded src/lib/pwa-register.ts wrapper (never in dev/preview/iframe; ?sw=off kills it); manifest and icons in public/; mobile install prompt is src/components/install-prompt.tsx.
+- PWA: vite-plugin-pwa generates /sw.js; NetworkFirst navigations exclude /~oauth. Register only via pwa-register.ts (never dev/preview/iframe; ?sw=off disables); public manifest/icons and install-prompt.tsx.
+- Homepage decoration uses a pointer-transparent fixed canvas, importing Three.js inside an effect to isolate it from other routes and SSR.

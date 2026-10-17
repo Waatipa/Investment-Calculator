@@ -1,4 +1,5 @@
 # Website update
+- [x] Add homepage-only animated space background, rotating investment planet, regional orbit highlighting and comet; preserved content/controls, verified desktop/phone fit, reduced-motion rendering, calculator opening, 14 tests and clean build.
 - [x] Fix shared calendar day selection to save full dates and close automatically; regression tests cover sequential fields and confirming the selected day.
 - [x] Add shared page/card breadcrumbs, entry-bounded Back, one-second return highlight and Coming soon for unlinked options; verified desktop/phone page returns, company stages, sourced comparison/regional results and Ask question returns.
 - [x] Restore combined Compare Stocks totals under the investment chart and in the detailed table; share the homepage disclaimer on every page. Verified real Apple/Microsoft results, cursor updates, desktop/mobile fit, 22 focused tests and clean build.
