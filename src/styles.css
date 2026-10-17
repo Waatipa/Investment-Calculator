@@ -299,7 +299,7 @@
   --gold-foreground: oklch(0.22 0.06 85);
   --ask-panel: var(--primary);
   --ask-answer: oklch(0.22 0.055 255);
-  --ask-answer-soft: color-mix(in oklab, var(--ask-answer) 68%, var(--primary));
+  --ask-answer-soft: color-mix(in oklab, var(--ask-answer) 84%, var(--primary));
   --ask-border: color-mix(in oklab, var(--ask-answer) 32%, var(--primary));
 }
 body { background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px), radial-gradient(ellipse at 86% 22%, var(--scene-glow), transparent 62%); background-size: 36px 36px,36px 36px,100% 100%; min-height: 100vh; }
