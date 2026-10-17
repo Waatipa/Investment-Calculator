@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { CompareResultsCharts } from "@/components/compare-results";
+import { CompareTotals } from "@/components/compare-totals";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -111,6 +112,7 @@ function Results({ data, amount, view, setView }: { data: CompareSeries[]; amoun
       {line("Best-case value", m => <strong>{money(m.bestValue, 0)}</strong>, "", true)}
       {line("Best-case return", m => <strong>{pct(m.bestReturnPct)}</strong>, "", true)}
     </tbody></table></div>
+      <CompareTotals holdings={ok.flatMap(r => r.m ? [{ invested: amount, value: r.m.value }] : [])} date="At the end of your selected period" incomplete={missing.length > 0} />
       <p className="compare-note">Buy {ok[0] ? longDate(ok[0].m?.buyDate ?? "") : ""} · Sell {ok[0] ? longDate(ok[0].m?.sellDate ?? "") : ""} (first and last trading days; hover a price for its date). Best case = buying at the period low and selling at the later peak. All values in USD.</p>{disclosure}</section>
     <aside className="compare-side compare-capital">{top && <><span>Top performer</span><strong>{top.c.name}</strong><span className={tone((top.m?.returnPct ?? 0))}>{pct((top.m?.returnPct ?? 0))}</span></>}</aside>
     {actions}

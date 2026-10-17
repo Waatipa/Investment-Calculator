@@ -9,6 +9,7 @@ import type { CompareSeries } from "@/lib/compare.functions";
 import { COMPARE_COMPANIES, compareMetrics } from "@/lib/compare";
 import { estimatedCapitalization, pointAtDate } from "@/lib/compare-timeline";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { CompareTotals } from "@/components/compare-totals";
 
 const money = (v: number, digits = 2) => `${v < 0 ? "−" : ""}$${Math.abs(v).toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits })}`;
 const pct = (v: number) => `${v >= 0 ? "+" : ""}${v.toFixed(1)}%`;
@@ -53,6 +54,7 @@ export function CompareResultsCharts({ data, amount, tabs, disclosure, actions }
         <input type="range" className="compare-scrub" min="0" max={dates.length - 1} value={idx} onChange={e => choose(Number(e.target.value))} aria-label="Drag to choose a date" aria-valuetext={dateText(date)} />
         <div className="comparison-endpoints"><span>{dateText(dates[0] ?? date)}</span><span>{dateText(dates[dates.length - 1] ?? date)}</span></div>
         <div className="comparison-mobile-values">{snap.map(x => <div key={x.r.s.symbol}><span><SeriesMark color={x.r.color} />{x.r.c.short}</span><strong>{money(x.value, 0)}</strong><small className={tone(x.ret)}>{pct(x.ret)}</small></div>)}</div>
+        <CompareTotals holdings={snap.map(x => ({ invested: amount, value: x.value }))} date={dateText(date)} incomplete={snap.length < data.length} />
       </div></section>
       <section className="comparison-market-cap"><h2>Market cap comparison</h2><p className="comparison-sub">Estimated size at the selected date · logarithmic scale</p>
         <ComparisonPlot rows={rows.filter(r => r.shares != null)} dates={dates} date={date} onPick={choose} capitalization />
