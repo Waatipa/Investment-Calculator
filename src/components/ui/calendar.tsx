@@ -2,12 +2,12 @@
 
 import * as React from "react";
 import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
-import { DayButton, DayPicker, getDefaultClassNames } from "react-day-picker";
+import { DayButton, DayPicker, getDefaultClassNames, type RootProps } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
 
-function CalendarRoot({ className, rootRef, ...props }: React.ComponentProps<NonNullable<React.ComponentProps<typeof DayPicker>["components"]>["Root"]>) {
+function CalendarRoot({ className, rootRef, ...props }: RootProps) {
   return <div data-slot="calendar" ref={rootRef} className={cn(className)} {...props} />;
 }
 
