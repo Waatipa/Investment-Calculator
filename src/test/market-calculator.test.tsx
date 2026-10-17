@@ -45,7 +45,7 @@ describe("Linked investment calculator", () => {
     const client = mount();
     expect(screen.getAllByText("Close")).toHaveLength(8);
     expect(screen.getAllByText("Off-Hours")).toHaveLength(8);
-    expect(screen.getByRole("button", { name: /^Calculate$/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^Investment Calculator$/ })).toBeInTheDocument();
     document.querySelectorAll(".off-hours .quote-price").forEach(price => expect(price).toHaveTextContent("—"));
     client.clear();
   });
