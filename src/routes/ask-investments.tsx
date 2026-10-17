@@ -56,8 +56,6 @@ function AskInvestments() {
   const list = QAS.filter(x => cat === "All" || x.cat === cat);
   return <main className="ask-shell">
     <h1 className="font-[Lora,Georgia,serif] text-3xl font-bold">Ask Investments</h1>
-    <p className="mb-4 mt-2 text-sm text-muted-foreground">{QAS.length} questions for new investors and researchers. For questions about a company's SEC filings, try our <Link to="/ask" className="text-primary underline">filings AI</Link>.</p>
-    <p className="info-fine mb-3">Provisional ranking · {SEARCH_VOLUME_SOURCE.provider} Google-search estimates for {SEARCH_VOLUME_SOURCE.country}, checked 16 October 2026. Known volumes rank highest within each category; unknown queries follow in their original order, not assumed popularity. Other countries' demand is unverified. Numbers stay the same across category views.</p>
     <div className="ask-chat">
       <div className="ask-log" ref={log} role="log" aria-live="polite">
         {msgs.map((m, i) => <div key={i} className={`ask-bubble ${m.role === "user" ? "ask-user" : "ask-bot"}`}>
