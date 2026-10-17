@@ -13,7 +13,7 @@
 - Render the educational disclaimer once in the shared root layout, so all pages use identical copy without duplication.
 - Aggregate comparison holdings through the browser-safe portfolioTotals helper and shared CompareTotals view, so chart-cursor and end-period table totals use the same formulas.
 - Company identity: letter-monogram badges only (no logo artwork); the site's own identity is the shared AcademyBrand pillar-and-growth wordmark and pillar favicon.
-- Shared dialogs hold calculator stages and scoped themes; browser-safe pure modules hold formulas, preserving semantic profit/loss colors and shared state.
+- Shared dialogs preserve state and profit/loss colors; pure modules hold formulas. All dates use CalculatorDateField; stable calendar components prevent focus remounts from losing clicks.
 - Never treat sample figures, sector medians or recommendations as sourced facts; financial-statement fields stay user-entered until a verified provider supplies them.
 - Mobile navigation stays in the shared Radix Sheet with focus trapping and link-triggered dismissal.
 - Share browser-safe ticker allowlists and listing boundaries across all price paths; reused tickers must exclude the previous issuer's history.
