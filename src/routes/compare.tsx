@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { CompareResultsCharts } from "@/components/compare-results";
 import { CompareTotals } from "@/components/compare-totals";
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Check, ChevronLeft, LoaderCircle } from "lucide-react";
@@ -12,6 +12,7 @@ import { pageHead } from "@/lib/markets";
 import { longDate } from "@/lib/investment";
 import { COMPARE_COMPANIES, MAX_FREE_COMPARE, compareMetrics, type CompareRegion } from "@/lib/compare";
 import { getComparison, type CompareSeries } from "@/lib/compare.functions";
+import { useNavigationStep } from "@/components/navigation-trail";
 
 export const Route = createFileRoute("/compare")({
   head: () => pageHead("Compare Stocks", "Compare how up to four US, European, African and Middle East stocks performed between two dates using actual historical prices."),
@@ -26,7 +27,6 @@ const shortDate = (iso: string) => longDate(iso).replace(/(\d+) (\w{3})\w* (\d{4
 const company = (s: string) => COMPARE_COMPANIES.find(c => c.symbol === s) ?? { symbol: s, short: s, name: s, initials: s.slice(0, 2), region: "US" as const };
 
 function ComparePage() {
-  const router = useRouter();
   const [step, setStep] = useState(1);
   const [view, setView] = useState<"chart" | "table">("chart");
   const [selected, setSelected] = useState<string[]>([]);
@@ -45,12 +45,11 @@ function ComparePage() {
   const amt = Number(amount);
   const toggle = (s: string) => setSelected(v => v.includes(s) ? v.filter(x => x !== s) : v.length >= MAX_FREE_COMPARE ? v : [...v, s]);
   const list = COMPARE_COMPANIES.filter(c => (region === "All" || c.region === region) && `${c.name} ${c.short}`.toLowerCase().includes(search.toLowerCase()));
-  const back = () => step === 1 ? router.history.back() : setStep(step === 4 ? 3 : step - 1);
+  useNavigationStep(step > 1 ? ["Select companies", "Investment details", ...(step >= 3 ? ["Results"] : []), ...(step === 4 ? ["Detailed table"] : [])] : [], () => { if (step === 4) setView("chart"); setStep(step === 4 ? 3 : step - 1); });
   const edit = () => { mutation.reset(); };
   const sub = step === 1 ? "Pick companies from any region." : step === 2 ? "One amount and one set of dates for every stock." : step === 3 ? `${money(amt, 0)} each · ${shortDate(start)} to ${shortDate(end)}` : `Detailed comparison · ${money(amt, 0)} each`;
 
   return <main className={`market-page compare-page${step >= 3 ? " compare-results-page" : ""}`}>
-    <Button variant="ghost" size="icon" className="compare-back" onClick={back} aria-label="Back"><ChevronLeft /></Button>
     <div className="compare-head"><div><h1>Compare Stocks</h1><p>{sub}</p></div>
       <ol className="compare-steps">{["Select", "Details", "Results"].map((l, i) => { const n = i + 1, cur = Math.min(step, 3); return <li key={l} className={n < cur ? "done" : n === cur ? "current" : ""}><span>{n < cur ? <Check /> : n}</span>{l}</li>; })}</ol></div>
 
