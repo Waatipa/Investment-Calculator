@@ -397,8 +397,8 @@ body { background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
   .reference-intro { grid-template-columns: minmax(0,1fr); gap: 18px; }
   .intro-side { padding-top: 0; }
   .compare-stocks { max-width: none; height: 44px; font-size: 13px; }
-  .intro-actions { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 7px; margin-top: 12px; }
-  .intro-actions > * { white-space: normal; font-size: 11px; line-height: 1.1; height: 42px; padding: 5px; }
+  .intro-actions { grid-template-columns: 1fr 1.45fr 1fr; gap: 6px; margin-top: 12px; }
+  .intro-actions > * { white-space: normal; font-size: 10px; line-height: 1.1; height: 42px; padding: 4px 3px; }
   .region-tabs { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px; margin: 12px 0; max-width: none; }
   .region-tabs > * { height: 30px; font-size: 10px; }
   .company-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
