@@ -4,7 +4,6 @@ import { Facebook, Link2, MessageCircle, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { pageHead } from "@/lib/markets";
 import { CATEGORY_GUIDES, CATEGORIES, QAS, type Category } from "@/lib/ask-investments";
-import { SEARCH_VOLUME_SOURCE } from "@/lib/ask-investments-volumes";
 
 export const Route = createFileRoute("/ask-investments")({
   head: () => pageHead("Ask Investments", "Explore 200 numbered investment questions, simple educational examples and guided steps through Investico Academy's market tools."),
