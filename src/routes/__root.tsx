@@ -20,6 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { InstallPrompt } from "@/components/install-prompt";
 import { registerServiceWorker } from "@/lib/pwa-register";
 import { NavigationProvider, NavigationTrail } from "@/components/navigation-trail";
+import { SpaceBackground } from "@/components/space-background";
 
 function NotFoundComponent() {
   return (
@@ -148,6 +149,7 @@ function RootComponent() {
       <SiteHeader />
       <NavigationTrail />
       <EducationalDisclaimer />
+      <SpaceBackground />
       <Outlet />
       <SiteFooter />
       <InstallPrompt />

@@ -307,13 +307,18 @@ body { background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
 body:has(.homepage-space-background) {
   isolation: isolate;
   background-image: none;
-  --space-blue: oklch(0.33 0.075 245);
-  --space-cyan: var(--primary);
+  --space-blue: oklch(0.30 0.085 255);
+  --space-lit: oklch(0.51 0.12 250);
+  --space-cyan: oklch(0.81 0.14 215);
+  --space-green: oklch(0.76 0.20 155);
+  --space-violet: oklch(0.65 0.12 295);
+  --space-gold: oklch(0.77 0.12 85);
   --space-star: oklch(0.91 0.035 215);
 }
 .homepage-space-background { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
 .homepage-space-background canvas { display: block; width: 100%; height: 100%; }
-@media (width < 768px) { .homepage-space-background { opacity: 0.65; } }
+body:has(.homepage-space-background) .market-artwork { visibility: hidden; }
+@media (width < 768px) { .homepage-space-background { opacity: 0.85; } }
 .site-header { border-bottom: 1px solid var(--border); background: var(--header-surface); }
 .header-inner { max-width: 1440px; margin: auto; padding: 12px 4.5%; display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 20px; }
 .academy-brand { display: inline-flex; align-items: center; gap: 10px; }
