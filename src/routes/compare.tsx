@@ -35,7 +35,7 @@ function ComparePage() {
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
   const run = useServerFn(getComparison);
-  const mutation = useMutation({ mutationFn: run, onSuccess: () => { setView("chart"); setStep(3); } });
+  const mutation = useMutation({ mutationFn: run, onSuccess: () => { setStep(current => current <= 2 ? 3 : current); } });
   useEffect(() => {
     if (step < 3 || !mutation.data?.some(s => s.latest?.open)) return;
     const timer = window.setInterval(() => { if (document.visibilityState === "visible" && !mutation.isPending) mutation.mutate({ data: { symbols: selected, start, end } }); }, 15000);
@@ -63,7 +63,7 @@ function ComparePage() {
         <p className="compare-note">Free plan allows up to {MAX_FREE_COMPARE}. More needs Premium.</p>
       </section>
       <aside className="compare-side"><h3>Your selection</h3>{selected.length ? selected.map(s => <div key={s} className="compare-side-row"><span className="compare-badge">{company(s).initials}</span><span>{company(s).name}<small>{company(s).short}</small></span></div>) : <p className="compare-note">No companies selected yet.</p>}</aside>
-      <Button className="compare-cta" disabled={!selected.length} onClick={() => setStep(2)}>Next: investment details</Button>
+      <Button className="compare-cta" disabled={!selected.length} onClick={() => { setView("chart"); setStep(2); }}>Next: investment details</Button>
     </div>}
 
     {step === 2 && <form className="compare-grid" onSubmit={e => { e.preventDefault(); edit(); mutation.mutate({ data: { symbols: selected, start, end } }); }}>
