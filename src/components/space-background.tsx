@@ -90,11 +90,12 @@ export function SpaceBackground() {
         renderer.setSize(width, height); camera.right = width; camera.top = height; camera.updateProjectionMatrix();
         const intro = document.querySelector(".reference-intro")?.getBoundingClientRect();
         radius = mobile.matches ? 77 : Math.min(130, width * 0.105);
-        baseY = (intro?.top ?? 240) + (mobile.matches ? 190 : 180) - window.scrollY;
+        baseY = (intro?.top ?? 240) + (mobile.matches ? 190 : 180) + window.scrollY;
         planet.scale.setScalar(radius);
         for (const star of stars) {
           for (let j = 0; j < star.coords.length; j += 3) { star.coords[j] = ((j * 0.618033 + star.layer * 0.271) % 1) * width; star.coords[j+1] = ((j * 0.414214 + star.layer * 0.137) % 1) * height; star.coords[j+2] = -350; }
-          star.geometry.attributes.position.needsUpdate = true;
+          const position = star.geometry.getAttribute("position");
+          if (position) position.needsUpdate = true;
         }
         draw(0);
       }
@@ -105,6 +106,7 @@ export function SpaceBackground() {
         globe.rotation.y = -0.4 + t * 0.035;
         for (let i = 0; i < orbits.length; i++) {
           const orbit = orbits[i], angle = t * (0.14 + i * 0.025) + i * 1.7;
+          if (!orbit) continue;
           orbit.orb.position.set(Math.cos(angle) * orbit.radius, Math.sin(angle) * orbit.radius, 0);
           orbit.material.opacity = hover ? (hover === orbit.name ? 0.75 : 0.06) : 0.23;
         }
@@ -116,6 +118,7 @@ export function SpaceBackground() {
       }
       let frame = 0, last = 0;
       function loop(time: number) {
+        if (motion.matches) return;
         frame = requestAnimationFrame(loop);
         if (document.hidden || motion.matches || time - last < (mobile.matches ? 66 : 33)) return;
         last = time; draw(time);
@@ -127,11 +130,12 @@ export function SpaceBackground() {
         if (motion.matches) draw(0);
       }
       const redraw = () => draw(0);
-      resize(); frame = requestAnimationFrame(loop);
+      const motionChanged = () => { cancelAnimationFrame(frame); draw(0); if (!motion.matches) frame = requestAnimationFrame(loop); };
+      resize(); if (!motion.matches) frame = requestAnimationFrame(loop);
       window.addEventListener("resize", resize); window.addEventListener("pointermove", pointer, { passive: true });
-      window.addEventListener("scroll", redraw, { passive: true }); motion.addEventListener("change", redraw);
+      window.addEventListener("scroll", redraw, { passive: true }); motion.addEventListener("change", motionChanged);
       cleanup = () => {
-        cancelAnimationFrame(frame); window.removeEventListener("resize", resize); window.removeEventListener("pointermove", pointer); window.removeEventListener("scroll", redraw); motion.removeEventListener("change", redraw);
+        cancelAnimationFrame(frame); window.removeEventListener("resize", resize); window.removeEventListener("pointermove", pointer); window.removeEventListener("scroll", redraw); motion.removeEventListener("change", motionChanged);
         scene.traverse(object => { if (object instanceof T.Mesh || object instanceof T.Line || object instanceof T.Points) { object.geometry.dispose(); for (const material of Array.isArray(object.material) ? object.material : [object.material]) material.dispose(); } });
         renderer.dispose(); renderer.domElement.remove();
       };
