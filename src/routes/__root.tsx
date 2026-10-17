@@ -16,6 +16,8 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { InstallPrompt } from "@/components/install-prompt";
+import { registerServiceWorker } from "@/lib/pwa-register";
 
 function NotFoundComponent() {
   return (
