@@ -25,19 +25,20 @@ export function MarketCalculator() {
   const [symbol, setSymbolState] = useState<Symbol>("NVDA");
   const [open, setOpen] = useState(false);
   const [overview, setOverview] = useState(false);
+  const [fromOverview, setFromOverview] = useState(false);
   const setSymbol = (s: Symbol) => { setSymbolState(s); setOverview(true); };
   useNavigationStep([COMPANIES.find(c => c.symbol === symbol)?.name ?? symbol, "Overview"], () => setOverview(false), overview);
   return <main className="market-page">
     <section className="reference-intro">
       <div className="reference-copy"><h1>How? When? How Much?<br />Should I Start Investing?</h1>
       <p>Our educational Stock Investment and Comparison Calculators help you to understand past stock price trends. This enables you to see how different assets performed over time so that you can make informed decisions.</p>
-      <div className="intro-actions"><ComingSoonButton>Start Free Course</ComingSoonButton><Button onClick={() => setOpen(true)}>Investment Calculator</Button><ComingSoonButton className="btn-gold">Invest Now</ComingSoonButton></div>
+      <div className="intro-actions"><ComingSoonButton>Start Free Course</ComingSoonButton><Button onClick={() => { setFromOverview(false); setOpen(true); }}>Investment Calculator</Button><ComingSoonButton className="btn-gold">Invest Now</ComingSoonButton></div>
       <Button className="compare-stocks" asChild><Link to="/compare"><ArrowLeftRight />Compare Stocks</Link></Button>
       </div><div className="intro-side"><RegionTabs active="US" /><Suspense fallback={null}><LiveStamp /></Suspense><p className="intro-side-note">Choose a region to browse companies, then press Compare Stocks to see how they performed over your chosen dates.</p></div>
     </section>
     <Suspense fallback={<CompanyButtons symbol={symbol} setSymbol={setSymbol} />}><LiveCompanies symbol={symbol} setSymbol={setSymbol} /></Suspense>
-    <StockOverviewDialog symbol={symbol} initials={initials[symbol]} open={overview} onOpenChange={setOverview} onProceed={() => { setOverview(false); setOpen(true); }} />
-    <InvestmentForm symbol={symbol} open={open} setOpen={setOpen} onReturnOverview={() => setOverview(true)} />
+    <StockOverviewDialog symbol={symbol} initials={initials[symbol]} open={overview} onOpenChange={setOverview} onProceed={() => { setFromOverview(true); setOverview(false); setOpen(true); }} />
+    <InvestmentForm symbol={symbol} open={open} setOpen={setOpen} fromOverview={fromOverview} onReturnOverview={() => setOverview(true)} />
   </main>;
 }
 
@@ -90,7 +91,7 @@ function CompanyButtons({ symbol, setSymbol, quotes }: { symbol: Symbol; setSymb
   })}</div>;
 }
 
-function InvestmentForm({ symbol, open, setOpen, onReturnOverview }: { symbol: Symbol; open: boolean; setOpen: (o: boolean) => void; onReturnOverview: () => void }) {
+function InvestmentForm({ symbol, open, setOpen, fromOverview, onReturnOverview }: { symbol: Symbol; open: boolean; setOpen: (o: boolean) => void; fromOverview: boolean; onReturnOverview: () => void }) {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [shares, setShares] = useState("10");
@@ -105,11 +106,11 @@ function InvestmentForm({ symbol, open, setOpen, onReturnOverview }: { symbol: S
   const entered = useRef({ shares: "10", amount: "", basis: "shares" as "shares" | "amount" });
   const revision = useRef(0);
   const company = COMPANIES.find(c => c.symbol === symbol);
-  useNavigationStep([company?.name ?? symbol, "Calculators", ...(metric ? [metric === "profit" ? "Profit calculator" : metric.name] : []), ...(result || metricResult ? ["Results"] : [])], () => {
+  useNavigationStep([company?.name ?? symbol, ...(fromOverview ? ["Overview"] : []), "Calculators", ...(metric ? [metric === "profit" ? "Profit calculator" : metric.name] : []), ...(result || metricResult ? ["Results"] : [])], () => {
     if (result) setResult(null);
     else if (metricResult) document.querySelector<HTMLButtonElement>("[role=dialog] .pro-back")?.click();
     else if (metric) setMetric(null);
-    else { setOpen(false); onReturnOverview(); }
+    else { setOpen(false); if (fromOverview) onReturnOverview(); }
   }, open);
   useEffect(() => { setMetric(null); setMetricResult(false); }, [symbol, open]);
   useEffect(() => { revision.current += 1; setResult(null); setError(""); setPurchasePrice(null); }, [symbol, startDate]);

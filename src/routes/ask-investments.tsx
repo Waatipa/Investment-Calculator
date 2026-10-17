@@ -4,6 +4,7 @@ import { Facebook, Link2, MessageCircle, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { pageHead } from "@/lib/markets";
 import { CATEGORY_GUIDES, CATEGORIES, QAS, type Category } from "@/lib/ask-investments";
+import { useNavigationStep } from "@/components/navigation-trail";
 
 export const Route = createFileRoute("/ask-investments")({
   head: () => pageHead("Ask Investments", "Explore 200 numbered investment questions, simple educational examples and guided steps through Investico Academy's market tools."),
@@ -20,6 +21,12 @@ function AskInvestments() {
   const [busy, setBusy] = useState(false);
   const log = useRef<HTMLDivElement>(null);
   const timers = useRef<number[]>([]);
+  const questions = msgs.filter(m => m.role === "user");
+  useNavigationStep(questions.map(m => m.text), () => {
+    timers.current.forEach(clearTimeout); timers.current = [];
+    setTyping(null); setBusy(false);
+    setMsgs(m => { const index = m.findLastIndex(x => x.role === "user"); return index >= 0 ? m.slice(0, index) : m; });
+  });
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
   useEffect(() => { log.current?.scrollTo({ top: log.current.scrollHeight }); }, [msgs, typing]);
 
