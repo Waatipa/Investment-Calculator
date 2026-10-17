@@ -124,7 +124,7 @@ export function SpaceBackground() {
           }
           orbit.title.position.set(0,-1.22,1.6);
         }
-        element.dataset.rotation=elapsed.toFixed(2);
+        if (host.current) host.current.dataset["rotation"]=elapsed.toFixed(2);
         renderer.render(scene,camera);
       }
       function resize() {
