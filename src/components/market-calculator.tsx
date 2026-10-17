@@ -25,7 +25,7 @@ export function MarketCalculator() {
   const [overview, setOverview] = useState(false);
   const setSymbol = (s: Symbol) => { setSymbolState(s); setOverview(true); };
   return <main className="market-page">
-    <p className="edu-disclaimer"><strong>Educational purposes only.</strong> The information on this page helps readers understand how companies have performed, so they can reach their own informed investment decisions in the future. It is not investment advice and it is not a tool to push anyone to invest. Do not invest unless you are willing and ready to. Past performance does not guarantee future results.</p>
+    <p className="edu-disclaimer">All the content in this platform as a whole (Calculators, Text and Others) helps readers understand how companies have performed, so they can reach their own informed investment decisions in the future. It is not investment advice and it is not a tool to push anyone to invest. Do not invest unless you are willing and ready to. Past performance does not guarantee future results.</p>
     <section className="reference-intro">
       <div className="reference-copy"><h1>How? When? How Much?<br />Should I Start Investing?</h1>
       <p>Our educational Stock Investment and Comparison Calculators help you to understand past stock price trends. This enables you to see how different assets performed over time so that you can make informed decisions.</p>
