@@ -36,7 +36,6 @@ function Overview({ symbol, initials, onProceed, onBack }: { symbol: string; ini
   const sess = d?.marketOpen ? null : d?.postMarket ?? d?.preMarket;
   return <div className="grid gap-4">
     <div className="flex items-start gap-3">
-      <button type="button" onClick={onBack} aria-label="Back to companies" className="mt-2 text-2xl text-muted-foreground hover:text-foreground">‹</button>
       <span className="company-initials">{initials ?? symbol.slice(0, 2)}</span>
       <div className="min-w-0">
         <DialogTitle className="font-display text-xl sm:text-3xl">{d?.name ?? symbol}</DialogTitle>

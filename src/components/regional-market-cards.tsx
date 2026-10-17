@@ -13,6 +13,7 @@ import { RegionalProfitCalculator } from "./regional-profit-calculator";
 import { LocationButton, LocalTimeToggle } from "./display-prefs";
 import { usePrefs } from "@/lib/display-prefs";
 import { StockOverviewDialog } from "./stock-overview";
+import { useNavigationStep } from "./navigation-trail";
 
 export type RegionalCompany = { symbol: string; name: string; ticker: string; country: string; initials: string; currency?: string; notTrading?: boolean };
 export function marketCapCurrency(currency: string | null | undefined) {
@@ -32,6 +33,12 @@ export function RegionalMarketCards({ companies, quotes, region }: { companies: 
   const company = companies.find(c => c.symbol === open);
   const quote = quotes.find(q => q.symbol === open);
   const currency = quote?.currency === "ZAc" ? "ZAR" : quote?.currency ?? company?.currency ?? (region.includes("Middle East") ? "AED" : "EUR");
+  useNavigationStep([companies.find(c => c.symbol === overview)?.name ?? overview ?? "Company", "Overview"], () => setOverview(null), !!overview);
+  useNavigationStep([company?.name ?? open ?? "Company", "Calculators", ...(metric ? [metric === "profit" ? "Profit calculator" : metric.name] : []), ...(profitResult ? ["Results"] : [])], () => {
+    if (profitResult) document.querySelector<HTMLButtonElement>("[role=dialog] [data-edit-investment], [role=dialog] .pro-back")?.click();
+    else if (metric) setMetric(null);
+    else { setOverview(open); setOpen(null); }
+  }, !!open);
   return <>
     <div className="company-grid" aria-label={`${region} companies`}>{sorted.map(c => {
       if (c.notTrading) return <div key={c.symbol} data-company={c.symbol} className="company-card regional-company">
@@ -54,7 +61,7 @@ export function RegionalMarketCards({ companies, quotes, region }: { companies: 
       <DialogContent data-company={company?.symbol} className="company-dialog pro-dialog regional-company max-h-[90dvh] w-[calc(100%-1.5rem)] max-w-3xl overflow-y-auto overflow-x-hidden rounded-lg p-4 sm:p-6">
         <DialogHeader className="company-dialog-heading"><div className="pro-heading-row"><span className="company-initials">{company?.initials}</span><div><div className="mb-2 text-xs font-semibold uppercase text-muted-foreground">{company?.name} · {company?.ticker}</div><DialogTitle className="pr-8 font-display text-xl">{metric === "profit" ? `${company?.name} ${profitResult ? "investment result" : "profit calculator"}` : metric?.name ?? `${company?.name} pro calculator`}</DialogTitle></div></div><DialogDescription>{metric === "profit" ? profitResult ? "Source-priced investment returns." : "Enter your dates and shares or amount, then calculate." : metric ? `${company?.name} financial analysis · ${currency}` : "Choose a calculator."}</DialogDescription></DialogHeader>
         {company && metric == null && <div className="location-row"><LocationButton homeCurrency={currency} /></div>}
-        {company && (metric === "profit" ? <RegionalProfitCalculator key={company.symbol} symbol={company.symbol} onBack={() => { setMetric(null); setProfitResult(false); }} onStageChange={setProfitResult} /> : metric ? <FinancialMetricForm key={`${company.symbol}-${metric.id}`} symbol={company.symbol} companyName={company.name} currency={currency} metric={metric} onBack={() => setMetric(null)} onStageChange={() => {}} /> : <ProCalculatorChoices onChoose={m => { setMetric(m); setProfitResult(false); }} />)}
+        {company && (metric === "profit" ? <RegionalProfitCalculator key={company.symbol} symbol={company.symbol} onBack={() => { setMetric(null); setProfitResult(false); }} onStageChange={setProfitResult} /> : metric ? <FinancialMetricForm key={`${company.symbol}-${metric.id}`} symbol={company.symbol} companyName={company.name} currency={currency} metric={metric} onBack={() => { setMetric(null); setProfitResult(false); }} onStageChange={setProfitResult} /> : <ProCalculatorChoices onChoose={m => { setMetric(m); setProfitResult(false); }} />)}
       </DialogContent>
     </Dialog>
   </>;

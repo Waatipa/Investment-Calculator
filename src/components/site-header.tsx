@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Menu, ChevronDown, ChevronRight } from "lucide-react";
 import { Sheet, SheetTrigger, SheetContent, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet";
 import { AcademyBrand } from "@/components/academy-brand";
+import { ComingSoonButton } from "@/components/coming-soon";
 
 type To = "/" | "/about-us" | "/markets" | "/europe" | "/africa" | "/middle-east" | "/compare" | "/ask-investments" | "/subscribe" | "/contact-us";
-type Item = { label: string; to: To; hint?: string };
+type Item = { label: string; to: To; hint?: string; soon?: boolean };
 
 const REGIONS: { label: string; to: To; companies: string[] }[] = [
   { label: "US", to: "/markets", companies: ["NVIDIA", "Apple", "Microsoft", "Amazon", "Alphabet"] },
@@ -14,7 +15,7 @@ const REGIONS: { label: string; to: To; companies: string[] }[] = [
   { label: "Africa", to: "/africa", companies: ["Naspers", "FirstRand", "Standard Bank", "MTN Group", "Dangote Cement"] },
   { label: "Middle East", to: "/middle-east", companies: ["Saudi Aramco", "Al Rajhi Bank", "TAQA Group", "ADNOC Gas", "Mashreq"] },
 ];
-const STOCKS: Item[] = [{ label: "Company charts", to: "/markets" }, { label: "Top movers", to: "/" }];
+const STOCKS: Item[] = [{ label: "Company charts", to: "/markets" }, { label: "Top movers", to: "/", soon: true }];
 const CALCULATORS: Item[] = [
   { label: "Compare Stocks", to: "/compare" }, { label: "Earnings per share", to: "/markets" }, { label: "Price to earnings ratio", to: "/markets" },
   { label: "Liquidity ratios", to: "/markets" }, { label: "Balance sheet", to: "/markets" }, { label: "Return on investment", to: "/markets" },
@@ -24,12 +25,13 @@ const NEWS: Item[] = [
   { label: "Company reports", to: "/ask-investments", hint: "Earnings and filings explained" },
   { label: "Market news", to: "/markets", hint: "What moved the markets today" },
 ];
-const START: Item[] = [{ label: "Choose a broker", to: "/subscribe" }, { label: "Open an account", to: "/subscribe" }, { label: "Your first investment", to: "/subscribe" }];
-const COURSES: Item[] = [{ label: "Free first course", to: "/subscribe" }, { label: "All courses", to: "/subscribe" }, { label: "My downloads", to: "/subscribe" }];
+const START: Item[] = [{ label: "Choose a broker", to: "/subscribe", soon: true }, { label: "Open an account", to: "/subscribe", soon: true }, { label: "Your first investment", to: "/subscribe", soon: true }];
+const COURSES: Item[] = [{ label: "Free first course", to: "/subscribe", soon: true }, { label: "All courses", to: "/subscribe", soon: true }, { label: "My downloads", to: "/subscribe", soon: true }];
 const TOP: Item[] = [{ label: "Home", to: "/" }, { label: "About Us", to: "/about-us" }];
 const AFTER: Item[] = [{ label: "Ask Investments", to: "/ask-investments" }, { label: "Subscribe", to: "/subscribe" }, { label: "Contact Us", to: "/contact-us" }];
 
 function MegaLink({ item, onClick }: { item: Item; onClick?: () => void }) {
+  if (item.soon) return <ComingSoonButton variant="ghost" className="mega-link"><span>{item.label}</span></ComingSoonButton>;
   return <Link to={item.to} onClick={onClick} className="mega-link"><span>{item.label}</span>{item.hint && <small>{item.hint}</small>}</Link>;
 }
 
@@ -56,7 +58,7 @@ function DesktopNav() {
       </div>
       {regions ? <>
         <div className="mega-col"><h4>Regions</h4>{REGIONS.map((r, idx) => <Link key={r.label} to={r.to} onClick={close} onMouseEnter={() => setRegion(idx)} className={`mega-link ${region === idx ? "mega-on" : ""}`}><span>{r.label}{region === idx ? " ›" : ""}</span></Link>)}</div>
-        {(() => { const r = REGIONS[region] ?? REGIONS[0]!; return <div className="mega-col"><h4>{r.label}</h4>{r.companies.map(c => <Link key={c} to={r.to} onClick={close} className="mega-link"><span>{c}</span></Link>)}</div>; })()}
+        {(() => { const r = REGIONS[region]; if (!r) return null; return <div className="mega-col"><h4>{r.label}</h4>{r.companies.map(c => <Link key={c} to={r.to} onClick={close} className="mega-link"><span>{c}</span></Link>)}</div>; })()}
       </> : <>
         <div className="mega-col"><h4>Calculators</h4>{CALCULATORS.map(i => <MegaLink key={i.label} item={i} onClick={close} />)}</div>
         <div className="mega-col"><h4>Analysis &amp; News</h4>{NEWS.map(i => <MegaLink key={i.label} item={i} onClick={close} />)}</div>
@@ -76,6 +78,7 @@ function Row({ label, open, onToggle, level = 0 }: { label: string; open: boolea
   return <button type="button" className={`m-row m-l${level} ${open ? "m-open" : ""}`} aria-expanded={open} onClick={onToggle}><span>{label}</span>{open ? <ChevronDown /> : <ChevronRight />}</button>;
 }
 function MLink({ item, level = 0 }: { item: Item; level?: number }) {
+  if (item.soon) return <ComingSoonButton variant="ghost" className={`m-row m-l${level}`}><span>{item.label}</span>{level > 0 && <ChevronRight />}</ComingSoonButton>;
   return <SheetClose asChild><Link to={item.to} className={`m-row m-l${level}`} activeProps={{ className: "m-open" }} activeOptions={{ exact: true }}><span>{item.label}</span>{level > 0 && <ChevronRight />}</Link></SheetClose>;
 }
 

@@ -19,6 +19,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { InstallPrompt } from "@/components/install-prompt";
 import { registerServiceWorker } from "@/lib/pwa-register";
+import { NavigationProvider, NavigationTrail } from "@/components/navigation-trail";
 
 function NotFoundComponent() {
   return (
@@ -143,12 +144,15 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+      <NavigationProvider>
       <SiteHeader />
+      <NavigationTrail />
       <EducationalDisclaimer />
       <Outlet />
       <SiteFooter />
       <InstallPrompt />
       <Toaster />
+      </NavigationProvider>
     </QueryClientProvider>
   );
 }
