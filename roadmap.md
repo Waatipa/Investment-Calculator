@@ -1,4 +1,5 @@
 # Website update
+- [x] Fix shared calendar day selection to save full dates and close automatically; regression tests cover sequential fields and confirming the selected day.
 - [x] Add shared page/card breadcrumbs, entry-bounded Back, one-second return highlight and Coming soon for unlinked options; verified desktop/phone page returns, company stages, sourced comparison/regional results and Ask question returns.
 - [x] Restore combined Compare Stocks totals under the investment chart and in the detailed table; share the homepage disclaimer on every page. Verified real Apple/Microsoft results, cursor updates, desktop/mobile fit, 22 focused tests and clean build.
 - [x] Match Compare Stocks result references on desktop/phone, synchronize chart pointers and replay, preserve sourced calculations and transparent pointer figures; complete real-data flow, table and zero mobile overflow verified. Market caps explicitly estimated using sourced current shares; 20 focused tests passed.
