@@ -771,3 +771,98 @@ html, body { max-width: 100%; overflow-x: hidden; overscroll-behavior-x: none; }
 .ask-bot .ask-share button { color: var(--ask-answer); }
 .ask-bot .ask-share button:hover { background: color-mix(in oklab, var(--ask-answer) 12%, transparent); color: var(--ask-answer); }
 .ask-bot .ask-typing span { background: var(--ask-answer); }
+
+/* Reference comparison results: one shared date drives both charts and the portfolio race. */
+:root, .dark {
+  --compare-series-1: var(--success);
+  --compare-series-2: var(--gold);
+  --compare-series-3: var(--destructive);
+  --compare-series-4: var(--primary);
+  --compare-plot: oklch(0.22 0.045 235);
+  --compare-panel: linear-gradient(165deg, var(--card), var(--background));
+}
+.compare-results-page { max-width: 1440px; padding-top: 30px; }
+.compare-results-page .compare-head { padding-left: 0; margin-bottom: 24px; }
+.compare-results-page .compare-back { position: static; height: 26px; margin-bottom: 8px; }
+.compare-results-page .compare-head h1 { font-family: var(--font-sans); font-size: 36px; }
+.comparison-results { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(290px, 1fr); gap: 20px; align-items: start; }
+.comparison-main { min-width: 0; display: grid; gap: 20px; }
+.comparison-investment, .comparison-market-cap, .comparison-race { background: var(--compare-panel); border: 1px solid var(--border); border-radius: 8px; min-width: 0; overflow: hidden; }
+.comparison-investment .compare-tabs { margin: 0; border: 0; border-bottom: 1px solid var(--border); border-radius: 0; padding: 5px; }
+.comparison-investment .compare-tabs button { border-radius: 5px; }
+.comparison-inner, .comparison-market-cap, .comparison-race { padding: 16px; }
+.comparison-chart-heading { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 14px; }
+.comparison-results h2 { font-family: var(--font-sans); font-size: 14px; font-weight: 700; line-height: 1.4; }
+.comparison-chart-heading p, .comparison-sub { font-size: 12px; line-height: 1.5; color: var(--muted-foreground); margin-top: 3px; }
+.comparison-tools { display: flex; gap: 6px; align-items: center; }
+.comparison-companies { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; margin-bottom: 14px; }
+.comparison-companies > div { display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); border-radius: 6px; padding: 10px; background: var(--background); }
+.comparison-companies p { font-size: 11px; line-height: 1.45; }
+.comparison-companies strong { margin-right: 3px; }
+.comparison-companies small { display: block; color: var(--muted-foreground); font-size: 10px; }
+.comparison-series-mark { display: inline-block; width: 24px; height: 12px; flex-shrink: 0; vertical-align: middle; margin-right: 4px; }
+.comparison-plot { width: 100%; height: auto; display: block; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.comparison-pointer { background: transparent; }
+.comparison-pointer text { paint-order: stroke; stroke: var(--compare-plot); stroke-width: 1px; stroke-linejoin: round; }
+.comparison-date { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-top: 12px; }
+.comparison-date strong { color: var(--gold); font-family: ui-monospace, monospace; font-size: 12px; }
+.comparison-date small { color: var(--muted-foreground); font-size: 10px; font-family: var(--font-sans); margin-left: 6px; font-weight: 400; }
+.comparison-date button { height: 28px; font-size: 11px; padding: 0 10px; border-radius: 999px; }
+.comparison-date button svg { width: 12px; height: 12px; }
+.comparison-results .compare-scrub { height: 22px; accent-color: var(--gold); margin-top: 8px; }
+.comparison-endpoints { display: flex; justify-content: space-between; gap: 8px; color: var(--muted-foreground); font-family: ui-monospace, monospace; font-size: 10px; }
+.comparison-mobile-values { display: none; }
+.comparison-market-cap > .comparison-sub { margin-bottom: 14px; }
+.comparison-cap-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 12px; }
+.comparison-cap-table th, .comparison-cap-table td { padding: 10px 6px; border-bottom: 1px solid var(--border); text-align: right; white-space: nowrap; }
+.comparison-cap-table th:first-child { text-align: left; }
+.comparison-cap-table thead th { font-size: 9px; color: var(--muted-foreground); text-transform: uppercase; background: var(--card); }
+.comparison-race-heading { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.comparison-race-heading > strong { font-family: ui-monospace, monospace; color: var(--gold); font-size: 11px; }
+.comparison-leader { display: flex; gap: 8px; align-items: center; border: 1px solid color-mix(in oklab, var(--gold) 35%, var(--border)); border-radius: 6px; background: color-mix(in oklab, var(--gold) 8%, var(--muted)); padding: 10px; font-size: 11px; margin: 12px 0; }
+.comparison-leader svg { color: var(--gold); width: 16px; height: 16px; flex-shrink: 0; }
+.comparison-racers { display: grid; gap: 10px; }
+.comparison-racers article { background: var(--background); border: 1px solid var(--border); border-radius: 8px; padding: 12px; min-width: 0; }
+.comparison-racer-heading { display: flex; align-items: center; gap: 4px; font-size: 12px; }
+.comparison-place { font-size: 9px; color: var(--gold-foreground); background: var(--gold); font-weight: 800; text-transform: uppercase; border-radius: 3px; padding: 2px 5px; }
+.comparison-return { margin-left: auto; font-family: ui-monospace, monospace; border-radius: 99px; padding: 2px 6px; background: var(--muted); font-size: 10px; white-space: nowrap; }
+.comparison-racers article > p { font-size: 11px; color: var(--muted-foreground); margin-top: 5px; }
+.comparison-racers dl { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) minmax(0, 1fr); gap: 6px; margin-top: 12px; }
+.comparison-racers dt { font-size: 8px; color: var(--muted-foreground); text-transform: uppercase; margin-bottom: 4px; }
+.comparison-racers dd { font-size: 11px; font-family: ui-monospace, monospace; font-weight: 700; overflow-wrap: anywhere; }
+.comparison-racers dl > div:nth-child(2) dd { font-size: 15px; }
+.comparison-racers progress { display: block; width: 100%; height: 5px; appearance: none; margin: 10px 0; accent-color: var(--primary); }
+.comparison-racers progress::-webkit-progress-bar { background: var(--muted); border-radius: 4px; }
+.comparison-racers progress::-webkit-progress-value { background: var(--primary); border-radius: 4px; }
+.comparison-racers progress::-moz-progress-bar { background: var(--primary); border-radius: 4px; }
+.comparison-racers article > small { display: block; font-family: ui-monospace, monospace; font-size: 9px; color: var(--muted-foreground); line-height: 1.5; }
+.comparison-racers article > small b { color: var(--primary); font-weight: 600; }
+.comparison-race .compare-actions { margin-top: 14px; }
+.comparison-race .compare-cta { height: 42px; font-size: 13px; border-radius: 6px; }
+.comparison-race .btn-gold { background: transparent; color: var(--gold); border: 1px solid var(--gold); box-shadow: none; }
+.comparison-optional { font-size: 10px; color: var(--muted-foreground); text-align: center; margin-top: 12px; line-height: 1.5; }
+.comparison-disclosure { grid-column: 1 / -1; }
+.comparison-chart-empty { min-height: 160px; display: grid; place-items: center; text-align: center; font-size: 12px; color: var(--muted-foreground); background: var(--compare-plot); border: 1px solid var(--border); border-radius: 6px; padding: 20px; }
+@media (max-width: 760px) {
+  .compare-results-page { padding-inline: 14px; }
+  .comparison-results { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .comparison-inner, .comparison-market-cap, .comparison-race { padding: 12px; }
+  .comparison-results h2 { font-size: 13px !important; }
+  .comparison-chart-heading { display: grid; gap: 10px; }
+  .comparison-companies { grid-template-columns: minmax(0, 1fr); gap: 7px; }
+  .comparison-companies > div { padding: 9px; }
+  .comparison-desktop-column { display: none; }
+  .comparison-cap-table { display: table; font-size: 10px; }
+  .comparison-cap-table thead th { font-size: 8px; }
+  .comparison-cap-table th, .comparison-cap-table td { padding: 9px 4px; white-space: normal; }
+  .comparison-cap-table .comparison-series-mark { width: 16px; }
+  .comparison-mobile-values { display: grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap: 6px; margin-top: 12px; }
+  .comparison-mobile-values > div { display: grid; background: var(--background); border: 1px solid var(--border); border-radius: 6px; padding: 7px; }
+  .comparison-mobile-values span { font-size: 9px; }
+  .comparison-mobile-values .comparison-series-mark { width: 15px; }
+  .comparison-mobile-values strong { font-size: 12px; }
+  .comparison-mobile-values small { font-size: 10px; }
+  .comparison-race { max-width: 100%; }
+  .comparison-racers dl > div:nth-child(2) dd { font-size: 18px; }
+  .comparison-racers dd { font-size: 12px; }
+}
