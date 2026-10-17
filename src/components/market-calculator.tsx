@@ -37,7 +37,7 @@ export function MarketCalculator() {
     </section>
     <Suspense fallback={<CompanyButtons symbol={symbol} setSymbol={setSymbol} />}><LiveCompanies symbol={symbol} setSymbol={setSymbol} /></Suspense>
     <StockOverviewDialog symbol={symbol} initials={initials[symbol]} open={overview} onOpenChange={setOverview} onProceed={() => { setOverview(false); setOpen(true); }} />
-    <InvestmentForm symbol={symbol} open={open} setOpen={setOpen} />
+    <InvestmentForm symbol={symbol} open={open} setOpen={setOpen} onReturnOverview={() => setOverview(true)} />
   </main>;
 }
 
@@ -90,7 +90,7 @@ function CompanyButtons({ symbol, setSymbol, quotes }: { symbol: Symbol; setSymb
   })}</div>;
 }
 
-function InvestmentForm({ symbol, open, setOpen }: { symbol: Symbol; open: boolean; setOpen: (o: boolean) => void }) {
+function InvestmentForm({ symbol, open, setOpen, onReturnOverview }: { symbol: Symbol; open: boolean; setOpen: (o: boolean) => void; onReturnOverview: () => void }) {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [shares, setShares] = useState("10");
@@ -109,7 +109,7 @@ function InvestmentForm({ symbol, open, setOpen }: { symbol: Symbol; open: boole
     if (result) setResult(null);
     else if (metricResult) document.querySelector<HTMLButtonElement>("[role=dialog] .pro-back")?.click();
     else if (metric) setMetric(null);
-    else { setOpen(false); document.dispatchEvent(new CustomEvent("investico-return-overview", { detail: symbol })); }
+    else { setOpen(false); onReturnOverview(); }
   }, open);
   useEffect(() => { setMetric(null); setMetricResult(false); }, [symbol, open]);
   useEffect(() => { revision.current += 1; setResult(null); setError(""); setPurchasePrice(null); }, [symbol, startDate]);

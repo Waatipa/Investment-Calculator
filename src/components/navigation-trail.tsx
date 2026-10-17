@@ -9,6 +9,8 @@ type TrailContext = { visits: PageVisit[]; steps: LocalStep[]; back: () => void;
 const Context = createContext<TrailContext | null>(null);
 
 function controlKey(el: Element): string {
+  const stable = el.getAttribute("aria-label") ?? el.getAttribute("data-company") ?? el.getAttribute("data-nav-id");
+  if (stable) return `${el.tagName}|${stable}`;
   return [el.tagName, el.getAttribute("href"), el.getAttribute("aria-label"), el.getAttribute("data-company"), el.getAttribute("data-nav-id"), el.textContent?.trim().replace(/\s+/g, " ").slice(0, 140)].join("|");
 }
 
@@ -41,7 +43,10 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const capture = (e: MouseEvent) => {
       const el = e.target instanceof Element ? e.target.closest("a,button,[role=button]") : null;
-      if (el && !el.closest("[data-navigation-trail]")) lastClick.current = controlKey(el);
+      if (el && !el.closest("[data-navigation-trail]")) {
+        lastClick.current = controlKey(el);
+        setVisits(old => old.map((v, i) => i === old.length - 1 ? { ...v, source: lastClick.current, scroll: window.scrollY } : v));
+      }
     };
     document.addEventListener("click", capture, true);
     const unsubscribe = router.history.subscribe(({ action }) => { returning.current = action.type === "BACK" || action.type === "GO" || action.type === "FORWARD"; });
