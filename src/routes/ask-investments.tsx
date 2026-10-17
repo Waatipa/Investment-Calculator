@@ -77,10 +77,6 @@ function AskInvestments() {
         </div>)}
         {typing !== null && <div className="ask-bubble ask-bot">{typing === "" ? <span className="ask-typing" aria-label="Typing"><span /><span /><span /></span> : typing}</div>}
       </div>
-      <form className="ask-compose" onSubmit={e => { e.preventDefault(); submitManual(draft); }}>
-        <input aria-label="Your investment question or question number" placeholder="Type a question or #number…" value={draft} onChange={e => setDraft(e.target.value)} maxLength={2000} />
-        <Button type="submit" size="icon" disabled={busy || !draft.trim()} aria-label="Send question"><Send /></Button>
-      </form>
       <div className="ask-picker">
         <div className="ask-cats">{(["All", ...CATEGORIES] as const).map(c => <Button variant="ghost" key={c} type="button" className={cat === c ? "on" : ""} aria-pressed={cat === c} onClick={() => setCat(c)}>{c}</Button>)}</div>
         <div className="ask-qs">{list.map(x => <Button variant="ghost" key={x.q} type="button" disabled={busy} title={x.volume === null ? "Search volume unknown · provisional position" : `${x.volume.toLocaleString()} estimated Google searches/month · UAE · Semrush`} onClick={() => ask(x.q, x.a, x.cat, x.number)}>#{x.number} {x.q}</Button>)}</div>
