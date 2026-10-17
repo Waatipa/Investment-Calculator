@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Facebook, Link2, MessageCircle, Send, Share2 } from "lucide-react";
+import { Facebook, Link2, MessageCircle, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { pageHead } from "@/lib/markets";
-import { CATEGORY_GUIDES, CATEGORIES, QAS, findQuestion, guideForQuestion, type Category } from "@/lib/ask-investments";
+import { CATEGORY_GUIDES, CATEGORIES, QAS, type Category } from "@/lib/ask-investments";
 import { SEARCH_VOLUME_SOURCE } from "@/lib/ask-investments-volumes";
 
 export const Route = createFileRoute("/ask-investments")({
@@ -18,7 +18,6 @@ function AskInvestments() {
   const [cat, setCat] = useState<Category | "All">("All");
   const [msgs, setMsgs] = useState<Msg[]>([{ role: "bot", text: WELCOME }]);
   const [typing, setTyping] = useState<string | null>(null);
-  const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const log = useRef<HTMLDivElement>(null);
   const timers = useRef<number[]>([]);
@@ -39,19 +38,6 @@ function AskInvestments() {
       else { setMsgs(m => [...m, { role: "bot", text: a, category, number }]); setTyping(null); setBusy(false); }
     };
     timers.current.push(window.setTimeout(step, reduced ? 0 : 350));
-  }
-
-  function submitManual(text: string) {
-    const input = text.trim();
-    if (!input || busy) return;
-    const exact = findQuestion(input);
-    if (exact) ask(exact.q, exact.a, exact.cat, exact.number);
-    else {
-      const category = guideForQuestion(input);
-      const guide = CATEGORY_GUIDES[category];
-      ask(input, `I don't have an explicit answer to this question in the site's educational content. I won't guess a figure or invent a recommendation. The following steps may help you find relevant information; they do not guarantee this tool can answer your exact question.\n\n${guide.steps}\n\nExample: for a past investment's value, enter your own dates and shares instead of assuming today's price applied in the past. If the required data is unavailable, leave the answer unresolved.`, category);
-    }
-    setDraft("");
   }
 
   async function shareAnswer(m: Msg, channel: "whatsapp" | "facebook" | "x" | "copy") {
