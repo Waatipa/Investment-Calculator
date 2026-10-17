@@ -1,0 +1,3 @@
+export function EducationalDisclaimer() {
+  return <div className="platform-disclaimer"><p className="edu-disclaimer">All the content in this platform as a whole (Calculators, Text and Others) helps readers understand how companies have performed, so they can reach their own informed investment decisions in the future. It is not investment advice and it is not a tool to push anyone to invest. Do not invest unless you are willing and ready to. Past performance does not guarantee future results.</p></div>;
+}

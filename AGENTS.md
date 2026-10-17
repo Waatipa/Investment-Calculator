@@ -10,6 +10,8 @@
 <!-- LOVABLE:END -->
 
 - Share navigation in the root layout; each named section gets its own leaf route so direct links and metadata stay independent.
+- Render the educational disclaimer once in the shared root layout, so all pages use identical copy without duplication.
+- Aggregate comparison holdings through the browser-safe portfolioTotals helper and shared CompareTotals view, so chart-cursor and end-period table totals use the same formulas.
 - Company identity: letter-monogram badges only (no logo artwork); the site's own identity is the shared AcademyBrand pillar-and-growth wordmark and pillar favicon.
 - Scope calculator theme tokens to the selected company on the shared dialog, preserving semantic profit/loss colors and shared calculation state.
 - Keep the Apple pro-calculator stages inside the shared dialog and financial formulas in a browser-safe pure module.
