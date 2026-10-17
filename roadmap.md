@@ -1,4 +1,5 @@
 # Website update
+- [ ] Restore combined Compare Stocks totals under the investment chart and in the detailed table; share the homepage disclaimer on every page and verify.
 - [x] Match Compare Stocks result references on desktop/phone, synchronize chart pointers and replay, preserve sourced calculations and transparent pointer figures; complete real-data flow, table and zero mobile overflow verified. Market caps explicitly estimated using sourced current shares; 20 focused tests passed.
 - [ ] Add Dangote Refinery to Africa: blocked until exchange trading starts and a ticker is verified; currently an IPO open through 27 October 2026, not a traded stock.
 - [x] Verify SpaceX's SPCX listing and add its US card, sourced quotes, overview and calculators; exclude pre-listing ticker history. Desktop/mobile profit flow verified; unavailable annual filing fields stay empty. All 41 tests passed.
