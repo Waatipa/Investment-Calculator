@@ -297,10 +297,10 @@
   --scene-glow: oklch(0.39 0.08 245 / 65%);
   --gold: oklch(0.81 0.15 85);
   --gold-foreground: oklch(0.22 0.06 85);
-  --ask-panel: oklch(0.225 0.05 250);
-  --ask-panel-top: oklch(0.30 0.062 230);
-  --ask-border: color-mix(in oklab, var(--primary) 34%, var(--border));
-  --ask-answer: oklch(0.87 0.062 205);
+  --ask-panel: var(--primary);
+  --ask-answer: oklch(0.22 0.055 255);
+  --ask-answer-soft: color-mix(in oklab, var(--ask-answer) 84%, var(--primary));
+  --ask-border: color-mix(in oklab, var(--ask-answer) 32%, var(--primary));
 }
 body { background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px), radial-gradient(ellipse at 86% 22%, var(--scene-glow), transparent 62%); background-size: 36px 36px,36px 36px,100% 100%; min-height: 100vh; }
 .site-header { border-bottom: 1px solid var(--border); background: var(--header-surface); }
@@ -697,7 +697,7 @@ body { background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
 .ask-chat { background: var(--card); border: 1px solid var(--border); border-radius: 18px; display: flex; flex-direction: column; height: min(88vh, 900px); overflow: hidden; }
 .ask-log { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
 .ask-bubble { max-width: 96%; padding: 18px 20px; border-radius: 14px; font-size: 16px; line-height: 1.7; white-space: pre-wrap; }
-.ask-bot { align-self: flex-start; background: linear-gradient(160deg, var(--ask-panel-top), var(--ask-panel)); border: 1px solid var(--ask-border); border-radius: 14px; border-top-left-radius: 4px; box-shadow: 0 10px 26px -16px oklch(0 0 0 / 55%); color: var(--foreground); }
+.ask-bot { align-self: flex-start; background: var(--ask-panel); border: 1px solid var(--ask-border); border-radius: 14px; border-top-left-radius: 4px; box-shadow: 0 10px 26px -16px oklch(0 0 0 / 45%); color: var(--ask-answer); }
 .ask-user { align-self: flex-end; background: var(--primary); color: var(--primary-foreground); border-top-right-radius: 4px; }
 .ask-typing span { display: inline-block; width: 7px; height: 7px; margin-right: 4px; border-radius: 50%; background: var(--primary); animation: ask-dot 1s infinite; }
 .ask-typing span:nth-child(2) { animation-delay: .15s; } .ask-typing span:nth-child(3) { animation-delay: .3s; }
@@ -761,3 +761,13 @@ html, body { max-width: 100%; overflow-x: hidden; overscroll-behavior-x: none; }
 .ask-qs button { height: auto; white-space: normal; font-weight: 400; }
 .ask-bubble { flex-shrink: 0; }
 @media (prefers-reduced-motion: reduce) { .ask-typing span { animation: none; } }
+/* Inside the blue answer bubble everything reads as dark blue */
+.ask-bot .text-muted-foreground { color: var(--ask-answer-soft); }
+.ask-bot .text-primary { color: var(--ask-answer); text-decoration-color: var(--ask-answer-soft); }
+.ask-bot details summary { color: var(--ask-answer-soft); }
+.ask-bot details p { color: var(--ask-answer); }
+.ask-bot .ask-share { border-top: 1px solid color-mix(in oklab, var(--ask-answer) 22%, var(--primary)); }
+.ask-bot .ask-share-label { color: var(--ask-answer-soft); }
+.ask-bot .ask-share button { color: var(--ask-answer); }
+.ask-bot .ask-share button:hover { background: color-mix(in oklab, var(--ask-answer) 12%, transparent); color: var(--ask-answer); }
+.ask-bot .ask-typing span { background: var(--ask-answer); }
