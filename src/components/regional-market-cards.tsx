@@ -35,7 +35,10 @@ export function RegionalMarketCards({ companies, quotes, region }: { companies: 
   const currency = quote?.currency === "ZAc" ? "ZAR" : quote?.currency ?? company?.currency ?? (region.includes("Middle East") ? "AED" : "EUR");
   useNavigationStep([companies.find(c => c.symbol === overview)?.name ?? overview ?? "Company", "Overview"], () => setOverview(null), !!overview);
   useNavigationStep([company?.name ?? open ?? "Company", "Overview", "Calculators", ...(metric ? [metric === "profit" ? "Profit calculator" : metric.name] : []), ...(profitResult ? ["Results"] : [])], () => {
-    if (profitResult) document.querySelector<HTMLButtonElement>("[role=dialog] [data-edit-investment], [role=dialog] .pro-back")?.click();
+    if (profitResult) {
+      const edit = document.querySelector<HTMLButtonElement>("[role=dialog] [data-edit-investment]") ?? document.querySelector<HTMLButtonElement>("[role=dialog] .pro-back");
+      edit?.click();
+    }
     else if (metric) setMetric(null);
     else { setOverview(open); setOpen(null); }
   }, !!open);
