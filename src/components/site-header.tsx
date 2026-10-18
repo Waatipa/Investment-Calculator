@@ -5,6 +5,7 @@ import { Menu, ChevronDown, ChevronRight } from "lucide-react";
 import { Sheet, SheetTrigger, SheetContent, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet";
 import { AcademyBrand } from "@/components/academy-brand";
 import { ComingSoonButton } from "@/components/coming-soon";
+import { PlatformShare } from "@/components/platform-share";
 
 type To = "/" | "/about-us" | "/markets" | "/europe" | "/africa" | "/middle-east" | "/compare" | "/ask-investments" | "/subscribe" | "/contact-us";
 type Item = { label: string; to: To; hint?: string; soon?: boolean };
@@ -112,10 +113,10 @@ export function SiteHeader() {
   return <header className="site-header"><div className="header-inner">
     <Link to="/" aria-label="Investico Academy home" className="min-w-0"><AcademyBrand /></Link>
     <DesktopNav />
-    <div className="mobile-nav"><Sheet><SheetTrigger asChild><Button size="icon" aria-label="Open menu"><Menu /></Button></SheetTrigger>
+    <div className="header-actions"><PlatformShare /><div className="mobile-nav"><Sheet><SheetTrigger asChild><Button size="icon" aria-label="Open menu"><Menu /></Button></SheetTrigger>
       <SheetContent className="mobile-menu reference-menu" aria-describedby="mobile-menu-description">
         <SheetTitle><AcademyBrand /></SheetTitle><SheetDescription id="mobile-menu-description" className="sr-only">Investico Academy navigation</SheetDescription>
         <MobileNav />
-      </SheetContent></Sheet></div>
+      </SheetContent></Sheet></div></div>
   </div></header>;
 }
