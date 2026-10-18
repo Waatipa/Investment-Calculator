@@ -1,5 +1,5 @@
 # Website update
-- [ ] Repair Share downloads with browser-generated branded JPEG/PDF QR files encoding https://investico.academy/; verify downloads and decoded destinations.
+- [x] Repair Share downloads with browser-generated branded JPEG/PDF/card files encoding https://investico.academy/; actual downloads, all three decoded QR targets, copied link, artwork and PDF visual inspection verified with no layout issues; five tests passed and build clean.
 - [x] Add reference-style top-right Share menu with instant branded business-card PNG, QR PNG, brochure PDF and homepage-link copying; verified all downloads, QR scan targets, artwork, desktop/phone fit, 13 tests and clean build.
 - [x] Recreate the supplied planet styling, increase globe/company orbit speed, remove pointer reactions and show four selected-region companies on its labeled orbit; verified region navigation, reduced motion and desktop/phone rendering.
 - [x] Add homepage-only animated space background, rotating investment planet, regional orbit highlighting and comet; preserved content/controls, verified desktop/phone fit, reduced-motion rendering, calculator opening, 14 tests and clean build.
