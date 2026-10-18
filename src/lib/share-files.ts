@@ -28,7 +28,7 @@ export async function generateShareFiles(): Promise<ShareFiles> {
     // Matches the shared AcademyBrand pillar and growth mark.
     ctx.save(); ctx.translate(48, 36); ctx.scale(2.3, 2.3); ctx.lineWidth = 3;
     ctx.beginPath();
-    for (const [x1, y1, x2, y2] of [[2,3,26,3],[4,8,24,8],[2,45,26,45],[4,40,24,40],[8,10,8,38],[14,10,14,38],[20,10,20,38]]) {
+    for (const [x1, y1, x2, y2] of [[2,3,26,3],[4,8,24,8],[2,45,26,45],[4,40,24,40],[8,10,8,38],[14,10,14,38],[20,10,20,38]] as const) {
       ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
     }
     ctx.stroke(); ctx.restore();
