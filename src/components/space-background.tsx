@@ -112,18 +112,25 @@ export function SpaceBackground() {
       const starGeometry=new T.BufferGeometry();starGeometry.setAttribute("position",new T.BufferAttribute(coords,3));
       scene.add(new T.Points(starGeometry,new T.PointsMaterial({color:starColor,size:1,sizeAttenuation:false,transparent:true,opacity:.4})));
       let width=1,height=1,radius=100,baseY=0,elapsed=0;
+      const baseRot=orbits.map(o=>o.group.rotation.clone());
       function draw() {
         planet.position.set(width*(mobile.matches?.80:.805),height-baseY+window.scrollY,0);
-        globe.rotation.y=-.4+elapsed*PLANET_SPIN;
+        // Tumble on several axes so the spin reads as natural, not purely horizontal.
+        globe.rotation.set(Math.sin(elapsed*.23)*.45+elapsed*PLANET_SPIN*.35,-.4+elapsed*PLANET_SPIN,Math.cos(elapsed*.17)*.3);
         for(const [i,orbit] of orbits.entries()) {
+          const b=baseRot[i];
+          // Each orbit precesses with its own rhythm.
+          if(b) orbit.group.rotation.set(b.x+Math.sin(elapsed*(.31+i*.07)+i)*.35,b.y+elapsed*(.12+i*.05)*(i%2?-1:1),b.z+Math.cos(elapsed*(.27+i*.06)+i*2)*.3);
           for(const [j,orb] of orbit.satellites.entries()) {
             const a=elapsed*(COMPANY_ORBIT_SPEED+i*.06)+j/ orbit.satellites.length*Math.PI*2+i*.6;
             orb.position.set(Math.cos(a)*orbit.r,Math.sin(a)*orbit.r,0);
-            // Keep text upright while the orbital coordinate frame remains tilted.
             for(const child of orb.children) if(child instanceof T.Sprite) child.quaternion.copy(orbit.group.quaternion).invert();
           }
           orbit.title.position.set(0,-1.22,1.6);
         }
+        // Drift stars across the whole page with varied speeds.
+        for(let j=0;j<coords.length;j+=3){const s=12+((j*.37)%1)*40;coords[j]=(((j*.618033)%1)*width+elapsed*s)%width;coords[j+1]=(((j*.414214)%1)*height+elapsed*s*.35)%height;}
+        const sa=starGeometry.getAttribute("position");if(sa)sa.needsUpdate=true;
         if (host.current) host.current.dataset["rotation"]=elapsed.toFixed(2);
         renderer.render(scene,camera);
       }
