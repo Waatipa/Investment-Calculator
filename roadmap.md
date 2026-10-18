@@ -1,4 +1,5 @@
 # Website update
+- [ ] Add reference-style top-right Share menu with instant branded business-card PNG, QR PNG, brochure PDF and homepage-link copying; verify downloads and phone/desktop fit.
 - [x] Recreate the supplied planet styling, increase globe/company orbit speed, remove pointer reactions and show four selected-region companies on its labeled orbit; verified region navigation, reduced motion and desktop/phone rendering.
 - [x] Add homepage-only animated space background, rotating investment planet, regional orbit highlighting and comet; preserved content/controls, verified desktop/phone fit, reduced-motion rendering, calculator opening, 14 tests and clean build.
 - [x] Fix shared calendar day selection to save full dates and close automatically; regression tests cover sequential fields and confirming the selected day.
