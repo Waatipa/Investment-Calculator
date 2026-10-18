@@ -301,6 +301,7 @@
   --ask-answer: oklch(0.22 0.055 255);
   --ask-answer-soft: color-mix(in oklab, var(--ask-answer) 84%, var(--primary));
   --ask-border: color-mix(in oklab, var(--ask-answer) 32%, var(--primary));
+  --share-option: oklch(0.25 0.04 235);
 }
 body { background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px), radial-gradient(ellipse at 86% 22%, var(--scene-glow), transparent 62%); background-size: 36px 36px,36px 36px,100% 100%; min-height: 100vh; }
 /* Homepage-only decoration: no layout changes or interaction interception. */
@@ -328,7 +329,7 @@ body:has(.homepage-space-background) .market-artwork { visibility: hidden; }
 .platform-share-panel h2 { font-size: 22px; font-weight: 700; line-height: 1.3; }
 .platform-share-panel > p { color: var(--muted-foreground); font-size: 15px; margin-top: 14px; line-height: 1.5; }
 .platform-share-options { display: grid; gap: 12px; border-top: 2px solid var(--border); margin-top: 20px; padding-top: 20px; }
-.platform-share-option { display: flex; justify-content: flex-start; gap: 16px; width: 100%; height: auto; min-height: 84px; padding: 14px; border-radius: 8px; background: var(--accent); text-align: left; white-space: normal; color: var(--foreground); }
+.platform-share-option { display: flex; justify-content: flex-start; gap: 16px; width: 100%; height: auto; min-height: 84px; padding: 14px; border-radius: 8px; background: var(--share-option); text-align: left; white-space: normal; color: var(--foreground); }
 .platform-share-option:hover { background: color-mix(in oklab, var(--accent) 85%, var(--primary)); }
 .platform-share-option > svg { width: 24px; height: 24px; color: var(--primary); flex: none; }
 .platform-share-option > svg:last-child { width: 19px; height: 19px; margin-left: auto; }
