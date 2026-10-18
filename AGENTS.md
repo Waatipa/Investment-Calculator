@@ -9,8 +9,8 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-- Shared root navigation uses leaf routes; NavigationProvider tracks visits/card Back callbacks; ComingSoonButton handles unlinked options.
-- Render the educational disclaimer once in the shared root layout, so all pages use identical copy without duplication.
+- Root leaf navigation tracks visits/Back; ComingSoonButton handles unlinked options.
+- Render the educational disclaimer once in root to avoid duplicate copy.
 - Aggregate comparison holdings through the browser-safe portfolioTotals helper and shared CompareTotals view, so chart-cursor and end-period table totals use the same formulas.
 - Company identity: letter-monogram badges only (no logo artwork); the site's own identity is the shared AcademyBrand pillar-and-growth wordmark and pillar favicon.
 - Shared dialogs preserve state and profit/loss colors; pure modules hold formulas. All dates use CalculatorDateField; stable calendar components prevent focus remounts from losing clicks.
@@ -36,3 +36,4 @@
 - Ask Investments content and routing/matching stay browser-safe with a frozen exact-query country-specific volume snapshot; missing volumes remain unknown and numbering never changes on refresh.
 - PWA: vite-plugin-pwa generates /sw.js; NetworkFirst navigations exclude /~oauth. Register only via pwa-register.ts (never dev/preview/iframe; ?sw=off disables); public manifest/icons and install-prompt.tsx.
 - Region decoration uses a shared pointer-transparent canvas and effect-only Three.js; planet-regions maps routes to identities without quote imports.
+- Platform-share centralizes homepage links and prebuilt branded CDN files; same-origin download links avoid PDF-generation delays.

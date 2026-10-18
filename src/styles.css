@@ -320,6 +320,31 @@ body:has(.homepage-space-background) {
 body:has(.homepage-space-background) .market-artwork { visibility: hidden; }
 @media (width < 768px) { .homepage-space-background { opacity: 0.85; } }
 .site-header { border-bottom: 1px solid var(--border); background: var(--header-surface); }
+.header-actions { grid-column: 2; grid-row: 1; display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+.header-inner > .desktop-nav { grid-column: 1 / -1; grid-row: 2; justify-content: flex-end; }
+.platform-share-trigger { height: 58px; padding: 0 16px; gap: 8px; border: 1px solid var(--primary); background: var(--accent); color: var(--foreground); border-radius: 8px; font-size: 20px; font-weight: 600; }
+.platform-share-trigger > svg { color: var(--primary); width: 18px; height: 18px; }
+.platform-share-panel { width: min(405px, calc(100vw - 32px)); max-height: calc(100dvh - 110px); overflow-y: auto; padding: 20px 16px 16px; background: var(--popover); color: var(--foreground); border: 1px solid var(--border); border-radius: 8px; }
+.platform-share-panel h2 { font-size: 22px; font-weight: 700; line-height: 1.3; }
+.platform-share-panel > p { color: var(--muted-foreground); font-size: 15px; margin-top: 14px; line-height: 1.5; }
+.platform-share-options { display: grid; gap: 12px; border-top: 2px solid var(--border); margin-top: 20px; padding-top: 20px; }
+.platform-share-option { display: flex; justify-content: flex-start; gap: 16px; width: 100%; height: auto; min-height: 84px; padding: 14px; border-radius: 8px; background: var(--accent); text-align: left; white-space: normal; color: var(--foreground); }
+.platform-share-option:hover { background: color-mix(in oklab, var(--accent) 85%, var(--primary)); }
+.platform-share-option > svg { width: 24px; height: 24px; color: var(--primary); flex: none; }
+.platform-share-option > svg:last-child { width: 19px; height: 19px; margin-left: auto; }
+.platform-share-option > span { display: grid; min-width: 0; gap: 9px; }
+.platform-share-option strong { font-size: 21px; line-height: 1.2; }
+.platform-share-option small { font-size: 15px; line-height: 1.4; font-weight: 400; color: var(--muted-foreground); }
+@media (max-width: 767px) {
+  .header-actions { gap: 8px; }
+  .platform-share-trigger { height: 40px; padding: 0 10px; font-size: 15px; gap: 5px; }
+  .platform-share-trigger > svg { width: 14px; height: 14px; }
+  .platform-share-panel h2 { font-size: 20px; }
+  .platform-share-option strong { font-size: 18px; }
+  .platform-share-option small { font-size: 13px; }
+  .platform-share-option { gap: 12px; }
+}
+@media (max-width: 380px) { .header-actions { gap: 5px; } .platform-share-trigger { padding: 0 8px; } .platform-share-trigger > svg:last-child { display: none; } }
 .header-inner { max-width: 1440px; margin: auto; padding: 12px 4.5%; display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 20px; }
 .academy-brand { display: inline-flex; align-items: center; gap: 10px; }
 .academy-pillar { width: 28px; height: 44px; color: var(--foreground); flex-shrink: 0; }
