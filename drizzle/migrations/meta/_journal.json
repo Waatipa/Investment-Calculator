@@ -22,6 +22,13 @@
       "when": 1792613082800,
       "tag": "0002_earnings_call_reactions",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792613436201,
+      "tag": "0003_scope_earnings_read_policies",
+      "breakpoints": true
     }
   ]
 }
