@@ -15,6 +15,13 @@
       "when": 1792163569809,
       "tag": "0001_contact_messages",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792613082800,
+      "tag": "0002_earnings_call_reactions",
+      "breakpoints": true
     }
   ]
 }

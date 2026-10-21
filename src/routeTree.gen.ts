@@ -23,8 +23,12 @@ import { Route as MiddleEastRouteImport } from './routes/middle-east'
 import { Route as SubscribeRouteImport } from './routes/subscribe'
 import { Route as AuthenticatedAskRouteImport } from './routes/_authenticated/ask'
 import { Route as ApiFilingChatRouteImport } from './routes/api/filing-chat'
+import { Route as EarningsReactionsIndexRouteImport } from './routes/earnings-reactions.index'
+import { Route as EarningsReactionsTickerRouteImport } from './routes/earnings-reactions.$ticker'
+import { Route as EarningsReactionsSettingsRouteImport } from './routes/earnings-reactions.settings'
 import { Route as AuthenticatedAskIndexRouteImport } from './routes/_authenticated/ask.index'
 import { Route as AuthenticatedAskThreadIdRouteImport } from './routes/_authenticated/ask.$threadId'
+import { Route as ApiPublicEarningsIngestRouteImport } from './routes/api/public/earnings-ingest'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -95,6 +99,22 @@ const ApiFilingChatRoute = ApiFilingChatRouteImport.update({
   path: '/api/filing-chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EarningsReactionsIndexRoute = EarningsReactionsIndexRouteImport.update({
+  id: '/earnings-reactions/',
+  path: '/earnings-reactions/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EarningsReactionsTickerRoute = EarningsReactionsTickerRouteImport.update({
+  id: '/earnings-reactions/$ticker',
+  path: '/earnings-reactions/$ticker',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EarningsReactionsSettingsRoute =
+  EarningsReactionsSettingsRouteImport.update({
+    id: '/earnings-reactions/settings',
+    path: '/earnings-reactions/settings',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedAskIndexRoute = AuthenticatedAskIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -106,6 +126,11 @@ const AuthenticatedAskThreadIdRoute =
     path: '/$threadId',
     getParentRoute: () => AuthenticatedAskRoute,
   } as any)
+const ApiPublicEarningsIngestRoute = ApiPublicEarningsIngestRouteImport.update({
+  id: '/api/public/earnings-ingest',
+  path: '/api/public/earnings-ingest',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -121,7 +146,11 @@ export interface FileRoutesByFullPath {
   '/subscribe': typeof SubscribeRoute
   '/ask': typeof AuthenticatedAskRouteWithChildren
   '/api/filing-chat': typeof ApiFilingChatRoute
+  '/earnings-reactions/$ticker': typeof EarningsReactionsTickerRoute
+  '/earnings-reactions/settings': typeof EarningsReactionsSettingsRoute
+  '/earnings-reactions/': typeof EarningsReactionsIndexRoute
   '/ask/$threadId': typeof AuthenticatedAskThreadIdRoute
+  '/api/public/earnings-ingest': typeof ApiPublicEarningsIngestRoute
   '/ask/': typeof AuthenticatedAskIndexRoute
 }
 export interface FileRoutesByTo {
@@ -137,7 +166,11 @@ export interface FileRoutesByTo {
   '/middle-east': typeof MiddleEastRoute
   '/subscribe': typeof SubscribeRoute
   '/api/filing-chat': typeof ApiFilingChatRoute
+  '/earnings-reactions/$ticker': typeof EarningsReactionsTickerRoute
+  '/earnings-reactions/settings': typeof EarningsReactionsSettingsRoute
+  '/earnings-reactions': typeof EarningsReactionsIndexRoute
   '/ask/$threadId': typeof AuthenticatedAskThreadIdRoute
+  '/api/public/earnings-ingest': typeof ApiPublicEarningsIngestRoute
   '/ask': typeof AuthenticatedAskIndexRoute
 }
 export interface FileRoutesById {
@@ -156,7 +189,11 @@ export interface FileRoutesById {
   '/subscribe': typeof SubscribeRoute
   '/_authenticated/ask': typeof AuthenticatedAskRouteWithChildren
   '/api/filing-chat': typeof ApiFilingChatRoute
+  '/earnings-reactions/$ticker': typeof EarningsReactionsTickerRoute
+  '/earnings-reactions/settings': typeof EarningsReactionsSettingsRoute
+  '/earnings-reactions/': typeof EarningsReactionsIndexRoute
   '/_authenticated/ask/$threadId': typeof AuthenticatedAskThreadIdRoute
+  '/api/public/earnings-ingest': typeof ApiPublicEarningsIngestRoute
   '/_authenticated/ask/': typeof AuthenticatedAskIndexRoute
 }
 export interface FileRouteTypes {
@@ -175,7 +212,11 @@ export interface FileRouteTypes {
     | '/subscribe'
     | '/ask'
     | '/api/filing-chat'
+    | '/earnings-reactions/$ticker'
+    | '/earnings-reactions/settings'
+    | '/earnings-reactions/'
     | '/ask/$threadId'
+    | '/api/public/earnings-ingest'
     | '/ask/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -191,7 +232,11 @@ export interface FileRouteTypes {
     | '/middle-east'
     | '/subscribe'
     | '/api/filing-chat'
+    | '/earnings-reactions/$ticker'
+    | '/earnings-reactions/settings'
+    | '/earnings-reactions'
     | '/ask/$threadId'
+    | '/api/public/earnings-ingest'
     | '/ask'
   id:
     | '__root__'
@@ -209,7 +254,11 @@ export interface FileRouteTypes {
     | '/subscribe'
     | '/_authenticated/ask'
     | '/api/filing-chat'
+    | '/earnings-reactions/$ticker'
+    | '/earnings-reactions/settings'
+    | '/earnings-reactions/'
     | '/_authenticated/ask/$threadId'
+    | '/api/public/earnings-ingest'
     | '/_authenticated/ask/'
   fileRoutesById: FileRoutesById
 }
@@ -227,6 +276,10 @@ export interface RootRouteChildren {
   MiddleEastRoute: typeof MiddleEastRoute
   SubscribeRoute: typeof SubscribeRoute
   ApiFilingChatRoute: typeof ApiFilingChatRoute
+  EarningsReactionsTickerRoute: typeof EarningsReactionsTickerRoute
+  EarningsReactionsSettingsRoute: typeof EarningsReactionsSettingsRoute
+  EarningsReactionsIndexRoute: typeof EarningsReactionsIndexRoute
+  ApiPublicEarningsIngestRoute: typeof ApiPublicEarningsIngestRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -329,6 +382,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiFilingChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/earnings-reactions/': {
+      id: '/earnings-reactions/'
+      path: '/earnings-reactions'
+      fullPath: '/earnings-reactions/'
+      preLoaderRoute: typeof EarningsReactionsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/earnings-reactions/$ticker': {
+      id: '/earnings-reactions/$ticker'
+      path: '/earnings-reactions/$ticker'
+      fullPath: '/earnings-reactions/$ticker'
+      preLoaderRoute: typeof EarningsReactionsTickerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/earnings-reactions/settings': {
+      id: '/earnings-reactions/settings'
+      path: '/earnings-reactions/settings'
+      fullPath: '/earnings-reactions/settings'
+      preLoaderRoute: typeof EarningsReactionsSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/ask/': {
       id: '/_authenticated/ask/'
       path: '/'
@@ -342,6 +416,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/ask/$threadId'
       preLoaderRoute: typeof AuthenticatedAskThreadIdRouteImport
       parentRoute: typeof AuthenticatedAskRoute
+    }
+    '/api/public/earnings-ingest': {
+      id: '/api/public/earnings-ingest'
+      path: '/api/public/earnings-ingest'
+      fullPath: '/api/public/earnings-ingest'
+      preLoaderRoute: typeof ApiPublicEarningsIngestRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -384,6 +465,10 @@ const rootRouteChildren: RootRouteChildren = {
   MiddleEastRoute: MiddleEastRoute,
   SubscribeRoute: SubscribeRoute,
   ApiFilingChatRoute: ApiFilingChatRoute,
+  EarningsReactionsTickerRoute: EarningsReactionsTickerRoute,
+  EarningsReactionsSettingsRoute: EarningsReactionsSettingsRoute,
+  EarningsReactionsIndexRoute: EarningsReactionsIndexRoute,
+  ApiPublicEarningsIngestRoute: ApiPublicEarningsIngestRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
