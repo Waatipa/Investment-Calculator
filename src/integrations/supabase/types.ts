@@ -90,6 +90,7 @@ export type Database = {
           revenue_consensus: number | null
           sector_move: number | null
           status: string
+          summary: string | null
           ticker: string
           updated_at: string
         }
@@ -99,6 +100,7 @@ export type Database = {
           revenue_consensus?: number | null
           sector_move?: number | null
           status?: string
+          summary?: string | null
           ticker: string
           updated_at?: string
         }
@@ -108,6 +110,7 @@ export type Database = {
           revenue_consensus?: number | null
           sector_move?: number | null
           status?: string
+          summary?: string | null
           ticker?: string
           updated_at?: string
         }

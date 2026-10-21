@@ -31,6 +31,7 @@ export async function analyzeAndStore(company: EarningsCompany, text: string, si
     providerOptions: { openai: { forceReasoning: true, reasoningEffort: "low", store: false } },
   });
   const o = await result.output;
+  const usage = await result.totalUsage.then(u => u, () => undefined);
   const db = await admin();
   const { error } = await db.from("call_events").insert({
     ticker: company.ticker, text, summary: o.summary, tone: Math.max(-100, Math.min(100, o.tone)),
@@ -38,7 +39,29 @@ export async function analyzeAndStore(company: EarningsCompany, text: string, si
     guidance: o.guidance_pct, guidance_consensus: o.guidance_consensus_pct,
   });
   if (error) throw new Error(error.message);
-  return o;
+  return { ...o, usage };
+}
+
+// After the call: one AI request turns the saved statements into a plain-English summary.
+export async function summarizeCall(company: EarningsCompany) {
+  const key = apiKey();
+  const db = await admin();
+  const { data, error } = await db.from("call_events").select("text,summary").eq("ticker", company.ticker).order("created_at", { ascending: true }).limit(400);
+  if (error) throw new Error(error.message);
+  const lines = (data ?? []).map(e => e.summary || e.text).filter(Boolean);
+  if (lines.length < 3) throw Object.assign(new Error("Not enough call statements saved yet to summarise."), { statusCode: 400 });
+  const provider = createOpenAI({ baseURL: GATEWAY, apiKey: key, headers: { "Lovable-API-Key": key, "X-Lovable-AIG-SDK": "vercel-ai-sdk" } });
+  const result = streamText({
+    model: provider.responses("openai/gpt-6-astra"),
+    instructions: `You summarise ${company.name} (${company.ticker})'s earnings call for ordinary readers. Write one beautiful plain-English paragraph (about 120-180 words): the headline figures reported (EPS, revenue, guidance) with whether they beat or missed expectations when known, the overall tone of management and analysts, and what drove the sentiment. No jargon, no bullet points, no investment advice.`,
+    prompt: lines.join("\n"),
+    providerOptions: { openai: { forceReasoning: true, reasoningEffort: "low", store: false } },
+  });
+  const summary = (await result.text).trim();
+  const usage = await result.totalUsage.then(u => u, () => undefined);
+  const { error: up } = await db.from("earnings_calls").upsert({ ticker: company.ticker, summary, updated_at: new Date().toISOString() });
+  if (up) throw new Error(up.message);
+  return { summary, usage };
 }
 
 // Audio chunk -> text using Lovable AI speech-to-text (streamed SSE, final text collected).
@@ -83,7 +106,7 @@ async function requireAdmin(request: Request) {
   return ok ? data.user.id : null;
 }
 
-const actionSchema = z.object({ ticker: z.string().min(1).max(10), action: z.enum(["start", "stop", "chunk", "status", "guidance"]), guidance: z.coerce.number().min(-100).max(100).optional() });
+const actionSchema = z.object({ ticker: z.string().min(1).max(10), action: z.enum(["start", "stop", "chunk", "status", "guidance", "summarize"]), guidance: z.coerce.number().min(-100).max(100).optional() });
 
 // Broadcast page: start/stop a live call and send audio chunks.
 export async function handleBroadcast(request: Request) {
@@ -112,18 +135,33 @@ export async function handleBroadcast(request: Request) {
     const { error } = await db.from("earnings_calls").upsert({ ticker: company.ticker, guidance_consensus: parsed.data.guidance ?? null, updated_at: new Date().toISOString() });
     return error ? json(500, { error: error.message }) : json(200, { ok: true });
   }
+  if (action === "summarize") {
+    try {
+      const { summary, usage } = await summarizeCall(company);
+      return json(200, { ok: true, summary, usage: usage ?? null });
+    } catch (e) {
+      const status = (e as { statusCode?: number }).statusCode ?? 502;
+      console.error("summarize", e);
+      return json([400, 402, 403, 429].includes(status) ? status : 502, { error: status === 402 ? "AI credits are used up. Add credits in Settings → Plans & credits." : (e as Error).message });
+    }
+  }
   if (action === "status") return json(200, { ok: true });
 
   const audio = form.get("audio");
   if (!(audio instanceof File) || !audio.size || audio.size > 20 * 1024 * 1024) return json(400, { error: "Audio chunk missing or too large" });
   try {
     const text = await transcribeChunk(audio, company, request.signal);
-    if (!text) return json(200, { ok: true, text: "", events: 0 });
+    if (!text) return json(200, { ok: true, text: "", events: 0, usage: { audioSeconds: 10, inputTokens: 0, outputTokens: 0 } });
     const parts = sentences(text);
     // Group short sentences so each analysis has enough context, sequentially to respect rate limits.
-    let events = 0;
-    for (let i = 0; i < parts.length; i += 2) { await analyzeAndStore(company, parts.slice(i, i + 2).join(" "), request.signal); events++; }
-    return json(200, { ok: true, text, events });
+    let events = 0, inputTokens = 0, outputTokens = 0;
+    for (let i = 0; i < parts.length; i += 2) {
+      const r = await analyzeAndStore(company, parts.slice(i, i + 2).join(" "), request.signal);
+      events++;
+      inputTokens += r.usage?.inputTokens ?? 0;
+      outputTokens += r.usage?.outputTokens ?? 0;
+    }
+    return json(200, { ok: true, text, events, usage: { audioSeconds: 10, inputTokens, outputTokens } });
   } catch (e) {
     const status = (e as { statusCode?: number }).statusCode ?? 502;
     console.error("broadcast chunk", e);
