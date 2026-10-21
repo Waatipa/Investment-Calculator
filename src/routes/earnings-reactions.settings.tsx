@@ -11,24 +11,26 @@ export const Route = createFileRoute("/earnings-reactions/settings")({
   component: Settings,
 });
 
-const ITEMS = [
-  ["ingestSecret", "Ingest secret", "Shared password your transcript relay sends with each sentence."],
-  ["transcriptApi", "Licensed live transcript API", "Pushes call sentences as they are spoken."],
-  ["deepgram", "Deepgram (speech-to-text)", "Turns the webcast audio into sentences."],
-  ["assemblyai", "AssemblyAI (speech-to-text)", "Alternative to Deepgram."],
-  ["consensusApi", "Consensus estimates API", "Loads expected EPS, revenue and guidance before the call."],
-  ["ai", "AI analysis", "Reads each sentence and extracts figures and tone."],
-] as const;
+type Status = Awaited<ReturnType<typeof getEarningsSourceStatus>>;
+const ITEMS: [keyof Status, string, string][] = [
+  ["ai", "AI analysis (Lovable AI)", "Reads each sentence and extracts figures and tone."],
+  ["ai", "Speech-to-text (Lovable AI)", "Turns the webcast audio into sentences — no extra account."],
+  ["ingestSecret", "Ingest secret", "Password for any outside transcript relay that posts sentences."],
+  ["consensusFree", "Expected EPS & revenue (Yahoo Finance)", "Free analyst averages, loaded when a broadcast starts."],
+  ["transcriptApi", "Licensed live transcript API (optional)", "Paid alternative to the broadcast page."],
+  ["deepgram", "Deepgram (optional)", "Paid alternative speech-to-text."],
+  ["assemblyai", "AssemblyAI (optional)", "Paid alternative speech-to-text."],
+];
 
 function Settings() {
   const q = useQuery({ queryKey: ["earnings-source-status"], queryFn: () => getEarningsSourceStatus() });
   return <div className="ecr"><div className="wrap">
-    <header className="box hdr"><h1>Live source settings<small>Keys are stored securely on the server and are never shown here. Ask in the editor chat to add or change one.</small></h1></header>
-    <section className="box" style={{ display: "grid", gap: 10 }}>{ITEMS.map(([k, n, d]) => <div key={k} className="row mini">
+    <header className="box hdr"><h1>Live source settings<small>Keys are stored securely on the server and are never shown here.</small></h1></header>
+    <section className="box" style={{ display: "grid", gap: 10 }}>{ITEMS.map(([k, n, d]) => <div key={n} className="row mini">
       <div><b>{n}</b><div className="note">{d}</div></div>
       <span className={`badge ${q.data?.[k] ? "live" : ""}`}>{q.isLoading ? "Checking…" : q.data?.[k] ? "Connected" : "Not set"}</span>
     </div>)}</section>
-    <section className="box note">While no live call is in progress, company pages run the demo feed and show a "Demo data" label.</section>
+    <section className="box note">To go live: open <Link to="/broadcast" style={{ color: "var(--ecr-gold)" }}>Broadcast</Link> (owner only), pick the company and share the webcast tab's audio. With no live call, company pages run the demo feed with a "Demo data" label.</section>
     <Link to="/earnings-reactions" className="btn" style={{ justifySelf: "start" }}>← All companies</Link>
   </div></div>;
 }
