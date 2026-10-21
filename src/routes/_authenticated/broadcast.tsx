@@ -14,12 +14,21 @@ export const Route = createFileRoute("/_authenticated/broadcast")({
 
 const CHUNK_MS = 10_000;
 
+// Rough estimate rates, in credits, for the on-screen counter. Labeled as an estimate on the page.
+const CREDITS_PER_AUDIO_MIN = 0.02;
+const CREDITS_PER_1K_TOKENS = 0.002;
+
+type Usage = { audioSeconds?: number; inputTokens?: number; outputTokens?: number };
+type Stats = { chunks: number; audioSeconds: number; inputTokens: number; outputTokens: number; analyses: number };
+const zeroStats: Stats = { chunks: 0, audioSeconds: 0, inputTokens: 0, outputTokens: 0, analyses: 0 };
+const estimateCredits = (s: Stats) => (s.audioSeconds / 60) * CREDITS_PER_AUDIO_MIN + ((s.inputTokens + s.outputTokens) / 1000) * CREDITS_PER_1K_TOKENS;
+
 async function send(fields: Record<string, string | Blob>) {
   const { data } = await supabase.auth.getSession();
   const form = new FormData();
   for (const [k, v] of Object.entries(fields)) form.append(k, v);
   const r = await fetch("/api/earnings-broadcast", { method: "POST", headers: { Authorization: `Bearer ${data.session?.access_token ?? ""}` }, body: form });
-  const body = await r.json().catch(() => ({})) as { error?: string; text?: string; consensus?: { eps: number | null; revenue: number | null } };
+  const body = await r.json().catch(() => ({})) as { error?: string; text?: string; consensus?: { eps: number | null; revenue: number | null }; usage?: Usage; events?: number; summary?: string };
   if (!r.ok) throw Object.assign(new Error(body.error ?? "Request failed"), { status: r.status });
   return body;
 }
