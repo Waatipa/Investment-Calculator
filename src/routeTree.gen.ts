@@ -22,6 +22,8 @@ import { Route as MarketsRouteImport } from './routes/markets'
 import { Route as MiddleEastRouteImport } from './routes/middle-east'
 import { Route as SubscribeRouteImport } from './routes/subscribe'
 import { Route as AuthenticatedAskRouteImport } from './routes/_authenticated/ask'
+import { Route as AuthenticatedBroadcastRouteImport } from './routes/_authenticated/broadcast'
+import { Route as ApiEarningsBroadcastRouteImport } from './routes/api/earnings-broadcast'
 import { Route as ApiFilingChatRouteImport } from './routes/api/filing-chat'
 import { Route as EarningsReactionsIndexRouteImport } from './routes/earnings-reactions.index'
 import { Route as EarningsReactionsTickerRouteImport } from './routes/earnings-reactions.$ticker'
@@ -94,6 +96,16 @@ const AuthenticatedAskRoute = AuthenticatedAskRouteImport.update({
   path: '/ask',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedBroadcastRoute = AuthenticatedBroadcastRouteImport.update({
+  id: '/broadcast',
+  path: '/broadcast',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const ApiEarningsBroadcastRoute = ApiEarningsBroadcastRouteImport.update({
+  id: '/api/earnings-broadcast',
+  path: '/api/earnings-broadcast',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiFilingChatRoute = ApiFilingChatRouteImport.update({
   id: '/api/filing-chat',
   path: '/api/filing-chat',
@@ -145,6 +157,8 @@ export interface FileRoutesByFullPath {
   '/middle-east': typeof MiddleEastRoute
   '/subscribe': typeof SubscribeRoute
   '/ask': typeof AuthenticatedAskRouteWithChildren
+  '/broadcast': typeof AuthenticatedBroadcastRoute
+  '/api/earnings-broadcast': typeof ApiEarningsBroadcastRoute
   '/api/filing-chat': typeof ApiFilingChatRoute
   '/earnings-reactions/$ticker': typeof EarningsReactionsTickerRoute
   '/earnings-reactions/settings': typeof EarningsReactionsSettingsRoute
@@ -165,6 +179,8 @@ export interface FileRoutesByTo {
   '/markets': typeof MarketsRoute
   '/middle-east': typeof MiddleEastRoute
   '/subscribe': typeof SubscribeRoute
+  '/broadcast': typeof AuthenticatedBroadcastRoute
+  '/api/earnings-broadcast': typeof ApiEarningsBroadcastRoute
   '/api/filing-chat': typeof ApiFilingChatRoute
   '/earnings-reactions/$ticker': typeof EarningsReactionsTickerRoute
   '/earnings-reactions/settings': typeof EarningsReactionsSettingsRoute
@@ -188,6 +204,8 @@ export interface FileRoutesById {
   '/middle-east': typeof MiddleEastRoute
   '/subscribe': typeof SubscribeRoute
   '/_authenticated/ask': typeof AuthenticatedAskRouteWithChildren
+  '/_authenticated/broadcast': typeof AuthenticatedBroadcastRoute
+  '/api/earnings-broadcast': typeof ApiEarningsBroadcastRoute
   '/api/filing-chat': typeof ApiFilingChatRoute
   '/earnings-reactions/$ticker': typeof EarningsReactionsTickerRoute
   '/earnings-reactions/settings': typeof EarningsReactionsSettingsRoute
@@ -211,6 +229,8 @@ export interface FileRouteTypes {
     | '/middle-east'
     | '/subscribe'
     | '/ask'
+    | '/broadcast'
+    | '/api/earnings-broadcast'
     | '/api/filing-chat'
     | '/earnings-reactions/$ticker'
     | '/earnings-reactions/settings'
@@ -231,6 +251,8 @@ export interface FileRouteTypes {
     | '/markets'
     | '/middle-east'
     | '/subscribe'
+    | '/broadcast'
+    | '/api/earnings-broadcast'
     | '/api/filing-chat'
     | '/earnings-reactions/$ticker'
     | '/earnings-reactions/settings'
@@ -253,6 +275,8 @@ export interface FileRouteTypes {
     | '/middle-east'
     | '/subscribe'
     | '/_authenticated/ask'
+    | '/_authenticated/broadcast'
+    | '/api/earnings-broadcast'
     | '/api/filing-chat'
     | '/earnings-reactions/$ticker'
     | '/earnings-reactions/settings'
@@ -275,6 +299,7 @@ export interface RootRouteChildren {
   MarketsRoute: typeof MarketsRoute
   MiddleEastRoute: typeof MiddleEastRoute
   SubscribeRoute: typeof SubscribeRoute
+  ApiEarningsBroadcastRoute: typeof ApiEarningsBroadcastRoute
   ApiFilingChatRoute: typeof ApiFilingChatRoute
   EarningsReactionsTickerRoute: typeof EarningsReactionsTickerRoute
   EarningsReactionsSettingsRoute: typeof EarningsReactionsSettingsRoute
@@ -375,6 +400,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAskRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/broadcast': {
+      id: '/_authenticated/broadcast'
+      path: '/broadcast'
+      fullPath: '/broadcast'
+      preLoaderRoute: typeof AuthenticatedBroadcastRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/earnings-broadcast': {
+      id: '/api/earnings-broadcast'
+      path: '/api/earnings-broadcast'
+      fullPath: '/api/earnings-broadcast'
+      preLoaderRoute: typeof ApiEarningsBroadcastRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/filing-chat': {
       id: '/api/filing-chat'
       path: '/api/filing-chat'
@@ -442,10 +481,12 @@ const AuthenticatedAskRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAskRoute: typeof AuthenticatedAskRouteWithChildren
+  AuthenticatedBroadcastRoute: typeof AuthenticatedBroadcastRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAskRoute: AuthenticatedAskRouteWithChildren,
+  AuthenticatedBroadcastRoute: AuthenticatedBroadcastRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -464,6 +505,7 @@ const rootRouteChildren: RootRouteChildren = {
   MarketsRoute: MarketsRoute,
   MiddleEastRoute: MiddleEastRoute,
   SubscribeRoute: SubscribeRoute,
+  ApiEarningsBroadcastRoute: ApiEarningsBroadcastRoute,
   ApiFilingChatRoute: ApiFilingChatRoute,
   EarningsReactionsTickerRoute: EarningsReactionsTickerRoute,
   EarningsReactionsSettingsRoute: EarningsReactionsSettingsRoute,

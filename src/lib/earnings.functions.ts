@@ -25,5 +25,6 @@ export const getEarningsSourceStatus = createServerFn({ method: "GET" }).handler
     assemblyai: has("ASSEMBLYAI_API_KEY"),
     consensusApi: has("CONSENSUS_API_KEY"),
     ai: has("LOVABLE_API_KEY"),
+    consensusFree: true,
   };
 });
