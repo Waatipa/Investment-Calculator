@@ -39,6 +39,14 @@ function Broadcast() {
   const [guidance, setGuidance] = useState("");
   const [live, setLive] = useState(false);
   const [log, setLog] = useState<string[]>([]);
+  const [stats, setStats] = useState<Stats>(zeroStats);
+  const [limit, setLimit] = useState("");
+  const [summary, setSummary] = useState<string | null>(null);
+  const [summarizing, setSummarizing] = useState(false);
+  const statsRef = useRef<Stats>(zeroStats);
+  const limitRef = useRef(0);
+  useEffect(() => { statsRef.current = stats; }, [stats]);
+  useEffect(() => { limitRef.current = parseFloat(limit) || 0; }, [limit]);
   const stream = useRef<MediaStream | null>(null);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   const recorder = useRef<MediaRecorder | null>(null);
@@ -59,7 +67,16 @@ function Broadcast() {
     rec.onstop = async () => {
       const blob = new Blob(parts, { type: "audio/webm" });
       if (blob.size < 2000) return;
-      try { const r = await send({ ticker, action: "chunk", audio: blob }); if (r.text) add(`Heard: ${r.text}`); }
+      try {
+        const r = await send({ ticker, action: "chunk", audio: blob });
+        if (r.text) add(`Heard: ${r.text}`);
+        const u = r.usage;
+        setStats(s => {
+          const n: Stats = { chunks: s.chunks + 1, audioSeconds: s.audioSeconds + (u?.audioSeconds ?? 10), inputTokens: s.inputTokens + (u?.inputTokens ?? 0), outputTokens: s.outputTokens + (u?.outputTokens ?? 0), analyses: s.analyses + (r.events ?? 0) };
+          if (limitRef.current > 0 && estimateCredits(n) >= limitRef.current) { add(`⚠ Estimated cost reached your ${limitRef.current}-credit limit — stopping automatically.`); setTimeout(() => stop(), 0); }
+          return n;
+        });
+      }
       catch (e) { add(`⚠ ${(e as Error).message}`); if ([402, 403].includes((e as { status?: number }).status ?? 0)) stop(); }
     };
     rec.start(); recorder.current = rec;
@@ -71,6 +88,7 @@ function Broadcast() {
       const tracks = media.getAudioTracks();
       if (!tracks.length) { media.getTracks().forEach(t => t.stop()); add("⚠ No audio. Choose the webcast tab and tick “Share tab audio”."); return; }
       stream.current = media;
+      setStats(zeroStats); statsRef.current = zeroStats; setSummary(null);
       const r = await send({ ticker, action: "start", ...(guidance ? { guidance } : {}) });
       add(`Call is LIVE. Expected EPS ${r.consensus?.eps ?? "unavailable"}, revenue ${r.consensus?.revenue != null ? `$${r.consensus.revenue.toFixed(2)}B` : "unavailable"} (Yahoo Finance).`);
       const audio = new MediaStream(tracks);
