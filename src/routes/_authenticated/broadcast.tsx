@@ -133,6 +133,29 @@ function Broadcast() {
       </div>
       <small className="note">Audio is sent every {CHUNK_MS / 1000} seconds. Each chunk uses a small amount of Lovable AI credits.</small>
     </section>
+    <section className="box" style={{ display: "grid", gap: 10 }}>
+      <div className="row"><b>Session cost</b><span className="note">Rough estimate, updated as the call runs.</span></div>
+      <div className="row" style={{ flexWrap: "wrap", gap: 18 }}>
+        <div><small className="note">Estimated credits</small><div style={{ fontWeight: 700, fontSize: 22, color: "var(--ecr-g)" }}>~{estimateCredits(stats).toFixed(3)}</div></div>
+        <div><small className="note">Audio processed</small><div style={{ fontWeight: 700 }}>{Math.floor(stats.audioSeconds / 60)}:{String(stats.audioSeconds % 60).padStart(2, "0")}</div></div>
+        <div><small className="note">Chunks sent</small><div style={{ fontWeight: 700 }}>{stats.chunks}</div></div>
+        <div><small className="note">Statements analysed</small><div style={{ fontWeight: 700 }}>{stats.analyses}</div></div>
+        <div><small className="note">AI tokens</small><div style={{ fontWeight: 700 }}>{(stats.inputTokens + stats.outputTokens).toLocaleString()}</div></div>
+      </div>
+      <label className="row"><span>Auto-stop at (estimated credits)<br /><small className="note">Leave empty for no limit. The broadcast stops itself when the estimate reaches this.</small></span>
+        <input inputMode="decimal" value={limit} onChange={e => setLimit(e.target.value.replace(/[^0-9.]/g, ""))} placeholder="e.g. 1" style={{ width: 100 }} />
+      </label>
+    </section>
+    {!live && (stats.chunks > 0 || summary) && <section className="box" style={{ display: "grid", gap: 10 }}>
+      <div className="row"><b>Call summary</b><span className="note">One small AI request — uses a tiny amount of credits.</span></div>
+      {summary ? <p style={{ color: "var(--ecr-mut)", lineHeight: 1.7, margin: 0 }}>{summary}</p> :
+        <div className="row"><button type="button" className="btn" disabled={summarizing} onClick={async () => {
+          setSummarizing(true);
+          try { const r = await send({ ticker, action: "summarize" }); setSummary(r.summary ?? null); add("Summary saved — it now shows on the company's reactions page."); }
+          catch (e) { add(`⚠ ${(e as Error).message}`); }
+          setSummarizing(false);
+        }}>{summarizing ? "Writing summary…" : "Generate call summary"}</button></div>}
+    </section>}
     <section className="box"><b>Activity</b><ul className="feed">{log.map((l, i) => <li key={i}>{l}</li>)}</ul></section>
   </div></div>;
 }
