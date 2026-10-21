@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      call_events: {
+        Row: {
+          created_at: string
+          eps_actual: number | null
+          eps_consensus: number | null
+          guidance: number | null
+          guidance_consensus: number | null
+          id: string
+          revenue_actual: number | null
+          revenue_consensus: number | null
+          summary: string | null
+          text: string
+          ticker: string
+          tone: number | null
+        }
+        Insert: {
+          created_at?: string
+          eps_actual?: number | null
+          eps_consensus?: number | null
+          guidance?: number | null
+          guidance_consensus?: number | null
+          id?: string
+          revenue_actual?: number | null
+          revenue_consensus?: number | null
+          summary?: string | null
+          text: string
+          ticker: string
+          tone?: number | null
+        }
+        Update: {
+          created_at?: string
+          eps_actual?: number | null
+          eps_consensus?: number | null
+          guidance?: number | null
+          guidance_consensus?: number | null
+          id?: string
+          revenue_actual?: number | null
+          revenue_consensus?: number | null
+          summary?: string | null
+          text?: string
+          ticker?: string
+          tone?: number | null
+        }
+        Relationships: []
+      }
       contact_messages: {
         Row: {
           created_at: string
@@ -35,6 +80,36 @@ export type Database = {
           emailed_at?: string | null
           id?: string
           message?: string
+        }
+        Relationships: []
+      }
+      earnings_calls: {
+        Row: {
+          eps_consensus: number | null
+          guidance_consensus: number | null
+          revenue_consensus: number | null
+          sector_move: number | null
+          status: string
+          ticker: string
+          updated_at: string
+        }
+        Insert: {
+          eps_consensus?: number | null
+          guidance_consensus?: number | null
+          revenue_consensus?: number | null
+          sector_move?: number | null
+          status?: string
+          ticker: string
+          updated_at?: string
+        }
+        Update: {
+          eps_consensus?: number | null
+          guidance_consensus?: number | null
+          revenue_consensus?: number | null
+          sector_move?: number | null
+          status?: string
+          ticker?: string
+          updated_at?: string
         }
         Relationships: []
       }
