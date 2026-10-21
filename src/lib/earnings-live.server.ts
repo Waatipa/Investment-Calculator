@@ -106,7 +106,7 @@ async function requireAdmin(request: Request) {
   return ok ? data.user.id : null;
 }
 
-const actionSchema = z.object({ ticker: z.string().min(1).max(10), action: z.enum(["start", "stop", "chunk", "status", "guidance"]), guidance: z.coerce.number().min(-100).max(100).optional() });
+const actionSchema = z.object({ ticker: z.string().min(1).max(10), action: z.enum(["start", "stop", "chunk", "status", "guidance", "summarize"]), guidance: z.coerce.number().min(-100).max(100).optional() });
 
 // Broadcast page: start/stop a live call and send audio chunks.
 export async function handleBroadcast(request: Request) {
