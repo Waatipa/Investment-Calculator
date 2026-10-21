@@ -25,6 +25,7 @@ import { Route as AuthenticatedAskRouteImport } from './routes/_authenticated/as
 import { Route as ApiFilingChatRouteImport } from './routes/api/filing-chat'
 import { Route as AuthenticatedAskIndexRouteImport } from './routes/_authenticated/ask.index'
 import { Route as AuthenticatedAskThreadIdRouteImport } from './routes/_authenticated/ask.$threadId'
+import { Route as ApiPublicEarningsIngestRouteImport } from './routes/api/public/earnings-ingest'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -106,6 +107,11 @@ const AuthenticatedAskThreadIdRoute =
     path: '/$threadId',
     getParentRoute: () => AuthenticatedAskRoute,
   } as any)
+const ApiPublicEarningsIngestRoute = ApiPublicEarningsIngestRouteImport.update({
+  id: '/api/public/earnings-ingest',
+  path: '/api/public/earnings-ingest',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -122,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/ask': typeof AuthenticatedAskRouteWithChildren
   '/api/filing-chat': typeof ApiFilingChatRoute
   '/ask/$threadId': typeof AuthenticatedAskThreadIdRoute
+  '/api/public/earnings-ingest': typeof ApiPublicEarningsIngestRoute
   '/ask/': typeof AuthenticatedAskIndexRoute
 }
 export interface FileRoutesByTo {
@@ -138,6 +145,7 @@ export interface FileRoutesByTo {
   '/subscribe': typeof SubscribeRoute
   '/api/filing-chat': typeof ApiFilingChatRoute
   '/ask/$threadId': typeof AuthenticatedAskThreadIdRoute
+  '/api/public/earnings-ingest': typeof ApiPublicEarningsIngestRoute
   '/ask': typeof AuthenticatedAskIndexRoute
 }
 export interface FileRoutesById {
@@ -157,6 +165,7 @@ export interface FileRoutesById {
   '/_authenticated/ask': typeof AuthenticatedAskRouteWithChildren
   '/api/filing-chat': typeof ApiFilingChatRoute
   '/_authenticated/ask/$threadId': typeof AuthenticatedAskThreadIdRoute
+  '/api/public/earnings-ingest': typeof ApiPublicEarningsIngestRoute
   '/_authenticated/ask/': typeof AuthenticatedAskIndexRoute
 }
 export interface FileRouteTypes {
@@ -176,6 +185,7 @@ export interface FileRouteTypes {
     | '/ask'
     | '/api/filing-chat'
     | '/ask/$threadId'
+    | '/api/public/earnings-ingest'
     | '/ask/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -192,6 +202,7 @@ export interface FileRouteTypes {
     | '/subscribe'
     | '/api/filing-chat'
     | '/ask/$threadId'
+    | '/api/public/earnings-ingest'
     | '/ask'
   id:
     | '__root__'
@@ -210,6 +221,7 @@ export interface FileRouteTypes {
     | '/_authenticated/ask'
     | '/api/filing-chat'
     | '/_authenticated/ask/$threadId'
+    | '/api/public/earnings-ingest'
     | '/_authenticated/ask/'
   fileRoutesById: FileRoutesById
 }
@@ -227,6 +239,7 @@ export interface RootRouteChildren {
   MiddleEastRoute: typeof MiddleEastRoute
   SubscribeRoute: typeof SubscribeRoute
   ApiFilingChatRoute: typeof ApiFilingChatRoute
+  ApiPublicEarningsIngestRoute: typeof ApiPublicEarningsIngestRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -343,6 +356,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAskThreadIdRouteImport
       parentRoute: typeof AuthenticatedAskRoute
     }
+    '/api/public/earnings-ingest': {
+      id: '/api/public/earnings-ingest'
+      path: '/api/public/earnings-ingest'
+      fullPath: '/api/public/earnings-ingest'
+      preLoaderRoute: typeof ApiPublicEarningsIngestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -384,6 +404,7 @@ const rootRouteChildren: RootRouteChildren = {
   MiddleEastRoute: MiddleEastRoute,
   SubscribeRoute: SubscribeRoute,
   ApiFilingChatRoute: ApiFilingChatRoute,
+  ApiPublicEarningsIngestRoute: ApiPublicEarningsIngestRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
