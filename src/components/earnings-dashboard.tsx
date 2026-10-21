@@ -8,7 +8,7 @@ import { DEMO_EVENTS, applyDemo, arrow, clamp, computeScores, demoInitial, foldE
 
 const col = (c: Tone) => `var(--ecr-${c})`;
 type FeedItem = { id: string; time: string; text: string; tone: Tone };
-type CallRow = { status: string; eps_consensus: number | null; revenue_consensus: number | null; guidance_consensus: number | null; sector_move: number | null };
+type CallRow = { status: string; eps_consensus: number | null; revenue_consensus: number | null; guidance_consensus: number | null; sector_move: number | null; summary: string | null };
 type EventRow = LiveEvent & { id: string; created_at: string; text: string; summary: string | null };
 
 function Gauge({ min, max, v, c, text }: { min: number; max: number; v: number; c: Tone; text: string }) {
@@ -34,7 +34,7 @@ export function EarningsDashboard({ company }: { company: EarningsCompany }) {
     let alive = true;
     (async () => {
       const [{ data: c }, { data: e }] = await Promise.all([
-        supabase.from("earnings_calls").select("status,eps_consensus,revenue_consensus,guidance_consensus,sector_move").eq("ticker", company.ticker).maybeSingle(),
+        supabase.from("earnings_calls").select("status,eps_consensus,revenue_consensus,guidance_consensus,sector_move,summary").eq("ticker", company.ticker).maybeSingle(),
         supabase.from("call_events").select("*").eq("ticker", company.ticker).order("created_at", { ascending: false }).limit(200),
       ]);
       if (!alive) return;
@@ -134,6 +134,11 @@ export function EarningsDashboard({ company }: { company: EarningsCompany }) {
       <div style={{ flex: 1, minWidth: 260 }}><b>What this means</b><p style={{ color: "var(--ecr-mut)", marginTop: 6 }}>{meaning(overall, rows)}</p></div>
       <div className="legend"><span><i style={{ background: "var(--ecr-g)" }} />Bullish</span><span><i style={{ background: "var(--ecr-r)" }} />Bearish</span><span><i style={{ background: "var(--ecr-n)" }} />Neutral</span></div>
     </section>
+
+    {call?.summary && !live && <section className="box" style={{ display: "grid", gap: 8 }}>
+      <div className="row"><b style={{ fontSize: 18 }}>Call summary</b><span className="note">Written from the saved call statements after the broadcast ended.</span></div>
+      <p style={{ color: "var(--ecr-mut)", lineHeight: 1.7, margin: 0 }}>{call.summary}</p>
+    </section>}
 
     <DelayedPrice company={company} />
 
