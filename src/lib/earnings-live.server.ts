@@ -135,6 +135,16 @@ export async function handleBroadcast(request: Request) {
     const { error } = await db.from("earnings_calls").upsert({ ticker: company.ticker, guidance_consensus: parsed.data.guidance ?? null, updated_at: new Date().toISOString() });
     return error ? json(500, { error: error.message }) : json(200, { ok: true });
   }
+  if (action === "summarize") {
+    try {
+      const { summary, usage } = await summarizeCall(company);
+      return json(200, { ok: true, summary, usage: usage ?? null });
+    } catch (e) {
+      const status = (e as { statusCode?: number }).statusCode ?? 502;
+      console.error("summarize", e);
+      return json([400, 402, 403, 429].includes(status) ? status : 502, { error: status === 402 ? "AI credits are used up. Add credits in Settings → Plans & credits." : (e as Error).message });
+    }
+  }
   if (action === "status") return json(200, { ok: true });
 
   const audio = form.get("audio");
