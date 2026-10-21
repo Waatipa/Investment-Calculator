@@ -31,7 +31,7 @@ export async function analyzeAndStore(company: EarningsCompany, text: string, si
     providerOptions: { openai: { forceReasoning: true, reasoningEffort: "low", store: false } },
   });
   const o = await result.output;
-  const usage = await result.totalUsage.catch(() => undefined);
+  const usage = await result.totalUsage.then(u => u, () => undefined);
   const db = await admin();
   const { error } = await db.from("call_events").insert({
     ticker: company.ticker, text, summary: o.summary, tone: Math.max(-100, Math.min(100, o.tone)),
@@ -58,7 +58,7 @@ export async function summarizeCall(company: EarningsCompany) {
     providerOptions: { openai: { forceReasoning: true, reasoningEffort: "low", store: false } },
   });
   const summary = (await result.text).trim();
-  const usage = await result.totalUsage.catch(() => undefined);
+  const usage = await result.totalUsage.then(u => u, () => undefined);
   const { error: up } = await db.from("earnings_calls").upsert({ ticker: company.ticker, summary, updated_at: new Date().toISOString() });
   if (up) throw new Error(up.message);
   return { summary, usage };
