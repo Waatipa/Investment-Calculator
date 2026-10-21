@@ -6,6 +6,7 @@ import { Sheet, SheetTrigger, SheetContent, SheetTitle, SheetDescription, SheetC
 import { AcademyBrand } from "@/components/academy-brand";
 import { ComingSoonButton } from "@/components/coming-soon";
 import { PlatformShare } from "@/components/platform-share";
+import { AuthEntry } from "@/components/auth-entry";
 
 type To = "/" | "/about-us" | "/markets" | "/europe" | "/africa" | "/middle-east" | "/compare" | "/ask-investments" | "/subscribe" | "/contact-us";
 type Item = { label: string; to: To; hint?: string; soon?: boolean };
@@ -87,6 +88,7 @@ function MobileNav() {
   const [o, setO] = useState<Partial<Record<"m"|"s"|"c"|"n"|"si"|"co"|`r${string}`, boolean>>>({});
   const t = (k: "m"|"s"|"c"|"n"|"si"|"co"|`r${string}`) => () => setO(s => ({ ...s, [k]: !s[k] }));
   return <nav aria-label="Mobile menu" className="m-nav">
+    <AuthEntry variant="menu" />
     {TOP.map(i => <MLink key={i.label} item={i} />)}
     <Row label="Markets" open={!!o.m} onToggle={t("m")} />
     {o.m && <>
@@ -113,7 +115,7 @@ export function SiteHeader() {
   return <header className="site-header"><div className="header-inner">
     <Link to="/" aria-label="Investico Academy home" className="min-w-0"><AcademyBrand /></Link>
     <DesktopNav />
-    <div className="header-actions"><PlatformShare /><div className="mobile-nav"><Sheet><SheetTrigger asChild><Button size="icon" aria-label="Open menu"><Menu /></Button></SheetTrigger>
+    <div className="header-actions"><AuthEntry /><PlatformShare /><div className="mobile-nav"><Sheet><SheetTrigger asChild><Button size="icon" aria-label="Open menu"><Menu /></Button></SheetTrigger>
       <SheetContent className="mobile-menu reference-menu" aria-describedby="mobile-menu-description">
         <SheetTitle><AcademyBrand /></SheetTitle><SheetDescription id="mobile-menu-description" className="sr-only">Investico Academy navigation</SheetDescription>
         <MobileNav />

@@ -30,7 +30,7 @@ function Settings() {
       <div><b>{n}</b><div className="note">{d}</div></div>
       <span className={`badge ${q.data?.[k] ? "live" : ""}`}>{q.isLoading ? "Checking…" : q.data?.[k] ? "Connected" : "Not set"}</span>
     </div>)}</section>
-    <section className="box note">To go live: open <Link to="/broadcast" style={{ color: "var(--ecr-gold)" }}>Broadcast</Link> (owner only), pick the company and share the webcast tab's audio. With no live call, company pages run the demo feed with a "Demo data" label.</section>
+    <section className="box note">To go live: <Link to="/auth" search={{ next: "/broadcast" }} style={{ color: "var(--ecr-gold)" }}>sign in or create an account</Link> with the owner email, then open <Link to="/broadcast" style={{ color: "var(--ecr-gold)" }}>Broadcast</Link>, pick the company and share the webcast tab's audio. With no live call, company pages run the demo feed with a "Demo data" label.</section>
     <Link to="/earnings-reactions" className="btn" style={{ justifySelf: "start" }}>← All companies</Link>
   </div></div>;
 }

@@ -346,6 +346,18 @@ body:has(.homepage-space-background) .market-artwork { visibility: hidden; }
   .platform-share-option { gap: 12px; }
 }
 @media (max-width: 380px) { .header-actions { gap: 5px; } .platform-share-trigger { padding: 0 8px; } .platform-share-trigger > svg:last-child { display: none; } }
+.auth-entry { display: inline-flex; align-items: center; gap: 8px; }
+.auth-entry-signin { display: inline-flex; align-items: center; gap: 8px; height: 58px; padding: 0 16px; border: 1px solid var(--primary); border-radius: 8px; background: var(--primary); color: var(--primary-foreground); font-size: 16px; font-weight: 600; }
+.auth-entry-signin:hover { background: color-mix(in oklab, var(--primary) 82%, var(--accent)); color: var(--primary-foreground); }
+.auth-entry-signin > svg { width: 17px; height: 17px; }
+.auth-entry-user { max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 600; color: var(--foreground); }
+.auth-entry-broadcast { display: inline-flex; align-items: center; gap: 6px; height: 58px; padding: 0 14px; border: 1px solid var(--primary); border-radius: 8px; font-size: 15px; font-weight: 600; color: var(--primary); }
+.auth-entry-broadcast > svg { width: 16px; height: 16px; }
+.auth-entry-out { display: inline-flex; align-items: center; gap: 6px; height: 58px; padding: 0 8px; background: none; border: 0; font-size: 14px; color: var(--muted-foreground); }
+.auth-entry-out > svg { width: 15px; height: 15px; }
+.auth-entry-menu > svg, .auth-entry-who > svg { color: var(--primary); width: 20px; height: 20px; flex: none; }
+.auth-entry-who { color: var(--muted-foreground); font-size: 13px; }
+@media (width < 1050px) { .header-actions > .auth-entry { display: none; } }
 .header-inner { max-width: 1440px; margin: auto; padding: 12px 4.5%; display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 20px; }
 .academy-brand { display: inline-flex; align-items: center; gap: 10px; }
 .academy-pillar { width: 28px; height: 44px; color: var(--foreground); flex-shrink: 0; }
