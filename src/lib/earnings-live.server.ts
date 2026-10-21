@@ -151,12 +151,17 @@ export async function handleBroadcast(request: Request) {
   if (!(audio instanceof File) || !audio.size || audio.size > 20 * 1024 * 1024) return json(400, { error: "Audio chunk missing or too large" });
   try {
     const text = await transcribeChunk(audio, company, request.signal);
-    if (!text) return json(200, { ok: true, text: "", events: 0 });
+    if (!text) return json(200, { ok: true, text: "", events: 0, usage: { audioSeconds: 10, inputTokens: 0, outputTokens: 0 } });
     const parts = sentences(text);
     // Group short sentences so each analysis has enough context, sequentially to respect rate limits.
-    let events = 0;
-    for (let i = 0; i < parts.length; i += 2) { await analyzeAndStore(company, parts.slice(i, i + 2).join(" "), request.signal); events++; }
-    return json(200, { ok: true, text, events });
+    let events = 0, inputTokens = 0, outputTokens = 0;
+    for (let i = 0; i < parts.length; i += 2) {
+      const r = await analyzeAndStore(company, parts.slice(i, i + 2).join(" "), request.signal);
+      events++;
+      inputTokens += r.usage?.inputTokens ?? 0;
+      outputTokens += r.usage?.outputTokens ?? 0;
+    }
+    return json(200, { ok: true, text, events, usage: { audioSeconds: 10, inputTokens, outputTokens } });
   } catch (e) {
     const status = (e as { statusCode?: number }).statusCode ?? 502;
     console.error("broadcast chunk", e);
