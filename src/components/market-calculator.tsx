@@ -34,6 +34,7 @@ export function MarketCalculator() {
       <p>Our educational Stock Investment and Comparison Calculators help you to understand past stock price trends. This enables you to see how different assets performed over time so that you can make informed decisions.</p>
       <div className="intro-actions"><ComingSoonButton>Start Free Course</ComingSoonButton><Button onClick={() => { setFromOverview(false); setOpen(true); }}>Investment Calculator</Button><ComingSoonButton className="btn-gold">Invest Now</ComingSoonButton></div>
       <Button className="compare-stocks" asChild><Link to="/compare"><ArrowLeftRight />Compare Stocks</Link></Button>
+      <Button className="compare-stocks" asChild><Link to="/earnings-reactions"><span className="ecr-home-dot" aria-hidden />Earnings Call Reactions</Link></Button>
       </div><div className="intro-side"><RegionTabs active="US" /><Suspense fallback={null}><LiveStamp /></Suspense><p className="intro-side-note">Choose a region to browse companies, then press Compare Stocks to see how they performed over your chosen dates.</p></div>
     </section>
     <Suspense fallback={<CompanyButtons symbol={symbol} setSymbol={setSymbol} />}><LiveCompanies symbol={symbol} setSymbol={setSymbol} /></Suspense>
