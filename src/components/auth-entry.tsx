@@ -1,15 +1,15 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { LogIn, LogOut, Radio } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { SheetClose } from "@/components/ui/sheet";
 
 const NEXT = "/broadcast";
 
 /**
- * Shows the sign-in entry point in the header (and mobile menu). Reads the
- * session only after hydration so server and client markup always match.
+ * Sign-in entry point. Reads the session only after hydration so server and
+ * client markup always match. In the header it is a button; inside the mobile
+ * menu it renders as ordinary menu rows.
  */
 export function AuthEntry({ variant = "header" }: { variant?: "header" | "menu" }) {
   const [ready, setReady] = useState(false);
@@ -32,19 +32,28 @@ export function AuthEntry({ variant = "header" }: { variant?: "header" | "menu" 
     setEmail(null);
   }
 
-  if (!ready) return <span className={`auth-entry ${variant === "menu" ? "auth-entry-menu" : ""}`} aria-busy="true" />;
+  if (!ready) return variant === "menu" ? null : <span className="auth-entry" aria-busy="true" />;
+
+  if (variant === "menu") {
+    if (!email) return <SheetClose asChild>
+      <Link to="/auth" search={{ next: NEXT }} className="m-row auth-entry-menu"><LogIn /><span>Sign in</span></Link>
+    </SheetClose>;
+    return <>
+      <span className="m-row auth-entry-who"><span>{email}</span></span>
+      <SheetClose asChild><Link to={NEXT} className="m-row"><Radio /><span>Broadcast</span></Link></SheetClose>
+      <button type="button" className="m-row" onClick={signOut}><LogOut /><span>Sign out</span></button>
+    </>;
+  }
 
   if (email) {
-    const name = email.split("@")[0];
-    return <span className={`auth-entry ${variant === "menu" ? "auth-entry-menu" : ""}`}>
-      <span className="auth-entry-user" title={email}>{name}</span>
+    return <span className="auth-entry">
+      <span className="auth-entry-user" title={email}>{email}</span>
       <Link to={NEXT} className="auth-entry-broadcast"><Radio />Broadcast</Link>
-      <Button variant="ghost" size="sm" className="auth-entry-out" onClick={signOut}><LogOut />Sign out</Button>
+      <button type="button" className="auth-entry-out" onClick={signOut}><LogOut />Sign out</button>
     </span>;
   }
 
-  const link = <Link to="/auth" search={{ next: NEXT }} className="auth-entry-signin"><LogIn />Sign in</Link>;
-  return variant === "menu"
-    ? <SheetClose asChild>{link}</SheetClose>
-    : <span className="auth-entry">{link}</span>;
+  return <span className="auth-entry">
+    <Link to="/auth" search={{ next: NEXT }} className="auth-entry-signin"><LogIn />Sign in</Link>
+  </span>;
 }
