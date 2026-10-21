@@ -35,5 +35,6 @@
 - Compare result charts and portfolio ranking share a calendar-date cursor through compare-timeline.ts; market-cap estimates use source current shares held constant and must explicitly disclose that they are not reported historical capitalization.
 - Ask Investments content and routing/matching stay browser-safe with a frozen exact-query country-specific volume snapshot; missing volumes remain unknown and numbering never changes on refresh.
 - PWA: vite-plugin-pwa generates /sw.js; NetworkFirst navigations exclude /~oauth. Register only via pwa-register.ts (never dev/preview/iframe; ?sw=off disables); public manifest/icons and install-prompt.tsx.
+- App icons share a padded pillar asset; ordinary icons have transparent rounded corners, while a separate opaque maskable icon lets mobile operating systems apply their own shape without cropping the pillar.
 - Region decoration uses a shared pointer-transparent canvas and effect-only Three.js; planet-regions maps routes to identities without quote imports.
 - Platform-share owns the homepage URL; share-files prepares browser QR/PDF blobs after hydration for click-triggered downloads.
