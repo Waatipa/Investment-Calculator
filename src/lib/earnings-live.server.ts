@@ -31,6 +31,7 @@ export async function analyzeAndStore(company: EarningsCompany, text: string, si
     providerOptions: { openai: { forceReasoning: true, reasoningEffort: "low", store: false } },
   });
   const o = await result.output;
+  const usage = await result.totalUsage.catch(() => undefined);
   const db = await admin();
   const { error } = await db.from("call_events").insert({
     ticker: company.ticker, text, summary: o.summary, tone: Math.max(-100, Math.min(100, o.tone)),
@@ -38,7 +39,29 @@ export async function analyzeAndStore(company: EarningsCompany, text: string, si
     guidance: o.guidance_pct, guidance_consensus: o.guidance_consensus_pct,
   });
   if (error) throw new Error(error.message);
-  return o;
+  return { ...o, usage };
+}
+
+// After the call: one AI request turns the saved statements into a plain-English summary.
+export async function summarizeCall(company: EarningsCompany) {
+  const key = apiKey();
+  const db = await admin();
+  const { data, error } = await db.from("call_events").select("text,summary").eq("ticker", company.ticker).order("created_at", { ascending: true }).limit(400);
+  if (error) throw new Error(error.message);
+  const lines = (data ?? []).map(e => e.summary || e.text).filter(Boolean);
+  if (lines.length < 3) throw Object.assign(new Error("Not enough call statements saved yet to summarise."), { statusCode: 400 });
+  const provider = createOpenAI({ baseURL: GATEWAY, apiKey: key, headers: { "Lovable-API-Key": key, "X-Lovable-AIG-SDK": "vercel-ai-sdk" } });
+  const result = streamText({
+    model: provider.responses("openai/gpt-6-astra"),
+    instructions: `You summarise ${company.name} (${company.ticker})'s earnings call for ordinary readers. Write one beautiful plain-English paragraph (about 120-180 words): the headline figures reported (EPS, revenue, guidance) with whether they beat or missed expectations when known, the overall tone of management and analysts, and what drove the sentiment. No jargon, no bullet points, no investment advice.`,
+    prompt: lines.join("\n"),
+    providerOptions: { openai: { forceReasoning: true, reasoningEffort: "low", store: false } },
+  });
+  const summary = (await result.text).trim();
+  const usage = await result.totalUsage.catch(() => undefined);
+  const { error: up } = await db.from("earnings_calls").upsert({ ticker: company.ticker, summary, updated_at: new Date().toISOString() });
+  if (up) throw new Error(up.message);
+  return { summary, usage };
 }
 
 // Audio chunk -> text using Lovable AI speech-to-text (streamed SSE, final text collected).
