@@ -75,15 +75,13 @@ export function EarningsDashboard({ company }: { company: EarningsCompany }) {
   const [clock, setClock] = useState("");
   useEffect(() => { const f = () => setClock("Last updated " + new Date().toLocaleString([], { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" })); f(); const id = setInterval(f, 1000); return () => clearInterval(id); }, []);
 
-  const badge = live ? (run ? "LIVE CALL" : "PAUSED") : demo ? (run ? "LIVE CALL" : "PAUSED") : call?.status === "replay" ? "REPLAY" : "SCHEDULED";
-  const badgeOn = (live || demo) && run;
-  const badgeText = demo && !run ? "PAUSED" : demo ? (call?.status === "replay" ? "REPLAY" : "SCHEDULED") : badge;
+  const badgeText = live ? (run ? "LIVE CALL" : "PAUSED") : call?.status === "replay" ? "REPLAY" : "SCHEDULED";
 
   return <div className="ecr"><div className="wrap">
     <header className="box hdr">
       <h1>{company.name} ({company.ticker}) · Earnings Call Reactions<small>Real-time read on what is driving the move and how the market is reacting.</small></h1>
       <div className="right">
-        <span className={`ecr-live ${live && run ? "" : "off"}`}><i /><span>{live ? badge : badgeText}</span></span>
+        <span className={`ecr-live ${live && run ? "" : "off"}`}><i /><span>{badgeText}</span></span>
         {demo && <span className="demo-tag">Demo data</span>}
         {(demo || live) && <button type="button" className="btn" onClick={() => setRun(r => !r)}>{run ? "Pause demo" : "Resume demo"}</button>}
         <span className="clock">{clock}</span>
