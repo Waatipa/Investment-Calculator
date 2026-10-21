@@ -22,6 +22,7 @@ import { Route as MarketsRouteImport } from './routes/markets'
 import { Route as MiddleEastRouteImport } from './routes/middle-east'
 import { Route as SubscribeRouteImport } from './routes/subscribe'
 import { Route as AuthenticatedAskRouteImport } from './routes/_authenticated/ask'
+import { Route as AuthenticatedBroadcastRouteImport } from './routes/_authenticated/broadcast'
 import { Route as ApiEarningsBroadcastRouteImport } from './routes/api/earnings-broadcast'
 import { Route as ApiFilingChatRouteImport } from './routes/api/filing-chat'
 import { Route as EarningsReactionsIndexRouteImport } from './routes/earnings-reactions.index'
@@ -95,6 +96,11 @@ const AuthenticatedAskRoute = AuthenticatedAskRouteImport.update({
   path: '/ask',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedBroadcastRoute = AuthenticatedBroadcastRouteImport.update({
+  id: '/broadcast',
+  path: '/broadcast',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const ApiEarningsBroadcastRoute = ApiEarningsBroadcastRouteImport.update({
   id: '/api/earnings-broadcast',
   path: '/api/earnings-broadcast',
@@ -151,6 +157,7 @@ export interface FileRoutesByFullPath {
   '/middle-east': typeof MiddleEastRoute
   '/subscribe': typeof SubscribeRoute
   '/ask': typeof AuthenticatedAskRouteWithChildren
+  '/broadcast': typeof AuthenticatedBroadcastRoute
   '/api/earnings-broadcast': typeof ApiEarningsBroadcastRoute
   '/api/filing-chat': typeof ApiFilingChatRoute
   '/earnings-reactions/$ticker': typeof EarningsReactionsTickerRoute
@@ -172,6 +179,7 @@ export interface FileRoutesByTo {
   '/markets': typeof MarketsRoute
   '/middle-east': typeof MiddleEastRoute
   '/subscribe': typeof SubscribeRoute
+  '/broadcast': typeof AuthenticatedBroadcastRoute
   '/api/earnings-broadcast': typeof ApiEarningsBroadcastRoute
   '/api/filing-chat': typeof ApiFilingChatRoute
   '/earnings-reactions/$ticker': typeof EarningsReactionsTickerRoute
@@ -196,6 +204,7 @@ export interface FileRoutesById {
   '/middle-east': typeof MiddleEastRoute
   '/subscribe': typeof SubscribeRoute
   '/_authenticated/ask': typeof AuthenticatedAskRouteWithChildren
+  '/_authenticated/broadcast': typeof AuthenticatedBroadcastRoute
   '/api/earnings-broadcast': typeof ApiEarningsBroadcastRoute
   '/api/filing-chat': typeof ApiFilingChatRoute
   '/earnings-reactions/$ticker': typeof EarningsReactionsTickerRoute
@@ -220,6 +229,7 @@ export interface FileRouteTypes {
     | '/middle-east'
     | '/subscribe'
     | '/ask'
+    | '/broadcast'
     | '/api/earnings-broadcast'
     | '/api/filing-chat'
     | '/earnings-reactions/$ticker'
@@ -241,6 +251,7 @@ export interface FileRouteTypes {
     | '/markets'
     | '/middle-east'
     | '/subscribe'
+    | '/broadcast'
     | '/api/earnings-broadcast'
     | '/api/filing-chat'
     | '/earnings-reactions/$ticker'
@@ -264,6 +275,7 @@ export interface FileRouteTypes {
     | '/middle-east'
     | '/subscribe'
     | '/_authenticated/ask'
+    | '/_authenticated/broadcast'
     | '/api/earnings-broadcast'
     | '/api/filing-chat'
     | '/earnings-reactions/$ticker'
@@ -388,6 +400,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAskRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/broadcast': {
+      id: '/_authenticated/broadcast'
+      path: '/broadcast'
+      fullPath: '/broadcast'
+      preLoaderRoute: typeof AuthenticatedBroadcastRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/earnings-broadcast': {
       id: '/api/earnings-broadcast'
       path: '/api/earnings-broadcast'
@@ -462,10 +481,12 @@ const AuthenticatedAskRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAskRoute: typeof AuthenticatedAskRouteWithChildren
+  AuthenticatedBroadcastRoute: typeof AuthenticatedBroadcastRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAskRoute: AuthenticatedAskRouteWithChildren,
+  AuthenticatedBroadcastRoute: AuthenticatedBroadcastRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
