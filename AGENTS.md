@@ -38,3 +38,6 @@
 - App icons share a padded pillar asset; ordinary icons have transparent rounded corners, while a separate opaque maskable icon lets mobile operating systems apply their own shape without cropping the pillar.
 - Region decoration uses a shared pointer-transparent canvas and effect-only Three.js; planet-regions maps routes to identities without quote imports.
 - Platform-share owns the homepage URL; share-files prepares browser QR/PDF blobs after hydration for click-triggered downloads.
+
+- Market routes validate a shared company search parameter and resolve it against their own company list to open the existing overview, so submenu links never mix regional securities.
+- Investment CTA optional labels use the shared OptionalInvestmentLabel to keep small-print presentation consistent.

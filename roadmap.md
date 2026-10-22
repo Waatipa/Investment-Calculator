@@ -1,4 +1,5 @@
 # Website update
+- [ ] Simplify header/footer menus, link regional company names to chart popups, rewrite About as illustrated education, whiten Ask answers, label investment CTAs optional and check Google sign-in.
 - [x] Add a visible sign-up entry point: "Sign in" button top-right beside Share on desktop, first row of the phone menu, plus owner wording on /auth and the earnings settings page; verified desktop header, create-account screen, phone menu row and clean build.
 - [x] Add reference-style top-right Share menu with instant branded business-card PNG, QR PNG, brochure PDF and homepage-link copying; verified all downloads, QR scan targets, artwork, desktop/phone fit, 13 tests and clean build.
 - [x] Recreate the supplied planet styling, increase globe/company orbit speed, remove pointer reactions and show four selected-region companies on its labeled orbit; verified region navigation, reduced motion and desktop/phone rendering.

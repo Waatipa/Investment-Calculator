@@ -1,3 +1,4 @@
+import { OptionalInvestmentLabel } from "@/components/optional-investment-label";
 import { useEffect, useMemo, useState } from "react";
 import { CompareResultsCharts } from "@/components/compare-results";
 import { CompareTotals } from "@/components/compare-totals";
@@ -91,7 +92,7 @@ function Results({ data, amount, view, setView }: { data: CompareSeries[]; amoun
   const disclosure = <>
     {missing.map(r => <p key={r.s.symbol} className="compare-alert">{r.c.name}: {r.s.error ?? "Unavailable."}</p>)}
     <p className="compare-note">Actual daily prices from Yahoo Finance, adjusted for stock splits; dividends, fees and taxes excluded.{fx ? " Non-USD listings are converted at each trading day's historical USD exchange rate." : ""} Market holidays are skipped: the buy and sell prices are from the first and last actual trading days in the period.{latest ? ` The final value uses the latest available ${latest.open ? "trade (may be delayed up to 15–20 minutes, not real-time)" : "closing price"} as of ${new Date(latest.time).toLocaleString("en-US", { timeZone: "America/New_York", dateStyle: "medium", timeStyle: "short" })} ET.` : ""}</p></>;
-  const actions = <div className="compare-actions">{view === "chart" && <Button className="compare-cta" onClick={() => setView("table")}>View detailed table</Button>}<Button asChild className="compare-cta btn-gold"><Link to="/subscribe">Invest now</Link></Button></div>;
+  const actions = <div className="compare-actions">{view === "chart" && <Button className="compare-cta" onClick={() => setView("table")}>View detailed table</Button>}<Button asChild className="compare-cta btn-gold"><Link to="/subscribe"><OptionalInvestmentLabel>Invest now</OptionalInvestmentLabel></Link></Button></div>;
   const tabs = <div className="compare-tabs" role="tablist">{(["chart", "table"] as const).map(v => <button key={v} type="button" role="tab" aria-selected={view === v} className={view === v ? "active" : ""} onClick={() => setView(v)}>{v === "chart" ? "Chart" : "Table"}</button>)}</div>;
 
   if (view === "chart") return <CompareResultsCharts data={data} amount={amount} tabs={tabs} disclosure={disclosure} actions={actions} />;

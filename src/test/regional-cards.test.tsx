@@ -32,7 +32,7 @@ describe("Regional cards", () => {
     fireEvent.change(screen.getByLabelText("Average shareholders’ equity (ZAR millions)"), { target: { value: "100" } });
     fireEvent.click(screen.getByRole("button", { name: "Calculate ROE" }));
     expect(screen.getAllByText("10.00%").length).toBeGreaterThan(0);
-    expect(screen.getByRole("link", { name: "Invest Now" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /^Invest Now/ })).toBeInTheDocument();
     client.clear();
   });
   it("shows Dangote Refinery's pre-listing offer with no prices and no calculator", () => {

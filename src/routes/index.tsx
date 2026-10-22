@@ -1,3 +1,4 @@
+import { companySearch } from "@/lib/company-selection";
 import { createFileRoute } from "@tanstack/react-router";
 import { MarketCalculator } from "@/components/market-calculator";
 import { quotesQuery } from "@/lib/markets";
@@ -6,6 +7,7 @@ const TITLE = "Investico Academy | Financial Education & Market Tools";
 const DESCRIPTION = "Investico Academy provides free educational resources and historical market calculators to help individuals learn the fundamentals of financial analysis.";
 
 export const Route = createFileRoute("/")({
+  validateSearch: companySearch,
   head: () => ({
     meta: [
       { title: TITLE },
@@ -19,5 +21,12 @@ export const Route = createFileRoute("/")({
   loader: async ({ context }) => { await context.queryClient.ensureQueryData(quotesQuery()); },
   errorComponent: ({ error }) => <p role="alert" className="p-6">Market prices are unavailable: {error instanceof Error ? error.message : "Please try again."}</p>,
   notFoundComponent: () => <p className="p-6">Market page not found.</p>,
-  component: MarketCalculator,
+   component: HomePage,
 });
+
+function HomePage() {
+  const { company } = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const dismiss = () => { if (company) void navigate({ search: {}, replace: true }); };
+  return <MarketCalculator onOverviewDismiss={dismiss} initialCompany={company} />;
+}

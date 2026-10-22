@@ -1,3 +1,4 @@
+import { OptionalInvestmentLabel } from "@/components/optional-investment-label";
 import { useState, type FormEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -117,7 +118,7 @@ export function FinancialMetricForm({ metric, onBack, onStageChange, symbol = "A
       <div className="pro-formula"><h3>DECISION SCALE</h3><div className="pro-decision-scale"><span>BUY</span><span>WAIT</span><span>HOLD</span><span>SELL</span></div><p>No recommendation assigned. These outcomes require more than a single calculated metric.</p></div>
       <p className="pro-disclaimer">Markets change quickly. Financial inputs must be checked against {companyName}’s filings. Forecasts and growth rates are assumptions, not guarantees. Investico Academy is not an investment advisor. Do your own research and consult a licensed advisor before investing.</p>
       {!regional && <Button asChild variant="outline" className="pro-submit"><Link to="/ask">Ask AI to explain these figures<ArrowRight /></Link></Button>}
-      <Button asChild className="pro-submit btn-gold"><Link to="/subscribe">Invest Now<ArrowRight /></Link></Button>
+      <Button asChild className="pro-submit btn-gold"><Link to="/subscribe"><OptionalInvestmentLabel>Invest Now</OptionalInvestmentLabel><ArrowRight /></Link></Button>
     </>}
   </div>;
 }
