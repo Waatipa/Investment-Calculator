@@ -1,3 +1,4 @@
+import { companySearch } from "@/lib/company-selection";
 import { createFileRoute } from "@tanstack/react-router";
 import { MarketCalculator } from "@/components/market-calculator";
 import { quotesQuery } from "@/lib/markets";
@@ -6,6 +7,7 @@ const TITLE = "Investico Academy | Financial Education & Market Tools";
 const DESCRIPTION = "Investico Academy provides free educational resources and historical market calculators to help individuals learn the fundamentals of financial analysis.";
 
 export const Route = createFileRoute("/")({
+  validateSearch: companySearch,
   head: () => ({
     meta: [
       { title: TITLE },

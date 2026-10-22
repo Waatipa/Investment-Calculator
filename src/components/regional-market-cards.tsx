@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { selectedCompany } from "@/lib/company-selection";
+import { useEffect, useState } from "react";
 import { useQueries } from "@tanstack/react-query";
 import { getFxRate } from "@/lib/fx.functions";
 import { FX_CURRENCIES } from "@/lib/display-prefs";
@@ -19,10 +20,14 @@ export type RegionalCompany = { symbol: string; name: string; ticker: string; co
 export function marketCapCurrency(currency: string | null | undefined) {
   return currency === "GBp" || currency === "GBX" ? "GBP" : currency === "ZAc" ? "ZAR" : currency;
 }
-export function RegionalMarketCards({ companies, quotes, region }: { companies: readonly RegionalCompany[]; quotes: RegionalQuote[]; region: string }) {
+export function RegionalMarketCards({ companies, quotes, region, initialCompany }: { initialCompany?: string; companies: readonly RegionalCompany[]; quotes: RegionalQuote[]; region: string }) {
   const { localTime: lt } = usePrefs();
   const [open, setOpen] = useState<string | null>(null);
   const [overview, setOverview] = useState<string | null>(null);
+  useEffect(() => {
+    const selected = selectedCompany(companies, initialCompany);
+    if (selected) { setOverview(selected.symbol); setOpen(null); setMetric(null); setProfitResult(false); }
+  }, [initialCompany, companies]);
   const [metric, setMetric] = useState<FinancialMetric | "profit" | null>(null);
   const [profitResult, setProfitResult] = useState(false);
   const capCurrencies = [...new Set(quotes.map(q => marketCapCurrency(q.currency)).filter((c): c is string => !!c && c !== "USD" && FX_CURRENCIES.includes(c)))];
