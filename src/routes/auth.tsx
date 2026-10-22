@@ -2,7 +2,6 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { pageHead } from "@/lib/markets";
@@ -11,7 +10,7 @@ const safeNext = (n?: string) => (n && n.startsWith("/") && !n.startsWith("//") 
 
 export const Route = createFileRoute("/auth")({
   validateSearch: z.object({ next: z.string().optional() }),
-  head: () => pageHead("Sign in or create an account", "Sign in or create your Investico Academy account with Google or email to save filing questions and access your account."),
+  head: () => pageHead("Sign in or create an account", "Sign in or create your Investico Academy account with your email address to save filing questions and access your account."),
   component: AuthPage,
 });
 
@@ -39,16 +38,6 @@ function AuthPage() {
     setBusy(false);
     if (res.error) return setMessage(res.error.message);
     if (mode === "signup" && !res.data.session) setMessage("Check your email to confirm your account, then sign in.");
-  }
-  async function google() {
-    setBusy(true); setMessage("");
-    sessionStorage.setItem("auth-next", target);
-    try {
-      const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: `${window.location.origin}/auth?next=${encodeURIComponent(target)}`, extraParams: { prompt: "select_account" } });
-      if (result.error) setMessage(result.error.message ?? "Google sign-in failed. Please try again.");
-      if (result.redirected) return;
-    } catch { setMessage("Google sign-in could not open. Please try again."); }
-    finally { setBusy(false); }
   }
 
   return <main className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center gap-5 px-5 py-12">
