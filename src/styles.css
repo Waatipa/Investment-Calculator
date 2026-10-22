@@ -716,7 +716,8 @@ body:has(.homepage-space-background) .market-artwork { visibility: hidden; }
 .reference-menu .m-nav > * { height: auto; }
 .reference-menu .m-nav > div { border: 0; padding: 0; }
 .desktop-nav > .nav-drop { padding: 0; }
-.m-row { display: flex; width: 100%; align-items: center; justify-content: space-between; min-height: 52px; padding: 0 2px; border-bottom: 1px solid var(--border); font-size: 15px; color: var(--foreground); background: none; text-align: left; }
+.m-row { display: flex; width: 100%; align-items: center; justify-content: space-between; min-height: 52px; padding: 0 2px; border-bottom: 1px solid var(--border); font-size: 15px; color: var(--foreground); background: none; text-align: left; white-space: nowrap; }
+.m-row span, .m-row a { overflow-wrap: normal; }
 .m-row svg { width: 14px; height: 14px; color: var(--muted-foreground) !important; }
 .m-row.m-l1 { min-height: 44px; padding-left: 14px; font-size: 13px; color: var(--muted-foreground); }
 .m-row.m-l2 { min-height: 40px; padding-left: 30px; font-size: 12.5px; color: var(--muted-foreground); }
