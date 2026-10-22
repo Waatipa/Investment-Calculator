@@ -709,6 +709,7 @@ body:has(.homepage-space-background) .market-artwork { visibility: hidden; }
 .mega-col + .mega-col { border-left: 1px solid var(--border); }
 .mega-col h4 { font-size: 11px; font-weight: 600; color: var(--primary); margin: 0 0 8px; }
 .mega-link { display: flex; flex-direction: column; text-align: left; font-size: 12.5px; color: var(--foreground); padding: 6px 0; background: none; border: 0; cursor: pointer; }
+.mega-link span { white-space: nowrap; overflow-wrap: normal; }
 .mega-link small { font-size: 10.5px; color: var(--muted-foreground); }
 .mega-link:hover, .mega-link.mega-on { color: var(--primary); }
 .m-nav { display: grid; margin-top: 16px; }
