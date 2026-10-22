@@ -40,17 +40,15 @@ function AuthPage() {
     if (mode === "signup" && !res.data.session) setMessage("Check your email to confirm your account, then sign in.");
   }
 
-  return <main className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center gap-5 px-5 py-12">
+  return <main className="mx-auto flex min-h-[70vh] w-full max-w-md flex-col justify-center gap-5 px-5 py-12">
     <div><h1 className="font-serif text-3xl font-bold text-foreground">{mode === "signin" ? "Sign in" : "Create your account"}</h1><p className="mt-2 text-sm text-muted-foreground">Create an account to save your questions about each company's filings, or sign in as the owner to broadcast a live earnings call.</p></div>
-    <div className="text-center text-xs text-muted-foreground">or use email</div>
     <form onSubmit={submit} className="flex flex-col gap-3">
       <label className="text-sm text-foreground">Email<Input type="email" required value={email} onChange={e => setEmail(e.target.value)} className="mt-1" /></label>
       <label className="text-sm text-foreground">Password<Input type="password" required minLength={6} value={password} onChange={e => setPassword(e.target.value)} className="mt-1" /></label>
       <Button type="submit" disabled={busy}>{busy ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}</Button>
     </form>
     <Button variant="link" onClick={() => { setMode(mode === "signin" ? "signup" : "signin"); setMessage(""); }}>{mode === "signin" ? "New here? Create an account" : "Already have an account? Sign in"}</Button>
-    <Button variant="outline" disabled={busy} onClick={google}>Continue with Google</Button>
-    <p className="text-center text-xs text-muted-foreground">Google works for both new and existing accounts.</p>
+    <p className="text-center text-xs text-muted-foreground">Sign in and sign up use your email address only — no phone number needed.</p>
     {message && <p role="status" className="text-sm text-muted-foreground">{message}</p>}
   </main>;
 }
