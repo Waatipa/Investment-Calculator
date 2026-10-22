@@ -1,5 +1,5 @@
 export function companySearch(search: Record<string, unknown>): { company?: string } {
-  return { company: typeof search.company === "string" ? search.company : undefined };
+  return typeof search['company'] === "string" ? { company: search['company'] } : {};
 }
 
 export function selectedCompany<T extends { symbol: string; notTrading?: boolean }>(companies: readonly T[], symbol?: string): T | undefined {

@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useRef, useState, type FormEvent } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Link, useSearch } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { selectedCompany } from "@/lib/company-selection";
 import { OptionalInvestmentLabel } from "./optional-investment-label";
 import { Triangle, Calculator, LoaderCircle, ArrowLeftRight } from "lucide-react";
@@ -23,12 +23,11 @@ import { ComingSoonButton } from "@/components/coming-soon";
 
 type Result = Awaited<ReturnType<typeof getInvestmentResult>>;
 
-export function MarketCalculator() {
-  const search = useSearch({ strict: false });
+export function MarketCalculator({ initialCompany }: { initialCompany?: string | undefined }) {
   useEffect(() => {
-    const company = selectedCompany(COMPANIES, search.company);
+    const company = selectedCompany(COMPANIES, initialCompany);
     if (company) { setSymbolState(company.symbol); setOverview(true); setOpen(false); }
-  }, [search.company]);
+  }, [initialCompany]);
   const [symbol, setSymbolState] = useState<Symbol>("NVDA");
   const [open, setOpen] = useState(false);
   const [overview, setOverview] = useState(false);

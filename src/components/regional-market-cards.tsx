@@ -20,14 +20,14 @@ export type RegionalCompany = { symbol: string; name: string; ticker: string; co
 export function marketCapCurrency(currency: string | null | undefined) {
   return currency === "GBp" || currency === "GBX" ? "GBP" : currency === "ZAc" ? "ZAR" : currency;
 }
-export function RegionalMarketCards({ companies, quotes, region, initialCompany }: { initialCompany?: string; companies: readonly RegionalCompany[]; quotes: RegionalQuote[]; region: string }) {
+export function RegionalMarketCards({ companies, quotes, region, initialCompany }: { initialCompany?: string | undefined; companies: readonly RegionalCompany[]; quotes: RegionalQuote[]; region: string }) {
   const { localTime: lt } = usePrefs();
   const [open, setOpen] = useState<string | null>(null);
   const [overview, setOverview] = useState<string | null>(null);
+  const requestedSymbol = selectedCompany(companies, initialCompany)?.symbol;
   useEffect(() => {
-    const selected = selectedCompany(companies, initialCompany);
-    if (selected) { setOverview(selected.symbol); setOpen(null); setMetric(null); setProfitResult(false); }
-  }, [initialCompany, companies]);
+    if (requestedSymbol) { setOverview(requestedSymbol); setOpen(null); setMetric(null); setProfitResult(false); }
+  }, [requestedSymbol]);
   const [metric, setMetric] = useState<FinancialMetric | "profit" | null>(null);
   const [profitResult, setProfitResult] = useState(false);
   const capCurrencies = [...new Set(quotes.map(q => marketCapCurrency(q.currency)).filter((c): c is string => !!c && c !== "USD" && FX_CURRENCIES.includes(c)))];
