@@ -1,54 +1,18 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { BarChart3, Square, Calculator } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowRight, BookOpen, ChartNoAxesCombined, Scale } from "lucide-react";
 import { pageHead } from "@/lib/markets";
+import { Button } from "@/components/ui/button";
+import learningImage from "@/assets/about-learning.jpg";
 
 export const Route = createFileRoute("/about-us")({
-  head: () => pageHead("About Us", "Investico Academy makes the stock market easy to understand with plain-language courses, market insight and calculators."),
+  head: () => pageHead("About Us", "Discover Investico Academy’s educational approach to historical stock prices, company research, investment possibilities and risk—without promises of profit."),
   component: AboutUs,
 });
-
-const CALCS = ["Compare Stocks", "Earnings per share", "Price-to-earnings ratio", "Liquidity ratios", "Balance sheet", "Return on investment"];
-const DIFF = [
-  ["Plain language", "Every term is explained, with no jargon left unexplained."],
-  ["Calculate first", "See the numbers before you decide, not after."],
-  ["Short and long term", "Tools and lessons for quick moves and lasting wealth."],
-  ["Free to start", "Your first course and the core tools cost nothing."],
-];
-
 function AboutUs() {
-  const [email, setEmail] = useState("");
-  const join = (e: React.FormEvent) => {
-    e.preventDefault();
-    window.location.href = `mailto:walterchaipa16@gmail.com?subject=${encodeURIComponent("App waitlist")}&body=${encodeURIComponent(`Please add ${email} to the Investico app waitlist.`)}`;
-  };
-  return <main className="info-page">
-    <h1>About Investico Academy</h1>
-    <p className="lead">Investico Academy is an online platform that makes the stock market easy to understand. We explain how markets move, teach what every investor needs to know, and give you calculators that show what your money could become.</p>
-    <div className="info-card"><h3>Our vision</h3><p className="quote">A world where anyone can understand the stock market well enough to invest with confidence.</p></div>
-    <div className="info-card"><h3>Our mission</h3><p>To make stock markets simple to understand and easy to calculate. We bring plain-language courses, market insight and practical calculators together, so people can judge companies, estimate returns and decide for themselves, in the short term and the long term.</p></div>
-
-    <h2>What we do</h2>
-    <div className="what-row"><div className="what-icon"><BarChart3 /></div><div><strong>Follow the markets</strong><span>See how stocks move, region by region, with clear charts and company profiles.</span></div></div>
-    <div className="what-row"><div className="what-icon"><Square /></div><div><strong>Learn the essentials</strong><span>Courses on investment terms, company fundamentals and how to read the numbers.</span></div></div>
-    <div className="what-row"><div className="what-icon"><Calculator /></div><div><strong>Calculate your results</strong><span>Compare stocks and test returns before you invest a single dollar.</span></div></div>
-
-    <h2>Why we start with calculators</h2>
-    <p className="lead">Numbers make investing real. When you calculate what $1,000 could have grown into, or compare two companies side by side, the value of investing becomes clear. Our calculators do the hard maths so you can focus on the decision.</p>
-    <div className="info-card"><h3 style={{ color: "var(--foreground)" }}>Our calculators</h3><ul className="dot-list">{CALCS.map(c => <li key={c}>{c}</li>)}</ul></div>
-
-    <h2>How we are different</h2>
-    {DIFF.map(([t, d]) => <div key={t} className="diff-row"><div><strong>{t}</strong><span>{d}</span></div></div>)}
-
-    <h2>Who it is for</h2>
-    <p className="lead">Anyone who wants to invest well: first-time investors learning the basics, and experienced investors who want clear numbers and fast comparisons.</p>
-    <h2>Investico on every screen</h2>
-    <p className="lead">Use Investico in your browser today. Our iPhone and Android apps are on the way, with the same tools and courses.</p>
-    <div className="platforms"><div>Web<small>Any browser</small></div><div>iPhone<small>Coming soon</small></div><div>Android<small>Coming soon</small></div></div>
-    <form onSubmit={join}>
-      <input className="info-input" type="email" required placeholder="Your email address" aria-label="Your email address" value={email} onChange={e => setEmail(e.target.value)} />
-      <button className="info-cta" type="submit">Join the app waitlist</button>
-    </form>
-    <div className="info-card"><p className="info-fine">Investico Academy provides education and general information only. It is not financial advice. Investing carries risk, including loss of capital, and past performance does not guarantee future results.</p></div>
+  return <main className="about-education">
+    <section className="about-cover"><img src={learningImage} width={1536} height={1024} alt="Two learners reviewing a notebook and an illustrative market chart" /><div className="about-cover-copy"><h1>About Investico Academy</h1><p>How? When? How much?<br />Understanding comes first.</p></div></section>
+    <section className="about-section"><div className="about-eyebrow">Knowledge, not promises</div><h2>Understand what investing can offer.</h2><p>Investico Academy is an educational resource for people who want to understand companies, stock markets and how investments have performed over time. We explain ideas in everyday language and connect them with historical prices, comparisons and company figures.</p><p>When a company performs well and markets move in your favour, an investment may grow in value. Prices can also fall, and you can lose some or all of the money you invest. Our goal is to help you understand both possibilities—not to promise earnings or tell you what to buy.</p></section>
+    <section className="about-section about-principles"><article><BookOpen /><h2>How does it work?</h2><p>Learn what shares represent, why prices change and how business results differ from a company’s share price. Clear explanations make unfamiliar ideas easier to understand.</p></article><article><ChartNoAxesCombined /><h2>When and how much?</h2><p>Explore how different dates and amounts changed historical outcomes. Compare companies over the same period, remembering that hindsight is not a forecast.</p></article><article><Scale /><h2>Should I invest?</h2><p>That choice is yours. Learning does not require investing. Consider your circumstances, ability to absorb losses and need for independent professional advice before making a decision.</p></article></section>
+    <section className="about-section"><h2>A clearer view of the past.</h2><p>Our educational Stock Investment and Comparison Calculators help you understand past stock price trends and see how different assets performed over time. Read the source labels and assumptions alongside the figures: historical results do not guarantee future returns.</p><div className="about-links"><Button asChild><Link to="/markets">Explore historical markets<ArrowRight /></Link></Button><Button asChild variant="outline"><Link to="/ask-investments">Read investment explanations<BookOpen /></Link></Button></div></section>
   </main>;
 }
