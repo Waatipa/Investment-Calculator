@@ -20,7 +20,7 @@ export type RegionalCompany = { symbol: string; name: string; ticker: string; co
 export function marketCapCurrency(currency: string | null | undefined) {
   return currency === "GBp" || currency === "GBX" ? "GBP" : currency === "ZAc" ? "ZAR" : currency;
 }
-export function RegionalMarketCards({ companies, quotes, region, initialCompany }: { initialCompany?: string | undefined; companies: readonly RegionalCompany[]; quotes: RegionalQuote[]; region: string }) {
+export function RegionalMarketCards({ companies, quotes, region, initialCompany, onOverviewDismiss }: { onOverviewDismiss?: () => void; initialCompany?: string | undefined; companies: readonly RegionalCompany[]; quotes: RegionalQuote[]; region: string }) {
   const { localTime: lt } = usePrefs();
   const [open, setOpen] = useState<string | null>(null);
   const [overview, setOverview] = useState<string | null>(null);
@@ -38,7 +38,7 @@ export function RegionalMarketCards({ companies, quotes, region, initialCompany 
   const company = companies.find(c => c.symbol === open);
   const quote = quotes.find(q => q.symbol === open);
   const currency = quote?.currency === "ZAc" ? "ZAR" : quote?.currency ?? company?.currency ?? (region.includes("Middle East") ? "AED" : "EUR");
-  useNavigationStep([companies.find(c => c.symbol === overview)?.name ?? overview ?? "Company", "Overview"], () => setOverview(null), !!overview);
+  useNavigationStep([companies.find(c => c.symbol === overview)?.name ?? overview ?? "Company", "Overview"], () => { setOverview(null); onOverviewDismiss?.(); }, !!overview);
   useNavigationStep([company?.name ?? open ?? "Company", "Overview", "Calculators", ...(metric ? [metric === "profit" ? "Profit calculator" : metric.name] : []), ...(profitResult ? ["Results"] : [])], () => {
     if (profitResult) {
       const edit = document.querySelector<HTMLButtonElement>("[role=dialog] [data-edit-investment]") ?? document.querySelector<HTMLButtonElement>("[role=dialog] .pro-back");
@@ -64,7 +64,7 @@ export function RegionalMarketCards({ companies, quotes, region, initialCompany 
         <div className="quote-section off-hours regional-country"><span>{c.country}</span></div>
       </Button>;
     })}</div>
-    <StockOverviewDialog symbol={overview} initials={companies.find(c => c.symbol === overview)?.initials} open={!!overview} onOpenChange={o => { if (!o) setOverview(null); }} onProceed={() => { setOpen(overview); setOverview(null); }} />
+    <StockOverviewDialog symbol={overview} initials={companies.find(c => c.symbol === overview)?.initials} open={!!overview} onOpenChange={o => { if (!o) { setOverview(null); onOverviewDismiss?.(); } }} onProceed={() => { setOpen(overview); setOverview(null); }} />
     <Dialog open={!!open} onOpenChange={o => { if (!o) { setOpen(null); setMetric(null); } }}>
       <DialogContent data-company={company?.symbol} className="company-dialog pro-dialog regional-company max-h-[90dvh] w-[calc(100%-1.5rem)] max-w-3xl overflow-y-auto overflow-x-hidden rounded-lg p-4 sm:p-6">
         <DialogHeader className="company-dialog-heading"><div className="pro-heading-row"><span className="company-initials">{company?.initials}</span><div><div className="mb-2 text-xs font-semibold uppercase text-muted-foreground">{company?.name} · {company?.ticker}</div><DialogTitle className="pr-8 font-display text-xl">{metric === "profit" ? `${company?.name} ${profitResult ? "investment result" : "profit calculator"}` : metric?.name ?? `${company?.name} pro calculator`}</DialogTitle></div></div><DialogDescription>{metric === "profit" ? profitResult ? "Source-priced investment returns." : "Enter your dates and shares or amount, then calculate." : metric ? `${company?.name} financial analysis · ${currency}` : "Choose a calculator."}</DialogDescription></DialogHeader>

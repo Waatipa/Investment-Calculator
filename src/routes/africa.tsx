@@ -15,11 +15,13 @@ export const Route = createFileRoute("/africa")({
 });
 function AfricaPage() {
   const { company } = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const dismiss = () => { if (company) void navigate({ search: {}, replace: true }); };
   const { data } = useSuspenseQuery(africaQuotesQuery());
   return <main className="market-page">
     <section className="reference-intro"><div className="reference-copy"><h1>Africa Markets</h1><p>Eight leading African listed companies across technology, banking, mining and telecommunications. A large-cap selection, not a live continent-wide ranking. Dangote Refinery is shown with its public offer details while its shares are not yet trading.</p></div><MarketArtwork /></section>
     <RegionTabs active="AFRICA" />
-    <RegionalMarketCards initialCompany={company} companies={[...AF_COMPANIES, DANGOTE_REFINERY]} quotes={data} region="African" />
+    <RegionalMarketCards onOverviewDismiss={dismiss} initialCompany={company} companies={[...AF_COMPANIES, DANGOTE_REFINERY]} quotes={data} region="African" />
     <p className="market-footer">Market data provided by Yahoo Finance; may be delayed. JSE share prices in South African cents (ZAc), market caps in rand (ZAR). Calculators use labeled provider summaries in the reporting currency. Attijariwafa Bank and Dangote Cement are not covered by this feed: prices and market caps are unavailable; their calculators accept user-entered figures. Dangote Refinery's public offer is open until 27 October and its shares are not trading yet, so no market prices are shown. Quote timestamps shown in ET.</p>
   </main>;
 }

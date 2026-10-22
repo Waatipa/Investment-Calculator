@@ -15,11 +15,13 @@ export const Route = createFileRoute("/middle-east")({
 });
 function RegionPage() {
   const { company } = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const dismiss = () => { if (company) void navigate({ search: {}, replace: true }); };
   const { data } = useSuspenseQuery(middleEastQuotesQuery());
   return <main className="market-page">
     <section className="reference-intro"><div className="reference-copy"><h1>Middle East Markets</h1><p>The region's largest listed companies on the Saudi Exchange (Tadawul), Abu Dhabi Securities Exchange (ADX) and Dubai Financial Market (DFM).</p></div><MarketArtwork /></section>
     <RegionTabs active="MIDDLE EAST" />
-    <RegionalMarketCards initialCompany={company} companies={ME_COMPANIES} quotes={data} region="Middle East Markets" />
+    <RegionalMarketCards onOverviewDismiss={dismiss} initialCompany={company} companies={ME_COMPANIES} quotes={data} region="Middle East Markets" />
     <p className="market-footer">Market data provided by Yahoo Finance. Data may be delayed. Prices and market caps in local currency (SAR / AED). ADX listings are not carried by our provider; unavailable values are never estimated.</p>
   </main>;
 }

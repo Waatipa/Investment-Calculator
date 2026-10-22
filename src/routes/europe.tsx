@@ -15,11 +15,13 @@ export const Route = createFileRoute("/europe")({
 });
 function RegionPage() {
   const { company } = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const dismiss = () => { if (company) void navigate({ search: {}, replace: true }); };
   const { data } = useSuspenseQuery(europeQuotesQuery());
   return <main className="market-page">
     <section className="reference-intro"><div className="reference-copy"><h1>Europe Markets</h1><p>The continent's largest listed companies on Euronext Amsterdam and Paris, XETRA, SIX Swiss Exchange, Nasdaq Copenhagen and the London Stock Exchange.</p></div><MarketArtwork /></section>
     <RegionTabs active="EUROPE" />
-    <RegionalMarketCards initialCompany={company} companies={EU_COMPANIES} quotes={data} region="Europe Markets" />
+    <RegionalMarketCards onOverviewDismiss={dismiss} initialCompany={company} companies={EU_COMPANIES} quotes={data} region="Europe Markets" />
     <p className="market-footer">Market data provided by Yahoo Finance. Data may be delayed. Prices in local currency. Market caps in currency units (GBP for London listings); London share prices in pence (GBp).</p>
   </main>;
 }

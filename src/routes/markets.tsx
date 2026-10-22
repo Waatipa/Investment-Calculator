@@ -14,5 +14,7 @@ export const Route = createFileRoute("/markets")({
 
 function MarketsPage() {
   const { company } = Route.useSearch();
-  return <MarketCalculator initialCompany={company} />;
+  const navigate = Route.useNavigate();
+  const dismiss = () => { if (company) void navigate({ search: {}, replace: true }); };
+  return <MarketCalculator onOverviewDismiss={dismiss} initialCompany={company} />;
 }

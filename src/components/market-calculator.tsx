@@ -23,7 +23,7 @@ import { ComingSoonButton } from "@/components/coming-soon";
 
 type Result = Awaited<ReturnType<typeof getInvestmentResult>>;
 
-export function MarketCalculator({ initialCompany }: { initialCompany?: string | undefined }) {
+export function MarketCalculator({ initialCompany, onOverviewDismiss }: { initialCompany?: string | undefined; onOverviewDismiss?: () => void }) {
   useEffect(() => {
     const company = selectedCompany(COMPANIES, initialCompany);
     if (company) { setSymbolState(company.symbol); setOverview(true); setOpen(false); }
@@ -33,7 +33,7 @@ export function MarketCalculator({ initialCompany }: { initialCompany?: string |
   const [overview, setOverview] = useState(false);
   const [fromOverview, setFromOverview] = useState(false);
   const setSymbol = (s: Symbol) => { setSymbolState(s); setOverview(true); };
-  useNavigationStep([COMPANIES.find(c => c.symbol === symbol)?.name ?? symbol, "Overview"], () => setOverview(false), overview);
+  useNavigationStep([COMPANIES.find(c => c.symbol === symbol)?.name ?? symbol, "Overview"], () => { setOverview(false); onOverviewDismiss?.(); }, overview);
   return <main className="market-page">
     <section className="reference-intro">
       <div className="reference-copy"><h1>How? When? How Much?<br />Should I Start Investing?</h1>
@@ -44,7 +44,7 @@ export function MarketCalculator({ initialCompany }: { initialCompany?: string |
       </div><div className="intro-side"><RegionTabs active="US" /><Suspense fallback={null}><LiveStamp /></Suspense><p className="intro-side-note">Choose a region to browse companies, then press Compare Stocks to see how they performed over your chosen dates.</p></div>
     </section>
     <Suspense fallback={<CompanyButtons symbol={symbol} setSymbol={setSymbol} />}><LiveCompanies symbol={symbol} setSymbol={setSymbol} /></Suspense>
-    <StockOverviewDialog symbol={symbol} initials={initials[symbol]} open={overview} onOpenChange={setOverview} onProceed={() => { setFromOverview(true); setOverview(false); setOpen(true); }} />
+    <StockOverviewDialog symbol={symbol} initials={initials[symbol]} open={overview} onOpenChange={v => { setOverview(v); if (!v) onOverviewDismiss?.(); }} onProceed={() => { setFromOverview(true); setOverview(false); setOpen(true); }} />
     <InvestmentForm symbol={symbol} open={open} setOpen={setOpen} fromOverview={fromOverview} onReturnOverview={() => setOverview(true)} />
   </main>;
 }
